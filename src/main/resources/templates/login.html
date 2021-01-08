@@ -1,0 +1,159 @@
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <link rel="stylesheet" href="/resources/css/bootstrap-4.5.3.min.css"/>
+    <link rel="stylesheet" href="/resources/css/style.css"/>
+    <link rel="stylesheet" href="/resources/css/login.css"/>
+
+    <script src="/resources/js/jquery-3.5.1.min.js"></script>
+    <script src="https://kit.fontawesome.com/ebf145548d.js" crossorigin="anonymous"></script>
+    <script th:inline="javascript">var requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:src="@{/resources/js/util.js}"></script>
+</head>
+<body onload="display_username()">
+<!--Load Wrapper-->
+<div th:replace="/fragments/loadingWrapper :: loadingWrapper"></div>
+
+<!--Page Header-->
+<header th:replace="/fragments/header :: pageHeader"></header>
+
+<!--Notificaction Banners-->
+<div th:with="msg=${param.message},link=#{message.forgotPassword}">
+    <div class="alert alert-info" th:utext="${#messages.msgWithParams(msg, link)}"
+         th:unless="${msg == null}">message
+    </div>
+</div>
+
+<div class="alert alert-info" th:utext="${message}"
+     th:unless="${message == null}">message
+</div>
+
+<div th:if="${param.error}" class="alert alert-danger">
+    <div th:if="${param.error[0]=='true'}"
+         th:utext="#{${session[SPRING_SECURITY_LAST_EXCEPTION]}}">
+    </div>
+    <div th:with="msg=${param.error[0]}">
+        <div th:with="email=${param.email[0]}" th:utext="#{${msg}} + ${email}"
+             th:unless="${param.email == null}">message
+        </div>
+        <div th:utext="#{${msg}}"
+             th:unless="${msg == null || msg == 'true' || param.email != null}">message
+        </div>
+    </div>
+</div>
+
+<!--Language Selector-->
+<div th:replace="/fragments/languageSelector :: languageSelector"></div>
+
+<!--Main Section Container-->
+<main class="container-md mb-4">
+    <div class="wrapper">
+        <h1 class="text-center" th:utext="#{label.form.loginTitle}"></h1>
+        <div id="formContent" class="py-2 px-4">
+            <div class="fadeIn first mb-4">
+                <i style="font-size: 30pt" class="fas fa-user"></i>
+            </div>
+            <form class="mb-0" name='f' action="login" method='POST' onsubmit="return validate();">
+                <div class="form-group px-2 text-left">
+                    <label for="username" th:utext="#{label.form.loginEmail}">Email</label>
+                    <input id="username" class="form-control" type='text' name='username'
+                           value='' required/>
+                </div>
+                <div class="form-group px-2 text-left">
+                    <label for="password" th:utext="#{label.form.loginPass}">password</label>
+                    <input id="password" class="form-control" type='password' name='password' required/>
+                </div>
+
+                <input class="btn btn-primary w-50" name="submit" type="submit" th:value="#{label.form.loginButton}"/>
+            </form>
+            <p class="text-center my-1" th:utext="#{label.form.loginOr}">or</p>
+            <div id="my-signin2"></div>
+            <hr/>
+            <small>
+                <a th:href="@{/resetPassword}" th:utext="#{message.forgotPassword}"></a>
+            </small>
+        </div>
+    </div>
+</main>
+
+<!--Page Footer-->
+<footer th:replace="/fragments/footer :: pageFooter"></footer>
+
+<script th:inline="javascript">
+    function init() {
+        gapi.load('auth2', function () {
+            auth2 = gapi.auth2.init({
+                client_id: /*[[${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}]]*/
+            });
+            gapi.signin2.render('my-signin2', {
+                'longtitle': true,
+                'theme': 'light',
+                'onsuccess': onSuccess,
+                'onfailure': onFailure
+            });
+            var serverContext = [[@{/}]];
+                function onSuccess(googleUser) {
+                    var idToken = googleUser.getAuthResponse().id_token;
+                    $.post(serverContext + "oauth_login", {idtoken: idToken}, function (data) {
+                        if(data.message != null) {
+                            var email = googleUser.getBasicProfile().getEmail();
+                            gapi.auth2.getAuthInstance().signOut();
+                            window.location.href = serverContext + "login?error=" + data.message + "&email=" + email;
+                        } else {
+                            location.reload();
+                        }
+                    })
+                        .fail(function (data) {
+                            if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                                window.location.href = serverContext + "login?message=" + data.responseJSON.message;
+                            }
+                        });
+                }
+                function onFailure(error) {
+                    window.location.href = serverContext + "login?error=auth.message.error";
+                }
+        });
+    }
+</script>
+<script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
+<script th:inline="javascript">
+    function validate() {
+        if (document.f.username.value == "" && document.f.password.value == "") {
+            var emptyEmail = /*[[#{message.email}]]*/;
+            var emptyPass = /*[[#{message.password}]]*/;
+            alert(emptyEmail + ". " + decodeURI(emptyPass));
+            document.f.username.focus();
+            return false;
+        }
+        if (document.f.username.value == "") {
+            alert(/*[[#{message.email}]]*/);
+            document.f.username.focus();
+            return false;
+        }
+        if (document.f.password.value == "") {
+            alert(/*[[#{message.password}]]*/);
+            document.f.password.focus();
+            return false;
+        }
+    }
+
+    function getCookie(name) {
+        return document.cookie.split('; ').reduce((r, v) => {
+            const parts = v.split('=')
+            return parts[0] === name ? decodeURIComponent(parts[1]) : r
+        }, '')
+    }
+
+    function display_username() {
+        var username = getCookie('welcome');
+        if (username) {
+            document.getElementById("username").value = username;
+        }
+    }
+</script>
+</body>
+</html>

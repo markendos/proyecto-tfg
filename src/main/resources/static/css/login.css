@@ -1,0 +1,38 @@
+/***** Login *****/
+.wrapper {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    min-height: 70%;
+    padding: 20px;
+}
+
+@media only screen and (max-width: 400px) {
+    #formContent {
+        max-width: 100% !important;
+    }
+}
+
+#formContent {
+    -webkit-border-radius: 10px 10px 10px 10px;
+    border-radius: 10px 10px 10px 10px;
+    background: #fff;
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+    padding: 0px;
+    text-align: center;
+    -webkit-box-shadow: 0 30px 60px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 30px 60px 0 rgba(0, 0, 0, 0.3);
+}
+
+.row {
+    max-width: 100%;
+}
+
+.abcRioButton {
+    margin: auto;
+    border-radius: 3px !important;
+}

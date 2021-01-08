@@ -1,0 +1,24 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <title>Users</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+<body>
+<!--Page Header-->
+<header th:replace="/fragments/header :: pageHeader"></header>
+
+<!--Language Selector-->
+<div th:replace="/fragments/languageSelector :: languageSelector"></div>
+
+
+<main class="container-md mt-2">
+    <h2>Currently logged in users</h2>
+    <div th:each="user : ${users}">
+        <p th:utext="${user}">user</p>
+    </div>
+</main>
+</body>
+</html>

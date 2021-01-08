@@ -1,0 +1,38 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+
+    <link rel="stylesheet" href="/resources/css/bootstrap-4.5.3.min.css"/>
+    <link rel="stylesheet" href="/resources/css/style.css"/>
+
+    <script src="/resources/js/jquery-3.5.1.min.js"></script>
+</head>
+<body sec:authorize="hasRole('USER')">
+
+<!--Load Wrapper-->
+<div th:replace="/fragments/loadingWrapper :: loadingWrapper"></div>
+
+<!--Page Header-->
+<header th:replace="/fragments/header :: pageHeader"></header>
+
+<!--Notificaction Banners-->
+<div th:with="msg=${param.message}">
+    <div class="alert alert-info" th:utext="#{${msg}}"
+         th:unless="${msg == null}">message
+    </div>
+</div>
+
+<!--Language Selector-->
+<div th:replace="/fragments/languageSelector :: languageSelector"></div>
+
+<!--Main Section Container-->
+<main class="container-md mt-2 mb-4">
+    <h1>This is the landing page for the user</h1>
+</main>
+
+<!--Page Footer-->
+<footer th:replace="/fragments/footer :: pageFooter"></footer>
+</body>
+</html>

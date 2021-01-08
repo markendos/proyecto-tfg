@@ -1,0 +1,21 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <title>Email error</title>
+
+    <link rel="stylesheet" href="/resources/css/bootstrap-4.5.3.min.css"/>
+</head>
+<body>
+
+<!--Notificaction Banners-->
+<h3 class="alert alert-danger" th:utext="#{message.email.config.error}">error</h3>
+
+<!--Language Selector-->
+<div th:replace="/fragments/languageSelector :: languageSelector"></div>
+
+<!--Main Section Container-->
+<main class="container-md mt-2">
+</main>
+</body>
+
+</html>

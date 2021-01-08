@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+
+    <link rel="stylesheet" href="/resources/css/bootstrap-4.5.3.min.css"/>
+    <link rel="stylesheet" href="/resources/css/style.css"/>
+
+    <script src="/resources/js/jquery-3.5.1.min.js"></script>
+    <script src="/resources/js/bootstrap-4.5.3.bundle.min.js"></script>
+    <script src="/resources/js/pwstrength-bootstrap-3.0.9.min.js"></script>
+
+    <script th:inline="javascript">var requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:src="@{/resources/js/util.js}"></script>
+</head>
+<body>
+
+<!--Load Wrapper-->
+<div th:replace="/fragments/loadingWrapper :: loadingWrapper"></div>
+
+<!--Page Header-->
+<header th:replace="/fragments/header :: pageHeader"></header>
+
+<!--Language Selector-->
+<div th:replace="/fragments/languageSelector :: languageSelector"></div>
+
+<!--Main Section Container-->
+<main class="container-md mt-2 mb-4">
+    <h1 th:utext="#{label.form.title}"></h1>
+    <br/>
+    <form action="#" method="POST" enctype="utf8">
+        <div class="form-group row">
+            <label for="email" class="col-sm-3" th:utext="#{label.user.email}">Email</label>
+            <span class="col-sm-5"><input id="email" type="email" class="form-control" name="email" value=""
+                                          required="required"/></span>
+            <span id="emailError" class="alert alert-danger col-sm-4" style="display:none"></span>
+
+        </div>
+        <div class="form-group row">
+            <label for="username" class="col-sm-3" th:utext="#{label.user.username}">Username</label>
+            <span class="col-sm-5"><input id="username" class="form-control" name="username" value=""
+                                          required="required"/></span>
+            <span id="usernameError" class="alert alert-danger col-sm-4" style="display:none"></span>
+
+        </div>
+        <div class="form-group row">
+            <label for="password" class="col-sm-3" th:utext="#{label.user.password}">Password</label>
+            <span class="col-sm-5"><input id="password" class="form-control" name="password" value=""
+                                          type="password" required="required" autocomplete="new-password"/></span>
+            <span id="passwordError" class="alert alert-danger col-sm-4" style="display:none"></span>
+        </div>
+        <div class="form-group row">
+            <label for="matchPassword" class="col-sm-3" th:utext="#{label.user.confirmPass}">Confirm
+                password</label>
+            <span class="col-sm-5"><input id="matchPassword" class="form-control" name="matchingPassword" value=""
+                                          type="password" required="required" autocomplete="new-password"/></span>
+            <span id="globalError" class="alert alert-danger col-sm-4" style="display:none"></span>
+        </div>
+        <br/>
+        <button type="submit" class="btn btn-primary" th:utext="#{label.form.submit}">Submit</button>
+    </form>
+</main>
+
+<!--Page Footer-->
+<footer th:replace="/fragments/footer :: pageFooter"></footer>
+
+<script th:inline="javascript">
+    var serverContext = [[@{/}]];
+
+        $(document).ready(function () {
+            $('form').submit(function (event) {
+                register(event);
+            });
+
+            $(":password").keyup(function () {
+                if ($("#password").val() != $("#matchPassword").val()) {
+                    $("#globalError").show().html(/*[[#{PasswordMatches.user}]]*/);
+                } else {
+                    $("#globalError").html("").hide();
+                }
+            });
+
+            var options = {};
+            options.common = {
+                minChar: 8
+            };
+            options.rules = {
+                activated: {
+                    wordMaxLength: true,
+                    wordTwoSpecialChar: false,
+                    wordThreeNumbers: false,
+                    wordUpperLowerCombo: false,
+                    wordLetterNumberCombo: false,
+                    wordLetterNumberCharCombo: false
+                }
+            };
+            options.ui = {
+                showErrors: true,
+                showPopover: true,
+                showVerdictsInsideProgressBar: true
+            };
+            options.i18n = {
+                t: function (key) {
+                    var result = "";
+                    switch (key) {
+                        case "wordMinLength":
+                            result =/*[[#{error.wordMinLength}]]*/;
+                            break;
+                        case "wordMaxLength":
+                            result =/*[[#{error.wordMaxLength}]]*/;
+                            break;
+                        case "wordLowercase":
+                            result =/*[[#{error.wordLowercase}]]*/;
+                            break;
+                        case "wordUppercase":
+                            result =/*[[#{error.wordUppercase}]]*/;
+                            break;
+                        case "wordNotEmail":
+                            result =/*[[#{error.wordNotEmail}]]*/;
+                            break;
+                        case "wordSimilarToUsername":
+                            result =/*[[#{error.wordSimilarToUsername}]]*/;
+                            break;
+                        case "wordOneNumber":
+                            result =/*[[#{error.wordOneNumber}]]*/;
+                            break;
+                        case "wordOneSpecialChar":
+                            result =/*[[#{error.wordOneSpecialChar}]]*/;
+                            break;
+                        case "wordSequences":
+                            result =/*[[#{error.wordSequences}]]*/;
+                            break;
+                    }
+
+                    return result === key ? '' : result; // This assumes you return the
+                    // key if no translation was found, adapt as necessary
+                }
+            };
+
+            $('#password').pwstrength(options);
+        });
+
+    function register(event) {
+        event.preventDefault();
+        $(".alert").html("").hide();
+        $(".error-list").html("");
+        if ($("#password").val() != $("#matchPassword").val()) {
+            $("#globalError").show().html(/!*[[#{PasswordMatches.user}]]*!/);
+            return;
+        }
+        var formData = $('form').serialize();
+        $.post(serverContext + "user/registration", formData, function (data) {
+            if (data.message == "success") {
+                window.location.href = serverContext + "successRegister?email=" + $("#email").val();
+            }
+
+        })
+            .fail(function (data) {
+                if (data.responseJSON.error.indexOf("MailError") > -1) {
+                    window.location.href = serverContext + "emailError";
+                } else if (data.responseJSON.error == "UserAlreadyExist") {
+                    $("#emailError").show().html(data.responseJSON.message);
+                } else if (data.responseJSON.error == "UsernameTaken") {
+                    $("#usernameError").show().html(data.responseJSON.message);
+                } else if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                    window.location.href = serverContext + "login?message=" + data.responseJSON.message;
+                } else {
+                    var errors = $.parseJSON(data.responseJSON.message);
+                    $.each(errors, function (index, item) {
+                        if (item.field) {
+                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                        } else {
+                            $("#globalError").show().append(item.defaultMessage + "<br/>");
+                        }
+                    });
+                }
+            });
+    }
+</script>
+</body>
+
+</html>

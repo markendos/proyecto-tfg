@@ -1,0 +1,26 @@
+<div class="text-right mr-2 mt-1" th:fragment="languageSelector">
+    <select id="locales" class="form-control form-control-sm mr-2 d-inline" style="width:auto;">
+        <option value="" th:utext="#{label.form.languageSelector}"></option>
+        <option value="en" th:utext="#{lang.option.English}"></option>
+        <option value="es" th:utext="#{lang.option.Spanish}"></option>
+    </select>
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#locales").change(function () {
+                var selectedOption = $('#locales').val();
+                if (selectedOption != '') {
+                    var path = window.location.pathname;
+                    var args = window.location.href.split('?')[1];
+                    var newArgs = "";
+                    if(args) {
+                        newArgs = args.replace(/lang=([a-z][a-z])(&)?/, "");
+                        if(newArgs.length > 0)
+                            newArgs = "&" + newArgs;
+                    }
+                    window.location.replace(path + '?lang=' + selectedOption + newArgs);
+                }
+            });
+        });
+    </script>
+</div>

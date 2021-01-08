@@ -1,0 +1,57 @@
+<header class="sticky-top" th:fragment="pageHeader">
+    <script>
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            if (auth2) {
+                auth2.signOut().then(function () {
+                    console.log('User signed out.');
+                });
+            }
+        }
+
+        function onLoad() {
+            gapi.load('auth2', function () {
+                gapi.auth2.init();
+            });
+        }
+    </script>
+    <meta name="google-signin-client_id"
+          th:content="${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}">
+    <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+    <script src="/resources/js/bootstrap-4.5.3.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/ebf145548d.js" crossorigin="anonymous"></script>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" th:href="@{/home}">Navbar</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarToggler">
+            <ul sec:authorize="hasAnyRole('USER', 'ADMIN')" class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{/home}" th:utext="#{label.pages.home.title}"><span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul sec:authorize="hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/changePassword}" sec:authentication="name">user</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/logout}" th:utext="#{label.pages.logout}" onclick="signOut();">logout</a>
+                </li>
+            </ul>
+            <ul sec:authorize="!hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/signUp}" th:utext="#{label.form.loginSignUp}"
+                       th:unless="${#httpServletRequest.requestURI == '/signUp'}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/login}" th:utext="#{label.form.loginLink}"
+                       th:unless="${#httpServletRequest.requestURI == '/login'}">Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
