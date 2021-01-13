@@ -2,16 +2,34 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Successful sign up</title>
 
     <link rel="stylesheet" href="/resources/css/bootstrap-4.5.3.min.css"/>
+    <link rel="stylesheet" href="/resources/css/style.css"/>
+
+    <script src="/resources/js/jquery-3.5.1.min.js"></script>
+    <script src="/resources/js/bootstrap-4.5.3.bundle.min.js"></script>
 </head>
 <body>
 
+<!--Load Wrapper-->
+<div th:replace="/fragments/loadingWrapper :: loadingWrapper"></div>
 
-<div class="container-md mt-4" th:with="email=${param.email}">
+<!--Page Header-->
+<header th:replace="/fragments/header :: pageHeader"></header>
+
+<!--Language Selector-->
+<div th:replace="/fragments/languageSelector :: languageSelector"></div>
+
+<!--Main Section Container-->
+<main class="container-md mt-2 mb-4" th:with="email=${param.email}">
     <h3 class="alert alert-success" th:utext="#{message.regSucc(${email})}">success</h3>
-    <a th:href="@{/login}" th:utext="#{label.login}">login</a>
-</div>
+    <a class="btn btn-primary" th:href="@{/login}" th:utext="#{label.login}">login</a>
+</main>
+
+<!--Page Footer-->
+<footer th:replace="/fragments/footer :: pageFooter"></footer>
+
 </body>
 </html>

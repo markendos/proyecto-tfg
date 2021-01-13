@@ -9,6 +9,7 @@ import es.upo.witzl.proyectotfg.model.User;
 import es.upo.witzl.proyectotfg.security.CustomLoginAuthenticationSuccessHandler;
 import es.upo.witzl.proyectotfg.security.MyUserPrincipal;
 import es.upo.witzl.proyectotfg.service.IUserService;
+import es.upo.witzl.proyectotfg.util.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -38,7 +39,7 @@ public class LoginController {
     private String clientId;
 
     @PostMapping("/oauth_login")
-    public String getLoginPage(final HttpServletRequest request, final HttpServletResponse response,
+    public GenericResponse getLoginPage(final HttpServletRequest request, final HttpServletResponse response,
                                         @RequestParam("idtoken") final String idToken) throws GeneralSecurityException,
             IOException {
         final String userEmail = verifyToken(idToken, clientId);
@@ -60,7 +61,7 @@ public class LoginController {
                 message = "auth.message.invalidUser";
             }
         }
-        return message;
+        return new GenericResponse(message);
     }
 
     private String verifyToken(final String idTokenString, final String clientId) throws GeneralSecurityException, IOException {
