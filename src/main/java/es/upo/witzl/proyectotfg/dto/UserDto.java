@@ -75,7 +75,6 @@ public class UserDto {
                 .append(email)
                 .append(", username=")
                 .append(username)
-                .append(", isUsing2FA=")
                 .append(", role=")
                 .append(role).append("]");
         return builder.toString();

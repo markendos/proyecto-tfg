@@ -37,11 +37,8 @@
          th:utext="#{${session[SPRING_SECURITY_LAST_EXCEPTION]}}">
     </div>
     <div th:with="msg=${param.error[0]}">
-        <div th:with="email=${param.email[0]}" th:utext="#{${msg}} + ${email}"
-             th:unless="${param.email == null}">message
-        </div>
         <div th:utext="#{${msg}}"
-             th:unless="${msg == null || msg == 'true' || param.email != null}">message
+             th:unless="${msg == null || msg == 'true'}">message
         </div>
     </div>
 </div>
@@ -103,7 +100,7 @@
                     $.post(serverContext + "oauth_login", {idtoken: idToken}, function (data) {
 
                         if (data.message != "success") {
-                            window.location.href = serverContext + "login?error=" + data.message + "&email=" + email;
+                            window.location.href = serverContext + "login?error=" + data.message;
                             auth2.signOut();
                         } else {
                             window.reload();

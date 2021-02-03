@@ -20,11 +20,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.unbescape.html.HtmlEscape;
 
@@ -54,7 +51,7 @@ public class RegistrationRestController {
     private Environment env;
 
     @Autowired
-    private LocaleResolver localeResolver;
+    private LocaleContextResolver localeResolver;
 
     public RegistrationRestController() {
         super();
