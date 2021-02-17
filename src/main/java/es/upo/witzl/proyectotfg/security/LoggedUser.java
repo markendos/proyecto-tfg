@@ -9,17 +9,16 @@ import java.util.Objects;
 
 @Component
 public class LoggedUser implements HttpSessionBindingListener {
+
     private String email;
     private String username;
     private boolean admin;
     private String ip;
-    private ActiveUserStore activeUserStore;
 
-    public LoggedUser(String email, String username, boolean admin, String ip, ActiveUserStore activeUserStore) {
+    public LoggedUser(String email, String username, boolean admin, String ip) {
         this.email = email;
         this.username = username;
         this.admin = admin;
-        this.activeUserStore = activeUserStore;
         this.ip = ip;
     }
 
@@ -28,7 +27,8 @@ public class LoggedUser implements HttpSessionBindingListener {
 
     @Override
     public void valueBound(HttpSessionBindingEvent event) {
-        List<LoggedUser> users = activeUserStore.getUsers();
+        ActiveUserStore auStore = ActiveUserStore.getInstance();
+        List<LoggedUser> users = auStore.getUsers();
         LoggedUser user = (LoggedUser) event.getValue();
         if (!users.contains(user.getUsername())) {
             users.add(user);
@@ -37,9 +37,11 @@ public class LoggedUser implements HttpSessionBindingListener {
 
     @Override
     public void valueUnbound(HttpSessionBindingEvent event) {
-        List<LoggedUser> users = activeUserStore.getUsers();
+        ActiveUserStore auStore = ActiveUserStore.getInstance();
+        List<LoggedUser> users = auStore.getUsers();
         LoggedUser user = (LoggedUser) event.getValue();
         users.remove(user);
+        auStore.setUsers(users);
     }
 
     public String getEmail() {
@@ -66,6 +68,14 @@ public class LoggedUser implements HttpSessionBindingListener {
         admin = admin;
     }
 
+    public String getIp() {
+        return ip;
+    }
+
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -84,8 +94,8 @@ public class LoggedUser implements HttpSessionBindingListener {
         return "LoggedUser{" +
                 "email='" + email + '\'' +
                 ", username='" + username + '\'' +
-                ", admin=" + admin + '\'' +
-                ", ip=" + ip +
+                ", admin=" + admin +
+                ", ip='" + ip + '\'' +
                 '}';
     }
 }

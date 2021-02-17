@@ -3,10 +3,7 @@ package es.upo.witzl.proyectotfg.service;
 import es.upo.witzl.proyectotfg.dto.UserDto;
 import es.upo.witzl.proyectotfg.error.UserAlreadyExistException;
 import es.upo.witzl.proyectotfg.error.UsernameTakenException;
-import es.upo.witzl.proyectotfg.model.PasswordResetToken;
-import es.upo.witzl.proyectotfg.model.Token;
-import es.upo.witzl.proyectotfg.model.User;
-import es.upo.witzl.proyectotfg.model.VerificationToken;
+import es.upo.witzl.proyectotfg.model.*;
 import es.upo.witzl.proyectotfg.repository.PasswordResetTokenRepository;
 import es.upo.witzl.proyectotfg.repository.RoleRepository;
 import es.upo.witzl.proyectotfg.repository.UserRepository;
@@ -59,7 +56,8 @@ public class UserService implements IUserService {
         user.setEmail(accountDto.getEmail());
         user.setUsername(accountDto.getUsername());
         user.setPassword(passwordEncoder.encode(accountDto.getPassword()));
-        user.setRoles(Arrays.asList(roleRepository.findByName("ROLE_USER")));
+        //user.setRoles(Arrays.asList(roleRepository.findByName("ROLE_USER")));
+        user.setRole(roleRepository.findByName("ROLE_USER"));
         return userRepository.save(user);
     }
 
@@ -69,7 +67,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void saveRegisteredUser(final User user) {
+    public void saveUser(final User user) {
         userRepository.save(user);
     }
 
@@ -88,6 +86,11 @@ public class UserService implements IUserService {
         }
 
         userRepository.delete(user);
+    }
+
+    @Override
+    public List<User> getUsers() {
+        return userRepository.findAll();
     }
 
     @Override
@@ -200,6 +203,11 @@ public class UserService implements IUserService {
             }
         }
         return result;
+    }
+
+    @Override
+    public Role getRole(String role) {
+        return roleRepository.findByName(role);
     }
 
     @Override

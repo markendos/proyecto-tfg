@@ -4,20 +4,24 @@ import es.upo.witzl.proyectotfg.dto.UserDto;
 import es.upo.witzl.proyectotfg.error.UserAlreadyExistException;
 import es.upo.witzl.proyectotfg.error.UsernameTakenException;
 import es.upo.witzl.proyectotfg.model.PasswordResetToken;
+import es.upo.witzl.proyectotfg.model.Role;
 import es.upo.witzl.proyectotfg.model.User;
 import es.upo.witzl.proyectotfg.model.VerificationToken;
 import es.upo.witzl.proyectotfg.security.MyUserPrincipal;
 import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUserService {
 
     User registerNewUserAccount(UserDto accountDto) throws UserAlreadyExistException, UsernameTakenException;
 
-    void saveRegisteredUser(User user);
+    void saveUser(User user);
 
     void deleteUser(User user);
+
+    List<User> getUsers();
 
     String createVerificationTokenForUser(User user);
 
@@ -56,4 +60,6 @@ public interface IUserService {
     String validateVerificationToken(String token, String username);
 
     String validatePasswordResetToken(String token, String username);
+
+    Role getRole(String role);
 }

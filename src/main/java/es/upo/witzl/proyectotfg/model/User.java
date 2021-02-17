@@ -1,14 +1,13 @@
 package es.upo.witzl.proyectotfg.model;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Iterator;
 
 @Entity // This tells Hibernate to make a table out of this class
-public class User {
+public class User{
 
     @Id
     @Column(length = 50)
@@ -22,9 +21,13 @@ public class User {
 
     private boolean enabled;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+/*    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(columnDefinition = "varchar(50)", name = "user_id", referencedColumnName = "email"), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Collection<Role> roles;
+    private Collection<Role> roles;*/
+
+    @ManyToOne
+    @JoinColumn(name="role_id", nullable=false)
+    private Role role;
 
     @OneToOne(mappedBy = "user")
     @PrimaryKeyJoinColumn
@@ -55,6 +58,7 @@ public class User {
         this.username = username;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
@@ -63,12 +67,22 @@ public class User {
         this.password = password;
     }
 
+/*    @JsonIgnore
     public Collection<Role> getRoles() {
         return roles;
     }
 
     public void setRoles(Collection<Role> roles) {
         this.roles = roles;
+    }*/
+
+    @JsonIgnore
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public boolean isEnabled() {
@@ -79,6 +93,7 @@ public class User {
         this.enabled = enabled;
     }
 
+    @JsonIgnore
     public VerificationToken getVerificationTokentoken() {
         return verificationTokentoken;
     }
@@ -87,6 +102,7 @@ public class User {
         this.verificationTokentoken = verificationTokentoken;
     }
 
+    @JsonIgnore
     public PasswordResetToken getResetToken() {
         return resetToken;
     }
@@ -123,17 +139,18 @@ public class User {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("User [email=")
-                .append(email)
-                .append(", username=").append(username)
-                .append(", enabled=").append(enabled)
-                .append(", roles=").append(roles)
-                .append("]");
-        return builder.toString();
+        return "User{" +
+                "email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", enabled=" + enabled +
+                ", role=" + role +
+                ", verificationTokentoken=" + verificationTokentoken +
+                ", resetToken=" + resetToken +
+                '}';
     }
 
-    public boolean isAdmin() {
+/*    public boolean isAdmin() {
         Iterator<Role> it = roles.iterator();
         boolean exit = false;
 
@@ -144,5 +161,8 @@ public class User {
             }
         }
         return exit;
+    }*/
+    public boolean isAdmin(){
+        return role.getName().equals("ROLE_ADMIN");
     }
 }

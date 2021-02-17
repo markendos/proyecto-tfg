@@ -1,8 +1,5 @@
 package es.upo.witzl.proyectotfg.model;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import javax.persistence.*;
 import java.util.Collection;
 
@@ -13,7 +10,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToMany(mappedBy = "roles")
+    @OneToMany(mappedBy = "role")
     private Collection<User> users;
 
     @ManyToMany

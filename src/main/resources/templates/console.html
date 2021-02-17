@@ -1,11 +1,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Console</title>
     <link rel="stylesheet" href="/resources/css/bootstrap-4.5.3.min.css"/>
     <link rel="stylesheet" href="/resources/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css"/>
 
     <script src="/resources/js/jquery-3.5.1.min.js"></script>
-    <script th:inline="javascript">var requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
-    <script th:src="@{/resources/js/util.js}"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
 </head>
 <body sec:authorize="hasRole('ADMIN')">
 
@@ -33,72 +39,13 @@
             <div class="sidebar-sticky">
                 <ul class="nav flex-column">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            <span data-feather="home"></span>
-                            Dashboard <span class="sr-only">(current)</span>
+                        <a class="nav-link active" th:href="@{/console}">
+                            <span data-feather="home">Users</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">
-                            <span data-feather="file"></span>
-                            Orders
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="shopping-cart"></span>
-                            Products
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="users"></span>
-                            Customers
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="bar-chart-2"></span>
-                            Reports
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="layers"></span>
-                            Integrations
-                        </a>
-                    </li>
-                </ul>
-
-                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                    <span>Saved reports</span>
-                    <a class="d-flex align-items-center text-muted" href="#">
-                        <span data-feather="plus-circle"></span>
-                    </a>
-                </h6>
-                <ul class="nav flex-column mb-2">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Current month
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Last quarter
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Social engagement
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file-text"></span>
-                            Year-end sale
+                            <span data-feather="file">Sensors</span>
                         </a>
                     </li>
                 </ul>
@@ -108,28 +55,110 @@
         <!--Main Section Container-->
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Dashboard</h1>
+                <h1>Dashboard</h1>
 
                 <div class="btn-toolbar mb-2 mb-md-0">
-                    <div class="btn-group mr-2">
-                        <button class="btn btn-sm btn-outline-secondary">Share</button>
-                        <button class="btn btn-sm btn-outline-secondary">Export</button>
-                    </div>
-                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                        <span data-feather="calendar"></span>
-                        This week
-                    </button>
+                    <button th:utext="#{label.pages.users.message}"  class="btn btn-outline-secondary" onclick="handleClick()"></button>
                 </div>
             </div>
-
-            <h2>This is the landing page for the admin</h2>
             <section>
-
-                <a th:href="@{/loggedUsers}" th:utext="#{label.pages.users.message}">View logged in users</a>
+                <div id="tableSpinner" class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <table id="usersTable" class="table table-striped table-bordered" style="width:100%"></table>
             </section>
         </main>
     </div>
 </div>
 </body>
 
+<script th:inline="javascript">
+    $(document).ready(() => {
+        fetchUsers();
+    });
+    const serverContext = [[@{/}]];
+
+    function handleClick() {
+        $("#usersTable_wrapper").hide();
+        $("#tableSpinner").show();
+        setTimeout(fetchUsers, 500);
+    }
+
+    function handleRoleChange(element) {
+        let data = { "user": element.id, "role": element.options[element.selectedIndex].value };
+        $.ajax({
+            url: `${serverContext}admin/user/role`,
+            type: 'PUT',
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: (data) => {
+                alert('SUCCESS: The operation was performed');
+                fetchUsers();
+            },
+            error: (data) => {
+                alert("ERROR: Could not perform the operation");
+                fetchUsers();
+            }
+        });
+    }
+
+    const renderTableSelector = (data, type, row) => {
+        const encoded = window.btoa(unescape(encodeURIComponent(row.email)));
+        return `<select id=${encoded} class="form-control" onChange="handleRoleChange(this)">` +
+            `<option value="user" ${data==='User' ? 'selected' : ''}>User</option>` +
+            `<option value="admin" ${data==='Admin' ? 'selected' : ''}>Admin</option>` +
+            '</select>';
+    }
+
+    function fetchUsers() {
+        $.get(serverContext + "admin/user/all", function (data) {
+            console.log(data.active);
+            let users = data.all.map(user => user.admin ? { ...user, admin:'Admin' } : { ...user, admin:'User' })
+            .map(user => user.enabled ? { ...user, enabled:'Enabled' } : { ...user, enabled:'Disabled' })
+            .map(user => data.active.find(u => user.email===u.email)
+                ? { ...user, status:'Online' } : { ...user, status:'Offline' });
+            console.log(users);
+
+            const lang = Cookies.get("language");
+            let langUrl = '';
+            if(lang && lang==='es') {
+                langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json';
+            } else {
+                langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/English.json';
+            }
+
+            //IF datatable is created, update data
+            if ( $.fn.dataTable.isDataTable( '#usersTable' ) ) {
+                let datatable = new $.fn.dataTable.Api( '#usersTable'  );
+                datatable.clear();
+                datatable.rows.add(users);
+                datatable.draw();
+            }
+            //ELSE, create datatable
+            else {
+                $('#usersTable').DataTable({
+                    data: users,
+                    columns: [
+                        { title: "Email", data: "email" },
+                        { title: "Username", data: "username" },
+                        { title: "Account", data: "enabled" },
+                        { title: "Status", data: "status" },
+                        { title: "Role", data: "admin", render: renderTableSelector },
+                        { title: "Actions", data: "email",
+                            render: function (dataField) { return '<a href="' + dataField + '">Action</a>'; }
+                        }
+                    ],
+                    retrieve: true,
+                    language: {
+                        url: langUrl
+                    }
+                });
+            }
+        }).fail(function (data) {
+                alert("ERROR: Could not fetch data");
+            });
+        $("#tableSpinner").hide();
+        $("#usersTable_wrapper").show();
+    }
+</script>
 </html>

@@ -1,14 +1,27 @@
 package es.upo.witzl.proyectotfg.security;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ActiveUserStore {
 
-    public List<LoggedUser> users;
+    private static ActiveUserStore INSTANCE;
+    private List<LoggedUser> users;
 
     public ActiveUserStore() {
-        users = new ArrayList<>();
+        this.users = new ArrayList<LoggedUser>();
+    }
+
+    public static ActiveUserStore getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new ActiveUserStore();
+        }
+
+        return INSTANCE;
     }
 
     public List<LoggedUser> getUsers() {
@@ -17,5 +30,13 @@ public class ActiveUserStore {
 
     public void setUsers(List<LoggedUser> users) {
         this.users = users;
+    }
+
+    public void addUser(LoggedUser user) {
+        this.users.add(user);
+    }
+
+    public void addUsers(Collection<LoggedUser> newUsers) {
+        this.users.addAll(newUsers);
     }
 }

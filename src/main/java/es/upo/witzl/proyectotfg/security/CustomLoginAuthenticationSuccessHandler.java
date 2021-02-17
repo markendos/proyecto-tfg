@@ -1,6 +1,5 @@
 package es.upo.witzl.proyectotfg.security;
 
-import es.upo.witzl.proyectotfg.model.User;
 import es.upo.witzl.proyectotfg.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -37,7 +36,9 @@ public class CustomLoginAuthenticationSuccessHandler implements AuthenticationSu
             MyUserPrincipal user = (MyUserPrincipal) authentication.getPrincipal();
             String email = user.getEmail();
             String username = user.getUsername();
-            new LoggedUser(email, username, user.isAdmin(), getClientIP(request), activeUserStore);
+            LoggedUser sessionUser = new LoggedUser(email, username, user.isAdmin(), getClientIP(request));
+            activeUserStore.addUser(sessionUser);
+            session.setAttribute("user", sessionUser);
             addWelcomeCookie(user.getEmail(), response);
 
             if (user.isAdmin()) {

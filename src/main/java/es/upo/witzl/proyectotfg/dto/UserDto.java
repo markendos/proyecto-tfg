@@ -67,17 +67,4 @@ public class UserDto {
     public void setMatchingPassword(final String matchingPassword) {
         this.matchingPassword = matchingPassword;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("UserDto [email=")
-                .append(email)
-                .append(", username=")
-                .append(username)
-                .append(", role=")
-                .append(role).append("]");
-        return builder.toString();
-    }
-
 }

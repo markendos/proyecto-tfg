@@ -33,7 +33,6 @@ public class MyUserDetailsService implements UserDetailsService {
     @Autowired
     private MessageSource messages;
 
-
     @Override
     public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {
         try {

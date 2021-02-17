@@ -84,7 +84,7 @@ public class RegistrationRestController {
                 User user = opt.get();
                 if(result.equals("valid")) {
                     user.setEnabled(true);
-                    userService.saveRegisteredUser(user);
+                    userService.saveUser(user);
                     message = "message.accountVerified";
                     redirect = "redirect:/login?message=" + message;
                 }else if(result.equals("expired")) {
