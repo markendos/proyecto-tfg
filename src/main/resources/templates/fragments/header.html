@@ -18,8 +18,9 @@
     <meta name="google-signin-client_id"
           th:content="${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}">
     <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
-    <script src="/resources/js/bootstrap-4.5.3.bundle.min.js"></script>
+    <script src="/resources/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/ebf145548d.js" crossorigin="anonymous"></script>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <a sec:authorize="hasRole('USER')" class="navbar-brand" th:href="@{/home}">Navbar</a>
         <a sec:authorize="hasRole('ADMIN')" class="navbar-brand" th:href="@{/console}">Navbar</a>
@@ -31,17 +32,17 @@
 
         <div class="collapse navbar-collapse" id="navbarToggler">
             <ul sec:authorize="hasRole('USER')" class="navbar-nav mr-auto mt-2 mt-lg-0">
-                <li class="nav-item active">
+                <li class="nav-item" th:classappend="${#httpServletRequest.requestURI} == '/home' ? active : ''">
                     <a class="nav-link" th:href="@{/home}" th:utext="#{label.nav.home}"><span class="sr-only">(current)</span></a>
                 </li>
             </ul>
             <ul sec:authorize="hasRole('ADMIN')" class="navbar-nav mr-auto mt-2 mt-lg-0">
-                <li class="nav-item active">
+                <li class="nav-item" th:classappend="${#httpServletRequest.requestURI} == '/console' ? active : ''">
                     <a class="nav-link" th:href="@{/console}" th:utext="#{label.nav.console}"><span class="sr-only">(current)</span></a>
                 </li>
             </ul>
             <ul sec:authorize="hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
-                <li class="nav-item">
+                <li class="nav-item" th:classappend="${#httpServletRequest.requestURI} == '/changePassword' ? active : ''">
                     <a class="nav-link" th:href="@{/changePassword}" sec:authentication="name">user</a>
                 </li>
                 <li class="nav-item">

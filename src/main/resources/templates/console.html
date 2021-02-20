@@ -3,23 +3,29 @@
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Console</title>
-    <link rel="stylesheet" href="/resources/css/bootstrap-4.5.3.min.css"/>
+    <link rel="stylesheet" href="/resources/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/resources/css/style.css"/>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css"/>
 
+    <!-- JQuery -->
     <script src="/resources/js/jquery-3.5.1.min.js"></script>
+    <!-- DataTables JS -->
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/rowgroup/1.1.2/js/dataTables.rowGroup.min.js"></script>
+    <!--  Cookie JS -->
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
-
+    <!-- Custom JS -->
+    <script th:src="@{/resources/js/sideBar.js}"></script>
 </head>
+
 <body sec:authorize="hasRole('ADMIN')">
 
 <!--Load Wrapper-->
 <div th:replace="/fragments/loadingWrapper :: loadingWrapper"></div>
 
 <!--Page Header-->
-<header th:replace="/fragments/header :: pageHeader"></header>
+<div th:replace="/fragments/header :: pageHeader"></div>
 
 <!--Notificaction Banners-->
 <div th:with="msg=${param.message}">
@@ -28,64 +34,67 @@
     </div>
 </div>
 
-<!--Language Selector-->
-<div th:replace="/fragments/languageSelector :: languageSelector"></div>
+<div class="container-fluid row w-100 pr-0">
+    <!-- Sidebar  -->
+    <div th:replace="/fragments/adminSidebar :: adminSidebar"></div>
 
-<div class="container-fluid">
-    <div class="row">
+    <!--Main Section Container-->
+    <main id="content" role="main" class="col pr-0 pl-2">
+        <div class="container-fluid px-0 d-flex">
+            <button type="button" id="sidebarCollapse" class="btn btn-light mt-2">
+                <i class="fas fa-align-left"></i>
+            </button>
+            <!--Language Selector-->
+            <div th:replace="/fragments/languageSelector :: languageSelector"></div>
+        </div>
 
-        <!--Admin Side Nav-->
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-            <div class="sidebar-sticky">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" th:href="@{/console}">
-                            <span data-feather="home">Users</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file">Sensors</span>
-                        </a>
-                    </li>
-                </ul>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1>Dashboard</h1>
+
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <button th:inline='text' class="btn btn-outline-secondary"
+                        onclick="startLoad()">
+                    [[#{label.pages.button.refresh}]]
+                    <i class="fas fa-sync-alt"></i>
+                </button>
             </div>
-        </nav>
-
-        <!--Main Section Container-->
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1>Dashboard</h1>
-
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <button th:utext="#{label.pages.users.message}"  class="btn btn-outline-secondary" onclick="handleClick()"></button>
-                </div>
+        </div>
+        <section>
+            <div id="tableSpinner" class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
             </div>
-            <section>
-                <div id="tableSpinner" class="spinner-border" role="status">
-                    <span class="sr-only">Loading...</span>
-                </div>
-                <table id="usersTable" class="table table-striped table-bordered" style="width:100%"></table>
-            </section>
-        </main>
-    </div>
+            <table id="usersTable" class="table table-striped table-bordered" style="width:100%">
+                <caption th:inline="text">
+                    <i class="fas fa-users"></i>
+                    [[#{label.pages.title.users}]]
+                </caption>
+            </table>
+        </section>
+    </main>
 </div>
 </body>
 
 <script th:inline="javascript">
     $(document).ready(() => {
         fetchUsers();
+        $('[data-toggle="tooltip"]').tooltip();
     });
+
     const serverContext = [[@{/}]];
 
-    function handleClick() {
+    function startLoad() {
         $("#usersTable_wrapper").hide();
         $("#tableSpinner").show();
         setTimeout(fetchUsers, 500);
     }
 
+    function endLoad() {
+        $("#tableSpinner").hide();
+        $("#usersTable_wrapper").show();
+    }
+
     function handleRoleChange(element) {
-        let data = { "user": element.id, "role": element.options[element.selectedIndex].value };
+        let data = {"user": element.id, "role": element.options[element.selectedIndex].value};
         $.ajax({
             url: `${serverContext}admin/user/role`,
             type: 'PUT',
@@ -105,31 +114,40 @@
     const renderTableSelector = (data, type, row) => {
         const encoded = window.btoa(unescape(encodeURIComponent(row.email)));
         return `<select id=${encoded} class="form-control" onChange="handleRoleChange(this)">` +
-            `<option value="user" ${data==='User' ? 'selected' : ''}>User</option>` +
-            `<option value="admin" ${data==='Admin' ? 'selected' : ''}>Admin</option>` +
+            `<option value="user" ${data === 'User' ? 'selected' : ''}>User</option>` +
+            `<option value="admin" ${data === 'Admin' ? 'selected' : ''}>Admin</option>` +
             '</select>';
+    }
+
+    const renderTooltip = (data, type, row) => {
+        const ipTooltip = row.ip ? `<span data-toggle="tooltip" data-placement="top" title="IP Address: ${row.ip}">
+                <i class="fas fa-info-circle ml-2"></i></span>` : '';
+
+        return `<i class="fas fa-circle" style="font-size:0.5em;color:${row.ip ? 'green' : 'red'}"></i>
+                ${row.status} ${ipTooltip}`;
     }
 
     function fetchUsers() {
         $.get(serverContext + "admin/user/all", function (data) {
-            console.log(data.active);
-            let users = data.all.map(user => user.admin ? { ...user, admin:'Admin' } : { ...user, admin:'User' })
-            .map(user => user.enabled ? { ...user, enabled:'Enabled' } : { ...user, enabled:'Disabled' })
-            .map(user => data.active.find(u => user.email===u.email)
-                ? { ...user, status:'Online' } : { ...user, status:'Offline' });
-            console.log(users);
+            let users = data.all.map(u => ({
+                ...data.active.find((user) => (user.email === u.email) && user),
+                ...u
+            }))
+                .map(user => user.admin ? {...user, admin: 'Admin'} : {...user, admin: 'User'})
+                .map(user => user.enabled ? {...user, enabled: 'Enabled'} : {...user, enabled: 'Disabled'})
+                .map(user => user.ip ? {...user, status: 'Online'} : {...user, status: 'Offline'});
 
             const lang = Cookies.get("language");
             let langUrl = '';
-            if(lang && lang==='es') {
+            if (lang && lang === 'es') {
                 langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json';
             } else {
                 langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/English.json';
             }
 
             //IF datatable is created, update data
-            if ( $.fn.dataTable.isDataTable( '#usersTable' ) ) {
-                let datatable = new $.fn.dataTable.Api( '#usersTable'  );
+            if ($.fn.dataTable.isDataTable('#usersTable')) {
+                let datatable = new $.fn.dataTable.Api('#usersTable');
                 datatable.clear();
                 datatable.rows.add(users);
                 datatable.draw();
@@ -137,28 +155,34 @@
             //ELSE, create datatable
             else {
                 $('#usersTable').DataTable({
+                    drawCallback: () => {
+                        $('[data-toggle="tooltip"]').tooltip();
+                    },
                     data: users,
+                    columnDefs: [
+                        {targets: [4], visible: false},
+                        {responsivePriority: 1, targets: -1}
+                    ],
                     columns: [
-                        { title: "Email", data: "email" },
-                        { title: "Username", data: "username" },
-                        { title: "Account", data: "enabled" },
-                        { title: "Status", data: "status" },
-                        { title: "Role", data: "admin", render: renderTableSelector },
-                        { title: "Actions", data: "email",
-                            render: function (dataField) { return '<a href="' + dataField + '">Action</a>'; }
-                        }
+                        {title: "Email", data: "email"},
+                        {title: "Username", data: "username"},
+                        {title: "Account", data: "enabled"},
+                        {title: "Status", data: "status", render: renderTooltip},
+                        {title: "Ip", data: "ip", defaultContent: "<i>N/A</i>"},
+                        {title: "Role", data: "admin", render: renderTableSelector},
                     ],
                     retrieve: true,
                     language: {
                         url: langUrl
-                    }
+                    },
+                    responsive: true,
                 });
             }
+            endLoad();
         }).fail(function (data) {
-                alert("ERROR: Could not fetch data");
-            });
-        $("#tableSpinner").hide();
-        $("#usersTable_wrapper").show();
+            alert("ERROR: Could not fetch data");
+            endLoad();
+        });
     }
 </script>
 </html>

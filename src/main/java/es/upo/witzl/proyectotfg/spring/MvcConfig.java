@@ -54,6 +54,7 @@ public class MvcConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(final ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("redirect:/login");
+        registry.addViewController("/addSensor");
         registry.addViewController("/badUser");
         registry.addViewController("/changePassword");
         registry.addViewController("/console");
