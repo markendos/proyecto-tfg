@@ -1,11 +1,11 @@
 package es.upo.witzl.proyectotfg.spring;
 
-import es.upo.witzl.proyectotfg.model.Privilege;
-import es.upo.witzl.proyectotfg.model.Role;
-import es.upo.witzl.proyectotfg.model.User;
-import es.upo.witzl.proyectotfg.repository.PrivilegeRepository;
-import es.upo.witzl.proyectotfg.repository.RoleRepository;
-import es.upo.witzl.proyectotfg.repository.UserRepository;
+import es.upo.witzl.proyectotfg.users.model.Privilege;
+import es.upo.witzl.proyectotfg.users.model.Role;
+import es.upo.witzl.proyectotfg.users.model.User;
+import es.upo.witzl.proyectotfg.users.repository.PrivilegeRepository;
+import es.upo.witzl.proyectotfg.users.repository.RoleRepository;
+import es.upo.witzl.proyectotfg.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;

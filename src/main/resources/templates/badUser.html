@@ -34,7 +34,7 @@
             </button>
 
             <script th:inline="javascript">
-                var serverContext = [[@{/}]];
+                const serverContext = /*[[@{/}]]*/;
 
                     function resendToken() {
                         var token = [[${token}]];

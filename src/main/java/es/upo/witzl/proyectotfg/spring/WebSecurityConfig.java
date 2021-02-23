@@ -1,8 +1,8 @@
 package es.upo.witzl.proyectotfg.spring;
 
-import es.upo.witzl.proyectotfg.security.CustomAuthenticationFailureHandler;
-import es.upo.witzl.proyectotfg.security.CustomLoginAuthenticationSuccessHandler;
-import es.upo.witzl.proyectotfg.security.MyLogoutSuccessHandler;
+import es.upo.witzl.proyectotfg.users.security.CustomAuthenticationFailureHandler;
+import es.upo.witzl.proyectotfg.users.security.CustomLoginAuthenticationSuccessHandler;
+import es.upo.witzl.proyectotfg.users.security.MyLogoutSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -18,7 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
-@ComponentScan(basePackages = {"es.upo.witzl.proyectotfg.security"})
+@ComponentScan(basePackages = {"es.upo.witzl.proyectotfg.users.security"})
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
@@ -45,7 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/console*", "/admin/**").hasRole("ADMIN")
+                .antMatchers("/console*", "/console/**", "/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/savePassword*").hasAuthority("CHANGE_PASSWORD_PRIVILEGE")
                 .antMatchers("/", "/login*", "/logout*", "/signUp*", "/user/registration*","/badUser*",
                         "/emailError*", "/successRegister*", "/registrationConfirm*", "/resetPassword*", "/user/resetPassword*",

@@ -9,6 +9,7 @@
     <!-- JQuery -->
     <script src="/resources/js/jquery-3.5.1.min.js"></script>
     <!-- Custom JS -->
+    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
     <script th:src="@{/resources/js/util.js}"></script>
     <script th:src="@{/resources/js/sideBar.js}"></script>
 </head>
@@ -20,12 +21,10 @@
 <!--Page Header-->
 <header th:replace="/fragments/header :: pageHeader"></header>
 
-<!--Notificaction Banners-->
-<div th:with="msg=${param.message}">
-    <div class="alert alert-info" th:utext="#{${msg}}"
-         th:unless="${msg == null}">message
-    </div>
-</div>
+<!--Notification Banners-->
+<div id="errormsg" class="alert alert-danger" style="display:none"></div>
+<div id="successmsg"class="alert alert-success" style="display:none"></div>
+
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
@@ -42,37 +41,74 @@
         </div>
 
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1>Register Sensor</h1>
+            <h1 th:utext="#{label.pages.title.sensors.register}"></h1>
         </div>
         <section>
-            <form action="#" method="POST" enctype="utf8">
+            <form action="#" method="POST" enctype="utf8" id="sensorForm">
                 <div class="form-group row">
-                    <label for="name" class="col-sm-2" th:utext="#{label.sensor.name}">old</label>
+                    <label for="name" class="col-sm-2" th:utext="#{label.sensor.name}">name</label>
                     <span class="col-sm-5">
-                        <input class="form-control" id="name" name="name" type="text" value=""/>
+                        <input id="name" class="form-control" name="name" type="text" value="" required/>
                     </span>
+                    <span id="nameError" class="alert alert-danger col-sm-4" style="display:none"></span>
                 </div>
                 <div class="form-group row">
-                    <label for="alias" class="col-sm-2" th:utext="#{label.sensor.alias}">new</label>
+                    <label for="alias" class="col-sm-2" th:utext="#{label.sensor.alias}">alias</label>
                     <span class="col-sm-5">
-                        <input class="form-control" id="alias" name="alias" type="text" value=""/>
+                        <input id="alias" class="form-control" name="alias" type="text" value="" required/>
                     </span>
+                    <span id="aliasError" class="alert alert-danger col-sm-4" style="display:none"></span>
                 </div>
                 <div class="form-group row">
-                    <label for="description" class="col-sm-2 align-self-start" th:utext="#{label.sensor.description}">confirm</label>
+                    <label for="description" class="col-sm-2 align-self-start" th:utext="#{label.sensor.description}">
+                        description
+                    </label>
                     <div class="col-sm-5">
-                        <textarea class="form-control" id="description" name="description" rows="6"></textarea>
+                        <textarea id="description" maxlength="500" class="form-control" name="description"
+                                  rows="6"></textarea>
                     </div>
-                    <div id="globalError" class="col-sm-4 alert alert-danger" style="display:none"
-                         th:utext="#{PasswordMatches.user}">error
-                    </div>
+                    <span id="descriptionError" class="alert alert-danger col-sm-4" style="display:none"></span>
+                    <span id="globalError" class="alert alert-danger col-sm-4" style="display:none"></span>
                 </div>
-                <button class="btn btn-primary" type="submit" onclick="savePass()" th:utext="#{label.form.submit}">
-                    change
-                </button>
+                <button class="btn btn-primary" type="submit" th:utext="#{label.form.submit}"></button>
             </form>
         </section>
     </main>
 </div>
+
+<script th:inline="javascript">
+    const serverContext = /*[[@{/}]]*/;
+    $(document).ready(function () {
+        $('#sensorForm').submit(function (event) {
+            saveSensor(event);
+        });
+    });
+
+    function saveSensor(event) {
+        event.preventDefault();
+        $(".alert").html("").hide();
+        $(".error-list").html("");
+        const formData = $('#sensorForm').serialize();
+        $.post(serverContext + "admin/sensor/add", formData, function (data) {
+            $("#successmsg").show().html(/*[[#{message.sensor.success.register}]]*/);
+        })
+            .fail(function (data) {
+                if (data.responseJSON.error.indexOf("SensorAlreadyExists") > -1) {
+                    $("#errormsg").show().append(data.responseJSON.message);
+                } else if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                    $("#errormsg").show().append(data.responseJSON.message);
+                } else {
+                    const errors = $.parseJSON(data.responseJSON.message);
+                    $.each(errors, function (index, item) {
+                        if (item.field) {
+                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                        } else {
+                            $("#globalError").show().append(item.defaultMessage + "<br/>");
+                        }
+                    });
+                }
+            });
+    }
+</script>
 </body>
 </html>

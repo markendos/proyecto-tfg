@@ -21,9 +21,8 @@
     <script src="/resources/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/ebf145548d.js" crossorigin="anonymous"></script>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a sec:authorize="hasRole('USER')" class="navbar-brand" th:href="@{/home}">Navbar</a>
-        <a sec:authorize="hasRole('ADMIN')" class="navbar-brand" th:href="@{/console}">Navbar</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="topnav">
+        <a class="navbar-brand" th:href="@{/}">Navbar</a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
                 aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,11 +41,21 @@
                 </li>
             </ul>
             <ul sec:authorize="hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
+                <li sec:authorize="hasAnyRole('USER')" class="nav-item col">
+                    <div id="notifications" class="nav-link row" onclick="toggleNotificationsPanel()">
+                        <i class="notification fas fa-bell"></i>
+                        <i class="fas fa-caret-down"></i>
+                    </div>
+                    <div id="notificationsPanel" class="row alert alert-info mr-2" style="display: none">Hola</div>
+                </li>
                 <li class="nav-item" th:classappend="${#httpServletRequest.requestURI} == '/changePassword' ? active : ''">
-                    <a class="nav-link" th:href="@{/changePassword}" sec:authentication="name">user</a>
+                    <a class="nav-link" th:href="@{/changePassword}">
+                        <i class="userIcon fas fa-user-circle"></i>
+                        <span sec:authentication="name"></span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/logout}" th:utext="#{label.pages.logout}" onclick="signOut();">logout</a>
+                    <a class="nav-link" th:href="@{/logout}" th:utext="#{label.pages.logout}" onclick="signOut()">logout</a>
                 </li>
             </ul>
             <ul sec:authorize="!hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
@@ -61,4 +70,10 @@
             </ul>
         </div>
     </nav>
+
+    <script th:inline="javascript">
+        function toggleNotificationsPanel() {
+            $("#notificationsPanel").toggle();
+        }
+    </script>
 </header>

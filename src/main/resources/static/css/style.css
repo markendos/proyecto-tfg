@@ -23,14 +23,45 @@ body {
     flex-direction: column;
 }
 
-/***** Header *****/
+/***** Header/Top Nav *****/
 .logo-header {
     max-height: 50px;
+}
+
+i.userIcon {
+    font-size: larger;
+}
+i.notification {
+    font-size: larger;
+}
+
+#notifications:hover {
+    cursor: pointer;
+}
+
+#notificationsPanel {
+    position: fixed;
+    min-height: 50px;
+    min-width: 200px;
+    z-index: 999;
 }
 
 /***** Notification Banners *****/
 .alert {
     margin: 0;
+    display: flex;
+    opacity: 0.9;
+    align-items: center;
+    overflow-wrap: anywhere;
+}
+
+.alert > i.fa-window-close {
+    margin-left: auto;
+}
+
+.alert > i.fa-window-close:hover {
+    font-size: 105%;
+    cursor: pointer;
 }
 
 /***** Language Selector *****/
@@ -144,6 +175,7 @@ span {
 #sidebar.fixed {
     position: fixed;
     z-index: 999;
+    height: 100vh;
 }
 
 #sidebar.active .sidebar-header h3,
@@ -209,14 +241,18 @@ span {
     margin-right: 10px;
 }
 
-#sidebar ul li.active>a,
-a[aria-expanded="true"] {
+#sidebar ul li.active>a {
     color: #fff;
     background: #00ad5f;
     opacity: 0.8;
 }
+
 #sidebar.active>#sidebarCollapse {
     margin: 0 !important;
+}
+
+#sidebar.active #sensorSubmenu {
+    padding: 0;
 }
 
 a[data-toggle="collapse"] {
@@ -322,18 +358,23 @@ a.article:hover {
     #sidebar {
         margin-left: 0;
     }
-    #sidebarCollapse span {
-        display: none;
+
+    #sensorSubmenu {
+        padding: 0;
     }
 }
 
 /***** Data Tables *****/
-#usersTable_wrapper > div:nth-child(2) > div {
+#dataTable_wrapper > div:nth-child(2) > div {
     overflow-x: auto;
 }
 caption {
     caption-side: top;
     font-size: 1.5em;
+}
+
+tbody > tr:hover {
+    cursor: pointer;
 }
 
 /***** Footer *****/

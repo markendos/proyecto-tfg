@@ -1,26 +1,28 @@
-<div class="text-right mt-1 d-inline-block ml-auto" th:fragment="languageSelector">
-    <select id="locales" class="form-control form-control-sm d-inline" style="width:auto;">
-        <option value="" th:utext="#{label.form.languageSelector}"></option>
-        <option value="en" th:utext="#{lang.option.English}"></option>
-        <option value="es" th:utext="#{lang.option.Spanish}"></option>
-    </select>
-    </script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $("#locales").change(function () {
-                var selectedOption = $('#locales').val();
-                if (selectedOption != '') {
-                    var path = window.location.pathname;
-                    var args = window.location.href.split('?')[1];
-                    var newArgs = "";
-                    if(args) {
-                        newArgs = args.replace(/lang=([a-z][a-z])(&)?/, "");
-                        if(newArgs.length > 0)
-                            newArgs = "&" + newArgs;
+<div class="row w-100" th:fragment="languageSelector">
+    <div class="col d-flex mt-1 justify-content-end" th:fragment="languageSelector">
+        <select id="locales" class="form-control form-control-sm d-inline" style="width:auto;">
+            <option value="" th:utext="#{label.form.languageSelector}"></option>
+            <option value="en" th:utext="#{lang.option.English}"></option>
+            <option value="es" th:utext="#{lang.option.Spanish}"></option>
+        </select>
+        </script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#locales").change(function () {
+                    var selectedOption = $('#locales').val();
+                    if (selectedOption != '') {
+                        var path = window.location.pathname;
+                        var args = window.location.href.split('?')[1];
+                        var newArgs = "";
+                        if(args) {
+                            newArgs = args.replace(/lang=([a-z][a-z])(&)?/, "");
+                            if(newArgs.length > 0)
+                                newArgs = "&" + newArgs;
+                        }
+                        window.location.replace(path + '?lang=' + selectedOption + newArgs);
                     }
-                    window.location.replace(path + '?lang=' + selectedOption + newArgs);
-                }
+                });
             });
-        });
-    </script>
-</div>
+        </script>
+    </div>
+    </div>

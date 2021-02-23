@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@ComponentScan({ "es.upo.witzl.proyectotfg.task" })
+@ComponentScan({"es.upo.witzl.proyectotfg.users.task"})
 public class SpringTaskConfig {
 
 }
