@@ -1,9 +1,11 @@
 package es.upo.witzl.proyectotfg.users.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import es.upo.witzl.proyectotfg.projects.model.CollaborationRequest;
 import es.upo.witzl.proyectotfg.projects.model.Project;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity // This tells Hibernate to make a table out of this class
@@ -36,8 +38,8 @@ public class User{
     @OneToMany(mappedBy = "user")
     private Collection<Project> ownedProjects;
 
-    @ManyToMany(mappedBy = "collaborators")
-    private Collection<Project> collaboratedProjects;
+    @OneToMany(mappedBy = "collaborator")
+    private Collection<CollaborationRequest> collaborationRequests;
 
     public User() {
         super();
@@ -113,12 +115,23 @@ public class User{
         this.ownedProjects = ownedProjects;
     }
 
-    public Collection<Project> getCollaboratedProjects() {
-        return collaboratedProjects;
+    public Collection<CollaborationRequest> getCollaborationRequests() {
+        return collaborationRequests;
     }
 
-    public void setCollaboratedProjects(Collection<Project> collaboratedProjects) {
-        this.collaboratedProjects = collaboratedProjects;
+    public void setCollaborationRequests(Collection<CollaborationRequest> collaborationRequests) {
+        this.collaborationRequests = collaborationRequests;
+    }
+
+    public Collection<Project> getCollaboratedProjects() {
+        Collection<CollaborationRequest> collaborationRequests = getCollaborationRequests();
+        Collection<Project> approved = new ArrayList<>();
+        for(CollaborationRequest cr : collaborationRequests) {
+            if(cr.getCollaborator().equals(this) && cr.getRequestStatus().equals("approved")) {
+                approved.add(cr.getProject());
+            }
+        }
+        return approved;
     }
 
     @Override
@@ -158,7 +171,7 @@ public class User{
                 ", verificationTokentoken=" + verificationTokentoken +
                 ", resetToken=" + resetToken +
                 ", ownedProjects=" + ownedProjects +
-                ", collaboratedProjects=" + collaboratedProjects +
+                ", collaborationRequests=" + collaborationRequests +
                 '}';
     }
 

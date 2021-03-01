@@ -17,7 +17,7 @@ public class SensorDto {
     @Size(min = 1, max = 10)
     private String alias;
 
-    @Size(max = 500)
+    @Size(max = 255)
     private String description;
 
     public String getName() {

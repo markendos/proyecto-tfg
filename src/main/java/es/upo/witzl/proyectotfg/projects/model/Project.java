@@ -1,5 +1,6 @@
 package es.upo.witzl.proyectotfg.projects.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import es.upo.witzl.proyectotfg.users.model.User;
 
 import javax.persistence.*;
@@ -21,7 +22,7 @@ public class Project {
     @Column(length = 60, nullable = false)
     private String name;
 
-    @Column(length = 500, nullable = false)
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
@@ -30,17 +31,15 @@ public class Project {
 
     @ManyToMany
     @JoinTable(name = "project_label", joinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "label_id", referencedColumnName = "id"))
+            inverseJoinColumns = @JoinColumn(name = "label_id", referencedColumnName = "name"))
     private Collection<Label> labels;
 
     @OneToOne(mappedBy = "project")
     @PrimaryKeyJoinColumn
     private Subject subject;
 
-    @ManyToMany
-    @JoinTable(name = "project_collaborator", joinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "collaborator_id", referencedColumnName = "email"))
-    private Collection<User> collaborators;
+    @OneToMany(mappedBy = "project")
+    private Collection<CollaborationRequest> collaborationRequests;
 
     public Long getId() {
         return id;
@@ -50,6 +49,7 @@ public class Project {
         this.id = id;
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }
@@ -98,12 +98,13 @@ public class Project {
         this.subject = subject;
     }
 
-    public Collection<User> getCollaborators() {
-        return collaborators;
+    @JsonIgnore
+    public Collection<CollaborationRequest> getCollaborationRequests() {
+        return collaborationRequests;
     }
 
-    public void setCollaborators(Collection<User> collaborators) {
-        this.collaborators = collaborators;
+    public void setCollaborationRequests(Collection<CollaborationRequest> collaborationRequests) {
+        this.collaborationRequests = collaborationRequests;
     }
 
     @Override
@@ -129,7 +130,7 @@ public class Project {
                 ", startDate=" + startDate +
                 ", labels=" + labels +
                 ", subject=" + subject +
-                ", collaborators=" + collaborators +
+                ", collaborationRequests=" + collaborationRequests +
                 '}';
     }
 }

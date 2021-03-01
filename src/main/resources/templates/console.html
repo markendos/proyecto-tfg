@@ -79,9 +79,8 @@
                                 description
                             </label>
                             <div class="col-sm-9">
-                                <textarea id="description" maxlength="500" class="form-control" name="description"
-                                          rows="6">
-                                </textarea>
+                                <textarea id="description" maxlength="255" class="form-control" name="description"
+                                          rows="6"></textarea>
                             </div>
                         </div>
                         <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
@@ -89,7 +88,9 @@
                 </div>
                 <div class="modal-footer">
                     <input type="text" name="id" id="id" value="" hidden>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:utext="#{label.form.cancel}">
+                        cancel
+                    </button>
                     <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
                 </div>
             </form>
@@ -213,7 +214,7 @@
             `<option value="user" ${data === 'User' ? 'selected' : ''}>User</option>` +
             `<option value="admin" ${data === 'Admin' ? 'selected' : ''}>Admin</option>` +
             '</select>';
-    }
+    };
 
     const renderTooltip = (data, type, row) => {
         const ipTooltip = row.ip ? `<span data-toggle="tooltip" data-placement="top" title="IP Address: ${row.ip}">
@@ -221,7 +222,7 @@
 
         return `<i class="fas fa-circle" style="font-size:0.5em;color:${row.ip ? 'green' : 'red'}"></i>
                 ${row.status} ${ipTooltip}`;
-    }
+    };
 
     function fetchUsers() {
         if (!loadingData) {
@@ -233,7 +234,8 @@
                 ...u
             }))
                 .map(user => user.admin ? {...user, admin: 'Admin'} : {...user, admin: 'User'})
-                .map(user => user.enabled ? {...user, enabled: 'Enabled'} : {...user, enabled: 'Disabled'})
+                .map(user => user.enabled ? {...user, enabled: [[#{table.user.value.enabled}]]} :
+                    {...user, enabled: [[#{table.user.value.disabled}]]})
                 .map(user => user.ip ? {...user, status: 'Online'} : {...user, status: 'Offline'});
             drawUsersTable(users);
         }).fail(function (data) {
@@ -281,9 +283,9 @@
                     { targets: 2, render: $.fn.dataTable.render.ellipsis( 100 ) }
                 ],
                 columns: [
-                    {title: "Name", data: "name"},
-                    {title: "Alias", data: "alias"},
-                    {title: "Description", data: "description"}
+                    {title: [[#{table.sensor.column.name}]], data: "name"},
+                    {title: [[#{table.sensor.column.alias}]], data: "alias"},
+                    {title: [[#{table.sensor.column.description}]], data: "description"}
                 ],
                 retrieve: true,
                 language: {
@@ -321,12 +323,12 @@
                     {responsivePriority: 1, targets: -1}
                 ],
                 columns: [
-                    {title: "Email", data: "email"},
-                    {title: "Username", data: "username"},
-                    {title: "Account", data: "enabled"},
-                    {title: "Status", data: "status", render: renderTooltip},
+                    {title: [[#{table.user.column.email}]], data: "email"},
+                    {title: [[#{table.user.column.username}]], data: "username"},
+                    {title: [[#{table.user.column.account}]], data: "enabled"},
+                    {title: [[#{table.user.column.status}]], data: "status", render: renderTooltip},
                     {title: "Ip", data: "ip", defaultContent: "<i>N/A</i>"},
-                    {title: "Role", data: "admin", render: renderTableSelector},
+                    {title: [[#{table.user.column.role}]], data: "admin", render: renderTableSelector},
                 ],
                 retrieve: true,
                 language: {

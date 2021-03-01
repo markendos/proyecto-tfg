@@ -1,7 +1,7 @@
 <div class="row w-100" th:fragment="languageSelector">
     <div class="col d-flex mt-1 justify-content-end" th:fragment="languageSelector">
         <select id="locales" class="form-control form-control-sm d-inline" style="width:auto;">
-            <option value="" th:utext="#{label.form.languageSelector}"></option>
+            <option value="" th:utext="#{label.form.languageSelector}" disabled selected></option>
             <option value="en" th:utext="#{lang.option.English}"></option>
             <option value="es" th:utext="#{lang.option.Spanish}"></option>
         </select>

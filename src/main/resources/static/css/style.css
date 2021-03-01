@@ -94,7 +94,7 @@ i.notification {
 }
 
 /***** Forms *****/
-input:hover, select:hover {
+select:hover {
     cursor: pointer;
 }
 
@@ -143,10 +143,10 @@ a:focus {
     margin: 40px 0;
 }
 
-i,
+/*i,
 span {
     display: inline-block;
-}
+}*/
 
 /* ---------------------------------------------------
     SIDEBAR STYLE
@@ -168,7 +168,7 @@ span {
 
 #sidebar.active {
     min-width: 80px;
-    max-width: 80px;
+    max-width: 125px;
     text-align: center;
 }
 

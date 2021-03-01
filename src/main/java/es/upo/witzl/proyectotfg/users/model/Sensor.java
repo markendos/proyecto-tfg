@@ -16,7 +16,6 @@ public class Sensor {
     @Column(unique = true, nullable = false, length = 10)
     private String alias;
 
-    @Column(nullable = true, length = 500)
     private String description;
 
     public Long getId() {

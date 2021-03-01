@@ -15,7 +15,12 @@ $(document).ajaxStart(function () {
 });
 $(document).ajaxStop(function () {
     hideSpinner();
-    $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
+    const alerts = $(".alert");
+    for(let i = 0; i < alerts.length; i++) {
+        if($(alerts[i]).find($('.fa-window-close')).length === 0) {
+            $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
+        }
+    }
 });
 
 // Function to hide the Loading Wrapper

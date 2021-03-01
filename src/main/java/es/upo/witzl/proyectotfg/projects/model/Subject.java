@@ -19,13 +19,13 @@ public class Subject {
     @Temporal(TemporalType.TIMESTAMP)
     private Date birthDate;
 
-    @Column(length = 10)
+    @Column(length = 1)
     private String gender;
 
-    @Column(length = 10)
+    @Column(length = 6)
     private float weight;
 
-    @Column(length = 10)
+    @Column(length = 6)
     private float height;
 
     private boolean smoker;
