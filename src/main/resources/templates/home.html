@@ -194,17 +194,18 @@
             width: 'resolve',
             tags: true,
             language: lang,
-            tokenSeparators: [','],
+            tokenSeparators: [',', ' '],
             ajax: {
                 url: serverContext + 'user/project/labels/all',
                 dataType: 'json',
                 processResults: function (data) {
+
                     return {
-                        results: data.all.map(({name: id, name: text})=>({id, text}))
+                        results: data.all.map(({ name: id, name: text })=>({ id, text }))
                     };
                 }
             },
-            minimumInputLength: 3,
+            minimumInputLength: 1,
             cache: true,
             createTag: function (params) {
                 const term = $.trim(params.term);
@@ -258,7 +259,9 @@
             startLoad();
         }
         $.get(serverContext + "user/project/all", function (data) {
-            let projects = data.all;
+            let owned = data.owned.map(p => true ? {...p, role: 'owner'} : {...p});
+            let auth = data.auth.map(p => true ? {...p, role: 'collaborator'} : {...p});
+            const projects = [...owned, ...auth];
             drawProjectsTable(projects);
         }).fail(function (data) {
             alert("ERROR: Could not fetch data");
@@ -300,6 +303,15 @@
         return labels;
     };
 
+    const renderProjectRole = (data, type, row) => {
+        let role = data === 'owner' ? /*[[#{table.project.column.role.owner}]]*/
+            : /*[[#{table.project.column.role.collaborator}]]*/;
+        return `<span>
+                    ${role}
+                    ${data === 'owner' ? `<i class="fas fa-lock-open"></i>` : `<i class="fas fa-lock"></i>`}
+                </span>`;
+    };
+
     function drawProjectsTable(projects) {
         if (lang && lang === 'es') {
             langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json';
@@ -331,6 +343,7 @@
                     {title: [[#{table.project.column.description}]], data: "description"},
                     {title: [[#{table.project.column.date}]], data: "startDate"},
                     {title: [[#{table.project.column.labels}]], data: "labels", render: renderProjectLabels},
+                    {title: [[#{table.project.column.role}]], data: "role", render: renderProjectRole},
                     {title: [[#{table.project.column.actions}]], render: renderProjectActions},
                 ],
                 retrieve: true,
@@ -359,8 +372,29 @@
     }
 
     function addOrRemoveLabels(projectId){
+        $('#labels').empty();
         $('#projectId').val(projectId);
         $('#labelsModal').modal('show');
+        // Fetch the preselected item, and add to the control
+        const labelsSelect = $('#labels');
+        $.ajax({
+            type: 'GET',
+            url: serverContext + 'user/project/labels/' + $("#projectId").val()
+        }).then(function (data) {
+            // create the option and append to Select2
+            data.tagged.forEach(tag => {
+                let option = new Option(tag.name, tag.name, true, true);
+                labelsSelect.append(option).trigger('change');
+
+                // manually trigger the `select2:select` event
+                labelsSelect.trigger({
+                    type: 'select2:select',
+                    params: {
+                        data: data
+                    }
+                });
+            });
+        });
     }
 
     function saveProject(event) {

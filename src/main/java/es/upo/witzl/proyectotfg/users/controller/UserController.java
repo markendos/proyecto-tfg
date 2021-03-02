@@ -41,10 +41,10 @@ public class UserController {
         ObjectMapper mapper = new ObjectMapper();
         HashMap aux = new HashMap();
 
-        if(allUsers != null && !allUsers.isEmpty()) {
+        if(allUsers != null) {
             aux.put("all", allUsers);
         }
-        if(active != null && !active.isEmpty()) {
+        if(active != null) {
             aux.put("active", active);
         }
 
@@ -58,6 +58,7 @@ public class UserController {
 
         if(userOptional.isPresent()) {
            User user = userOptional.get();
+
            if(user.getEmail().equals(principal.getEmail())) {
                return ResponseEntity.badRequest().build();
            } else {
