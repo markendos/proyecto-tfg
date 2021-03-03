@@ -68,31 +68,27 @@
                 <div class="modal-body">
                     <div class="form-group row">
                         <div id="nameError" class="text-danger row col offset-3" style="display:none"></div>
-                        <div class="row col-12">
-                            <label for="name" class="col-sm-3" th:utext="#{label.project.name}">name</label>
-                            <div class="col-sm-9">
-                                <input id="name" class="form-control" name="name" type="text" value="" required/>
-                            </div>
+                        <label for="name" class="col-sm-3" th:utext="#{label.project.name}">name</label>
+                        <div class="col-sm-9">
+                            <input id="name" class="form-control" name="name" type="text" value="" required/>
                         </div>
                     </div>
                     <div class="form-group row">
                         <div id="descriptionError" class="text-danger row col offset-3" style="display:none"></div>
-                        <div class="row col-12">
-                            <label for="description" class="col-sm-3 align-self-start"
-                                   th:utext="#{label.project.description}">
-                                description
-                            </label>
-                            <div class="col-sm-9">
+                        <label for="description" class="col-sm-3 align-self-start"
+                               th:utext="#{label.project.description}">
+                            description
+                        </label>
+                        <div class="col-sm-9">
                                 <textarea id="description" maxlength="255" class="form-control" name="description"
                                           rows="6" required></textarea>
-                            </div>
                         </div>
                         <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="text" name="id" id="id" value="" hidden>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:utext="#{label.form.cancel}">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            th:utext="#{label.form.cancel}">
                         cancel
                     </button>
                     <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
@@ -117,18 +113,92 @@
                 <div class="modal-body">
                     <div class="form-group row">
                         <div id="labelError" class="text-danger row col offset-3" style="display:none"></div>
-                        <div class="row col-12">
-                            <label for="labels" class="col-sm-3" th:utext="#{label.project.label}">label</label>
-                            <div class="col-sm-9">
-                                <select id="labels" name="names" multiple>
-                                </select>
-                            </div>
+                        <label for="labels" class="col-sm-3" th:utext="#{label.project.label}">label</label>
+                        <div class="col-sm-9">
+                            <select id="labels" name="names" multiple>
+                            </select>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="text" name="projectId" id="projectId" value="" hidden>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:utext="#{label.form.cancel}">
+                    <input type="text" id="labelsProjectId" name="projectId" value="" hidden>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            th:utext="#{label.form.cancel}">
+                        cancel
+                    </button>
+                    <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Project Subject Modal Form -->
+<div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="subjectModalLabel" th:utext="#{label.pages.title.project.subject}">Modal
+                    title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="#" method="POST" enctype="utf8" id="subjectForm">
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div id="genderError" class="text-danger row col offset-3" style="display:none"></div>
+                        <label class="col-sm-4" th:utext="#{label.form.subject.gender}"></label>
+                            <div class="col-sm-3">
+                                <input type="radio" name="gender" id="genderMale" value="m"
+                                       required>
+                                <label class="font-weight-normal" for="genderMale"
+                                       th:utext="#{label.form.subject.gender.male}">m</label>
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="radio" name="gender" id="genderFemale"
+                                       value="f" required>
+                                <label class="font-weight-normal" for="genderFemale"
+                                       th:utext="#{label.form.subject.gender.female}"></label>
+                            </div>
+                    </div>
+                    <div class="form-group row">
+                        <div id="birthDateError" class="text-danger row col offset-3" style="display:none"></div>
+                        <label for="birthDate" class="col-sm-4" th:utext="#{label.form.subject.birth}">date</label>
+                        <div class="col-sm-8">
+                            <input id="birthDate" class="form-control" name="birthDate" type="date" value="" required/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div id="weightError" class="text-danger row col offset-3" style="display:none"></div>
+                        <label for="weight" class="col-sm-4" th:utext="#{label.form.subject.weight}">weight</label>
+                        <div class="col-sm-8">
+                            <input id="weight" class="form-control" name="weight" type="number" value=""
+                                   min="0" step="0.1"/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div id="heightError" class="text-danger row col offset-3" style="display:none"></div>
+                        <label for="height" class="col-sm-4" th:utext="#{label.form.subject.height}">height</label>
+                        <div class="col-sm-8">
+                            <input id="height" class="form-control" name="height" type="number" value=""
+                                   min="0" step="1"/>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div id="smokerError" class="text-danger row col offset-3" style="display:none"></div>
+                        <label for="smoker" class="col-sm-4" th:utext="#{label.form.subject.smoker}">
+                            smoker
+                        </label>
+                        <div class="col">
+                            <input id="smoker" name="smoker" type="checkbox"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="text" id="subjectProjectId" name="projectId" value="" hidden>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            th:utext="#{label.form.cancel}">
                         cancel
                     </button>
                     <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
@@ -192,11 +262,12 @@
         $('#labels').select2({
             theme: 'bootstrap4',
             width: 'resolve',
+            closeOnSelect: false,
             tags: true,
             language: lang,
             tokenSeparators: [',', ' '],
             ajax: {
-                url: serverContext + 'user/project/labels/all',
+                url: serverContext + 'labels/all',
                 dataType: 'json',
                 processResults: function (data) {
 
@@ -258,10 +329,10 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "user/project/all", function (data) {
+        $.get(serverContext + "project/all", function (data) {
             let owned = data.owned.map(p => true ? {...p, role: 'owner'} : {...p});
             let auth = data.auth.map(p => true ? {...p, role: 'collaborator'} : {...p});
-            const projects = [...owned, ...auth];
+            const projects = [...owned, ...auth].map(p => p.subject ? {...p} : {...p, subject: 'N/A'});
             drawProjectsTable(projects);
         }).fail(function (data) {
             alert("ERROR: Could not fetch data");
@@ -272,8 +343,10 @@
     function handleProjectAction(element) {
         const selectedOption = element.options[element.selectedIndex].value;
         const id = element.id.substring(element.id.indexOf('-') + 1);
-        if(selectedOption === 'labels') {
-            addOrRemoveLabels(id);
+        switch (selectedOption) {
+            case 'labels': addOrRemoveLabels(id); break;
+            case 'subject': registerSubject(id); break;
+            case 'delete': deleteProject(id); break;
         }
         $(element).prop('selectedIndex', 0);
     }
@@ -282,18 +355,11 @@
         return `<select id="project-${row.id}" class="form-control" onChange="handleProjectAction(this)">
                     <option value="" disabled selected>${[[#{table.project.option.default}]]}</option>
                     <option value="labels">${[[#{table.project.option.labels}]]}</option>
+                    <option value="subject" ${row.subject==='N/A' ? '' : 'disabled'}>
+                        ${[[#{table.project.option.subject}]]}</option>
+                    <option class="text-danger" value="delete">${[[#{table.project.option.delete}]]}</option>
                 </select>`;
     };
-
-    function getRandomColor() {
-        const available = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark'];
-        const index = getRandomInt(0, available.length);
-        return available[index];
-    }
-
-    function getRandomInt(min, max) {
-        return Math.floor(Math.random() * (max - min)) + min;
-    }
 
     const renderProjectLabels = (data, type, row) => {
         let labels = '';
@@ -310,6 +376,20 @@
                     ${role}
                     ${data === 'owner' ? `<i class="fas fa-lock-open"></i>` : `<i class="fas fa-lock"></i>`}
                 </span>`;
+    };
+
+    const renderSubjectTooltip = (data, type, row) => {
+        const subjectTooltip = data ? `<span data-toggle="tooltip" data-html="true" data-placement="bottom"
+                            title="<ul class='text-left'>
+                                       <li>${[[#{label.form.subject.gender}]]} ${data.gender}</li>
+                                       <li>${[[#{label.form.subject.birth}]]} ${data.birthDate}</li>
+                                       <li>${[[#{label.form.subject.weight}]]} ${data.weight}</li>
+                                       <li>${[[#{label.form.subject.height}]]} ${data.height}</li>
+                                       <li>${[[#{label.form.subject.smoker}]]} ${data.smoker}</li>
+                                   </ul>">
+                <i class="fas fa-info-circle ml-2"></i></span>` : '';
+
+        return `${subjectTooltip}`;
     };
 
     function drawProjectsTable(projects) {
@@ -341,6 +421,7 @@
                     {title: "id", data: "id"},
                     {title: [[#{table.project.column.name}]], data: "name"},
                     {title: [[#{table.project.column.description}]], data: "description"},
+                    {title: [[#{table.project.column.subject}]], data: "subject", render: renderSubjectTooltip},
                     {title: [[#{table.project.column.date}]], data: "startDate"},
                     {title: [[#{table.project.column.labels}]], data: "labels", render: renderProjectLabels},
                     {title: [[#{table.project.column.role}]], data: "role", render: renderProjectRole},
@@ -365,6 +446,9 @@
         $('#labelsForm').submit(function (event) {
             saveProjectLabels(event);
         });
+        $('#subjectForm').submit(function (event) {
+            saveProjectSubject(event);
+        });
     });
 
     function clearForm() {
@@ -373,13 +457,13 @@
 
     function addOrRemoveLabels(projectId){
         $('#labels').empty();
-        $('#projectId').val(projectId);
+        $('#labelsProjectId').val(projectId);
         $('#labelsModal').modal('show');
         // Fetch the preselected item, and add to the control
         const labelsSelect = $('#labels');
         $.ajax({
             type: 'GET',
-            url: serverContext + 'user/project/labels/' + $("#projectId").val()
+            url: serverContext + 'labels/' + projectId
         }).then(function (data) {
             // create the option and append to Select2
             data.tagged.forEach(tag => {
@@ -397,12 +481,34 @@
         });
     }
 
+    function registerSubject(projectId){
+        $('#subjectForm')[0].reset();
+        $('#subjectProjectId').val(projectId);
+        $('#subjectModal').modal('show');
+    }
+
+    function deleteProject(projectId) {
+        if(confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
+            $.ajax({
+                type: 'DELETE',
+                url: serverContext + 'project/delete/' + projectId,
+                success: (data) => {
+                    $("#successmsg").show().html(/*[[#{message.project.success.delete}]]*/);
+                    fetchProjects();
+                },
+                error: (data) => {
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
+        }
+    }
+
     function saveProject(event) {
         event.preventDefault();
         $(".alert").html("").hide();
         $(".error-list").html("");
         const formData = $('#projectForm').serialize();
-        $.post(serverContext + "user/project/add", formData, function (data) {
+        $.post(serverContext + "project/add", formData, function (data) {
             $('#projectModal').modal('hide');
             fetchProjects();
             $("#successmsg").show().html(/*[[#{message.project.success.create}]]*/);
@@ -429,7 +535,7 @@
         $(".alert").html("").hide();
         $(".error-list").html("");
         const formData = $('#labelsForm').serialize();
-        $.post(serverContext + "user/project/labels/add", formData, function (data) {
+        $.post(serverContext + "labels/add", formData, function (data) {
             $('#labelsModal').modal('hide');
             fetchProjects();
             $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
@@ -451,6 +557,37 @@
                 }else {
                     $("#errormsg").show().append(`ERROR: ${data.status}`);
                     $('#labelsModal').modal('hide');
+                }
+            });
+    }
+
+    function saveProjectSubject(event) {
+        event.preventDefault();
+        $(".alert").html("").hide();
+        $(".error-list").html("");
+        const formData = $('#subjectForm').serialize();
+        $.post(serverContext + "subject/add", formData, function (data) {
+            $('#subjectModal').modal('hide');
+            fetchProjects();
+            $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
+        }).fail(function (data) {
+                if(data.responseJSON) {
+                    if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                        $("#errormsg").show().append(data.responseJSON.message);
+                        $('#subjectModal').modal('hide');
+                    } else {
+                        const errors = data.responseJSON.message;
+                        $.each(errors, function (index, item) {
+                            if (item.field) {
+                                $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                            } else {
+                                $("#globalError").show().append(item.defaultMessage + "<br/>");
+                            }
+                        });
+                    }
+                }else {
+                    $("#errormsg").show().append(`ERROR: ${data.status}`);
+                    $('#subjectModal').modal('hide');
                 }
             });
     }

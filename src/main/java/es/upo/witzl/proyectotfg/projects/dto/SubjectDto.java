@@ -13,7 +13,6 @@ public class SubjectDto {
     @Positive
     private Long projectId;
 
-    @NotBlank
     @Past
     @DateTimeFormat(pattern="yyyy-MM-dd")
     private Date birthDate;
@@ -23,11 +22,9 @@ public class SubjectDto {
     private String gender;
 
     @Positive
-    @Size(max = 6)
     private float weight;
 
     @Positive
-    @Size(max = 6)
     private float height;
 
     private boolean smoker;
@@ -79,5 +76,17 @@ public class SubjectDto {
 
     public void setSmoker(boolean smoker) {
         this.smoker = smoker;
+    }
+
+    @Override
+    public String toString() {
+        return "SubjectDto{" +
+                "projectId=" + projectId +
+                ", birthDate=" + birthDate +
+                ", gender='" + gender + '\'' +
+                ", weight=" + weight +
+                ", height=" + height +
+                ", smoker=" + smoker +
+                '}';
     }
 }

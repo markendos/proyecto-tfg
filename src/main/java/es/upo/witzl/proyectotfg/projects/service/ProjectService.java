@@ -81,4 +81,9 @@ public class ProjectService implements IProjectService{
         project.setLabels(projectLabels);
         projectRepository.save(project);
     }
+
+    @Override
+    public void deleteProject(Project project) {
+        projectRepository.delete(project);
+    }
 }

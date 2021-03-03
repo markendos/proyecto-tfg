@@ -72,6 +72,14 @@
     </nav>
 
     <script th:inline="javascript">
+        $(document).ready(function () {
+            $("#notifications, #notificationsPanel").click(function(e) {
+                e.stopPropagation(); //stops click event from reaching document
+            });
+            $(document).click(function() {
+                $("#notificationsPanel").hide(); //click came from somewhere else
+            });
+        });
         function toggleNotificationsPanel() {
             $("#notificationsPanel").toggle();
         }

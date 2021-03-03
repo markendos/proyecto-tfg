@@ -25,4 +25,6 @@ public interface IProjectService {
     void requestCollaboration(User user, Project project);
 
     void assignLabels(Collection<String> labels, Project project);
+
+    void deleteProject(Project project);
 }

@@ -13,7 +13,7 @@
     <!-- PWSTRENGTH JS -->
     <script src="/resources/js/pwstrength-bootstrap-3.0.9.min.js"></script>
     <!-- Custom JS -->
-    <script th:inline="javascript">var requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
     <script th:src="@{/resources/js/util.js}"></script>
 </head>
 <body>
@@ -43,7 +43,7 @@
         <div class="form-group row">
             <label for="username" class="col-sm-3" th:utext="#{label.user.username}">Username</label>
             <span class="col-sm-5">
-                <input id="username" class="form-control" name="username" value=""/></span>
+                <input id="username" class="form-control" name="username" value="" required/></span>
             <span id="usernameError" class="alert alert-danger col-sm-4" style="display:none"></span>
 
         </div>
@@ -51,7 +51,7 @@
             <label for="password" class="col-sm-3" th:utext="#{label.user.password}">Password</label>
             <span class="col-sm-5">
                 <input id="password" class="form-control" name="password" value="" type="password"
-                                          autocomplete="new-password"/>
+                                          autocomplete="new-password" required/>
             </span>
             <span id="passwordError" class="alert alert-danger col-sm-4" style="display:none"></span>
         </div>
@@ -59,8 +59,8 @@
             <label for="matchPassword" class="col-sm-3" th:utext="#{label.user.confirmPass}">Confirm
                 password</label>
             <span class="col-sm-5">
-                <input id="matchPassword" class="form-control" name="matchingPassword" value=""
-                                          type="password" autocomplete="new-password"/></span>
+                <input id="matchPassword" class="form-control" name="matchingPassword" value="" type="password"
+                       autocomplete="new-password" required/></span>
             <span id="globalError" class="alert alert-danger col-sm-4" style="display:none"></span>
         </div>
         <br/>

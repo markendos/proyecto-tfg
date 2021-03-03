@@ -1,5 +1,7 @@
-package es.upo.witzl.proyectotfg.users.error;
+package es.upo.witzl.proyectotfg.error;
 
+import es.upo.witzl.proyectotfg.projects.error.SubjectAlreadyExistsException;
+import es.upo.witzl.proyectotfg.users.error.*;
 import es.upo.witzl.proyectotfg.util.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -91,6 +93,14 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         logger.error("409 Status Code", ex);
         Locale locale = localeResolver.resolveLocale(req);
         final GenericResponse bodyOfResponse = new GenericResponse(messages.getMessage("message.sensor.error.exists", null, locale), "SensorAlreadyExists");
+        return new ResponseEntity<>(bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler({SubjectAlreadyExistsException.class})
+    public ResponseEntity<Object> handleSubjectExists(final RuntimeException ex, final WebRequest request, final HttpServletRequest req) {
+        logger.error("409 Status Code", ex);
+        Locale locale = localeResolver.resolveLocale(req);
+        final GenericResponse bodyOfResponse = new GenericResponse(messages.getMessage("message.subject.error.exists", null, locale), "SubjectAlreadyExists");
         return new ResponseEntity<>(bodyOfResponse, new HttpHeaders(), HttpStatus.CONFLICT);
     }
 
