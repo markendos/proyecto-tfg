@@ -18,7 +18,7 @@
     <meta name="google-signin-client_id"
           th:content="${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}">
     <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
-    <script src="/resources/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/resources/js/bootstrap.bundle.min.js}"></script>
     <script src="https://kit.fontawesome.com/ebf145548d.js" crossorigin="anonymous"></script>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="topnav">

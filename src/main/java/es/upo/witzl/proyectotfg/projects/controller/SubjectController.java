@@ -32,7 +32,7 @@ public class SubjectController {
 
 
     @PostMapping(value = "/subject/add", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity registerSubject(@Valid SubjectDto subjectDto, Authentication authentication) {
+    public ResponseEntity registerOrUpdateSubject(@Valid SubjectDto subjectDto, Authentication authentication) {
             MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
             Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
 
@@ -43,7 +43,11 @@ public class SubjectController {
                 if (projectOptional.isPresent()) {
                     Project project = projectOptional.get();
                     if (project.getUser().equals(user)) {
-                        subjectService.registerSubjectToProject(subjectDto, project);
+                        if(project.getSubject() == null) {
+                            subjectService.registerSubjectToProject(subjectDto, project);
+                        } else {
+                            subjectService.updateSubject(subjectDto, project);
+                        }
 
                         return ResponseEntity.ok().build();
                     } else {

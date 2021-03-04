@@ -1,13 +1,6 @@
 $(document).ready(function () {
-    const requiredFields = $(":input[required]");
-    let requiredLabels = $(requiredFields).parent().prev('label');
-    $(requiredLabels).append("<span class='text-danger'>*</span>");
-    requiredLabels = $(requiredFields).prev('label');
-    $(requiredLabels).append("<span class='text-danger'>*</span>");
+    markRequiredFields();
 
-    if (requiredFields.length > 0) {
-        $($(requiredFields).get(-1)).after("<small>(<strong class='text-danger'>*</strong>)" + requiredMessage + "</small>");
-    }
     $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
 });
 $(document).ajaxStart(function () {
@@ -25,6 +18,26 @@ $(document).ajaxStop(function () {
         }
     }
 });
+
+function markRequiredFields() {
+    const requiredFields = $(":input[required]");
+    let requiredLabels = $(requiredFields).parent().prev('label');
+    $(requiredLabels).append("<span class='text-danger'>*</span>");
+    requiredLabels = $(requiredFields).prev('label');
+    $(requiredLabels).append("<span class='text-danger'>*</span>");
+
+    if (requiredFields.length > 0) {
+        $($(requiredFields).get(-1)).after("<small>(<strong class='text-danger'>*</strong>)" + requiredMessage + "</small>");
+    }
+}
+
+function utf8_to_b64(str) {
+    return window.btoa(unescape(encodeURIComponent(str)));
+}
+
+function b64_to_utf8( str ) {
+    return decodeURIComponent(escape(window.atob(str)));
+}
 
 // Function to hide the Loading Wrapper
 function hideSpinner() {

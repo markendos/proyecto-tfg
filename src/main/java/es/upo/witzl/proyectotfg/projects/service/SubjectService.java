@@ -8,6 +8,10 @@ import es.upo.witzl.proyectotfg.projects.repository.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 @Service
 public class SubjectService implements ISubjectService {
 
@@ -26,7 +30,56 @@ public class SubjectService implements ISubjectService {
         subject.setHeight(subjectDto.getHeight());
         subject.setSmoker(subjectDto.isSmoker());
         subject.setProject(project);
+        subject.setBmi(calculateBmi(subject));
+        subject.setBfp(calculateBfp(subject));
 
         return subjectRepository.save(subject);
+    }
+
+    @Override
+    public Subject updateSubject(SubjectDto subjectDto, Project project) {
+        Subject subject = project.getSubject();
+        subject.setGender(subjectDto.getGender());
+        subject.setBirthDate(subjectDto.getBirthDate());
+        subject.setWeight(subjectDto.getWeight());
+        subject.setHeight(subjectDto.getHeight());
+        subject.setSmoker(subjectDto.isSmoker());
+        subject.setBmi(calculateBmi(subject));
+        subject.setBfp(calculateBfp(subject));
+
+        return subjectRepository.save(subject);
+    }
+
+    private float calculateBmi(Subject subject) {
+        float weight = subject.getWeight();
+        float height = subject.getHeight()/100;
+
+        return weight/((float) Math.pow(height, 2));
+    }
+
+    private float calculateBfp(Subject subject) {
+        float bmi = subject.getBmi();
+        float bmi2 = bmi * bmi;
+        int age = getDiffYears(subject.getBirthDate(), new Date());
+        int gender = subject.getGender() == "m" ? 1 : 0;
+        return (float) (-44.988 + (0.503 * age) + (10.689 * gender) + (3.172 * bmi) - (0.026 * bmi2) +
+                (0.181 * bmi * gender) - (0.02 * bmi * age) - (0.005 * bmi2 * gender) + (0.00021 * bmi2 * age));
+
+    }
+
+    private int getDiffYears(Date first, Date last) {
+        Calendar a = getCalendar(first);
+        Calendar b = getCalendar(last);
+        int diff = b.get(Calendar.YEAR) - a.get(Calendar.YEAR);
+        if (a.get(Calendar.DAY_OF_YEAR) > b.get(Calendar.DAY_OF_YEAR)) {
+            diff--;
+        }
+        return diff;
+    }
+
+    public static Calendar getCalendar(Date date) {
+        Calendar cal = Calendar.getInstance(Locale.getDefault());
+        cal.setTime(date);
+        return cal;
     }
 }

@@ -209,7 +209,7 @@
     }
 
     const renderTableSelector = (data, type, row) => {
-        const encoded = window.btoa(unescape(encodeURIComponent(row.email)));
+        const encoded = utf8_to_b64(row.email);
         return `<select id=${encoded} class="form-control" onChange="handleRoleChange(this)">` +
             `<option value="user" ${data === 'User' ? 'selected' : ''}>User</option>` +
             `<option value="admin" ${data === 'Admin' ? 'selected' : ''}>Admin</option>` +
