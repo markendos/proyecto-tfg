@@ -43,10 +43,11 @@
             <ul sec:authorize="hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li sec:authorize="hasAnyRole('USER')" class="nav-item col">
                     <div id="notifications" class="nav-link row" onclick="toggleNotificationsPanel()">
+                        <span id="notificationCounter" class="badge badge-light">0</span>
                         <i class="notification fas fa-bell"></i>
                         <i class="fas fa-caret-down"></i>
                     </div>
-                    <div id="notificationsPanel" class="row alert alert-info mr-2" style="display: none">Hola</div>
+                    <div id="notificationsPanel" class="row mr-2" style="display: none"></div>
                 </li>
                 <li class="nav-item" th:classappend="${#httpServletRequest.requestURI} == '/changePassword' ? active : ''">
                     <a class="nav-link" th:href="@{/changePassword}">
@@ -55,24 +56,71 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/logout}" th:utext="#{label.pages.logout}" onclick="signOut()">logout</a>
+                    <a class="nav-link" th:href="@{/logout}" th:inline="text" onclick="signOut()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        [[#{label.pages.logout}]]
+                    </a>
                 </li>
             </ul>
             <ul sec:authorize="!hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/signUp}" th:utext="#{label.form.loginSignUp}"
-                       th:unless="${#httpServletRequest.requestURI == '/signUp'}">Login</a>
+                    <a class="nav-link" th:href="@{/signUp}" th:unless="${#httpServletRequest.requestURI == '/signUp'}">
+                        <i class="fas fa-user-plus"></i>
+                        <span th:utext="#{label.form.loginSignUp}"></span>
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/login}" th:utext="#{label.form.loginLink}"
-                       th:unless="${#httpServletRequest.requestURI == '/login'}">Login</a>
+                    <a class="nav-link" th:href="@{/login}" th:inline="text"
+                       th:unless="${#httpServletRequest.requestURI == '/login'}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        [[#{label.form.loginLink}]]
+                    </a>
                 </li>
             </ul>
         </div>
     </nav>
 
-    <script th:inline="javascript">
+    <!-- Collaboration Request Notification Modal Form -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel" th:utext="#{label.pages.title.request.notification}">Modal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="#" method="POST" enctype="utf8" id="notificationForm">
+                    <div class="modal-body">
+                        <p id="notificationText"></p>
+                        <div class="form-group row align-items-start">
+                            <label for="requestMessage" class="col-sm-3" th:utext="#{label.request.message}">message</label>
+                            <div class="col-sm-9">
+                                <textarea id="requestMessage" class="form-control" name="requestMessage" rows="5" readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="text" id="requestProjectId" name="projectId" value="" hidden>
+                        <input type="text" id="requestUserEmail" name="userEmail" value="" hidden>
+                        <button type="button" class="btn btn-danger" onclick="denyRequest()"
+                                th:utext="#{label.form.deny}">
+                            cancel
+                        </button>
+                        <button class="btn btn-success" type="button" th:utext="#{label.form.approve}"
+                                onclick="approveRequest()">
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script sec:authorize="hasRole('USER')"  th:inline="javascript">
         $(document).ready(function () {
+            fetchCollaborationRequests();
+            $("body").append($("#notificationModal"));
+
             $("#notifications, #notificationsPanel").click(function(e) {
                 e.stopPropagation(); //stops click event from reaching document
             });
@@ -80,8 +128,41 @@
                 $("#notificationsPanel").hide(); //click came from somewhere else
             });
         });
+
         function toggleNotificationsPanel() {
             $("#notificationsPanel").toggle();
+        }
+
+        function fetchCollaborationRequests() {
+            loadingData = true;
+            const serverCtx = /*[[@{/}]]*/;
+            $.get(serverCtx + "collaboration/all", function (data) {
+                const requests = data.all;
+                $("#notificationCounter").text(requests.length);
+                showRequests(requests);
+                loadingData = false;
+            }).fail(function (data) {
+                console.log(data.responseJSON.message);
+                loadingData = false;
+            });
+        }
+
+        function showRequests(requests) {
+            const notifications = $("#notificationsPanel");
+            requests.forEach(r => {
+                $(notifications).append(`<a id="${utf8_to_b64(JSON.stringify(r))}" onclick="handleCollaborationRequest(this)">` +
+                    `${r.collaborator.username} ${[[#{message.notification.request}]]}`+ '</a>');
+            });
+        }
+
+        function handleCollaborationRequest(element) {
+            const request = JSON.parse(b64_to_utf8(element.id));
+            $("#notificationText").text(`The user "${request.collaborator.username}" has requested collaboration in your project "${request.project.name}"`);
+            $("#requestMessage").val(request.requestMessage);
+            $("#requestUserEmail").val(request.collaborator.email);
+            $("#requestProjectId").val(request.project.id);
+            toggleNotificationsPanel();
+            $("#notificationModal").modal('show');
         }
     </script>
 </header>

@@ -128,7 +128,6 @@ public class Subject {
     public String toString() {
         return "Subject{" +
                 "id='" + id + '\'' +
-                ", project=" + project +
                 ", birthDate=" + birthDate +
                 ", gender='" + gender + '\'' +
                 ", weight=" + weight +

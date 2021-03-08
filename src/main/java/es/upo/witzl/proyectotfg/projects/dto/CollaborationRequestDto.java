@@ -26,4 +26,12 @@ public class CollaborationRequestDto {
     public void setRequestMessage(String requestMessage) {
         this.requestMessage = requestMessage;
     }
+
+    @Override
+    public String toString() {
+        return "CollaborationRequestDto{" +
+                "projectId=" + projectId +
+                ", requestMessage='" + requestMessage + '\'' +
+                '}';
+    }
 }

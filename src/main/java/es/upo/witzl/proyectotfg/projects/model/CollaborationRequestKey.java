@@ -8,17 +8,17 @@ import java.util.Objects;
 @Embeddable
 public class CollaborationRequestKey implements Serializable {
 
-    @Column(name = "collaborator_id")
-    private Long collaboratorId;
+    @Column(name = "collaborator_id", length = 50)
+    private String collaboratorId;
 
     @Column(name = "project_id")
     private Long projectId;
 
-    public Long getCollaboratorId() {
+    public String getCollaboratorId() {
         return collaboratorId;
     }
 
-    public void setCollaboratorId(Long collaboratorId) {
+    public void setCollaboratorId(String collaboratorId) {
         this.collaboratorId = collaboratorId;
     }
 

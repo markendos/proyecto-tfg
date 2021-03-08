@@ -27,30 +27,30 @@
     <h3 class="alert alert-warning" th:utext="${#messages.msgWithParams(message, email)}"
         th:unless="${message == null || email == null}">error</h3>
     <h3 class="alert alert-danger" th:utext="#{${error}}" th:unless="${error == null}">error</h3>
-    <div class="d-inline">
-        <a class="btn btn-primary" th:href="@{/signUp}" th:utext="#{label.form.loginSignUp}">signup</a>
-        <div th:if="${token != null}" class="d-inline">
-            <button class="btn btn-secondary" onclick="resendToken()" th:utext="#{label.form.resendRegistrationToken}">
+    <div class="m-4 d-flex">
+        <a class="btn btn-primary mr-4" th:href="@{/signUp}" th:utext="#{label.form.loginSignUp}">signup</a>
+        <div th:if="${token != null}">
+            <button class="btn btn-secondary" onclick="resendToken()"
+                    th:utext="#{label.form.resendRegistrationToken}">
             </button>
-
             <script th:inline="javascript">
                 const serverContext = /*[[@{/}]]*/;
 
-                    function resendToken() {
-                        var token = [[${token}]];
-                        $.get(serverContext + "user/resendRegistrationToken?token=" + token, function (data) {
-                            window.location.href = serverContext + "login?message=" + data.message;
-                        })
-                            .fail(function (data) {
-                                if (data.responseJSON.error.indexOf("MailError") > -1) {
-                                    window.location.href = serverContext + "emailError";
-                                } else {
-                                    window.location.href = serverContext + "login?error=" + data.responseJSON.message;
-                                }
-                            });
-                    }
+                function resendToken() {
+                    const token = [[${token}]];
+                    showSpinner();
+                    $.get(serverContext + "user/resendRegistrationToken?token=" + token, function (data) {
+                        window.location.href = serverContext + "login?message=" + data.message;
+                    })
+                        .fail(function (data) {
+                            if (data.responseJSON.error.indexOf("MailError") > -1) {
+                                window.location.href = serverContext + "emailError";
+                            } else {
+                                window.location.href = serverContext + "login?error=" + data.responseJSON.message;
+                            }
+                        });
+                }
             </script>
-
         </div>
     </div>
 </main>

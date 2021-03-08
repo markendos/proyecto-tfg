@@ -71,7 +71,10 @@
             <div id="my-signin2"></div>
             <hr/>
             <small>
-                <a th:href="@{/resetPassword}" th:utext="#{message.forgotPassword}"></a>
+                <a th:href="@{/resetPassword}">
+                    <i class="fas fa-envelope"></i>
+                    <span th:utext="#{message.forgotPassword}"></span>
+                </a>
             </small>
         </div>
     </div>

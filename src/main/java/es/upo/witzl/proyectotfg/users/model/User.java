@@ -107,6 +107,7 @@ public class User{
         this.resetToken = resetToken;
     }
 
+    @JsonIgnore
     public Collection<Project> getOwnedProjects() {
         return ownedProjects;
     }
@@ -115,6 +116,7 @@ public class User{
         this.ownedProjects = ownedProjects;
     }
 
+    @JsonIgnore
     public Collection<CollaborationRequest> getCollaborationRequests() {
         return collaborationRequests;
     }
@@ -123,6 +125,7 @@ public class User{
         this.collaborationRequests = collaborationRequests;
     }
 
+    @JsonIgnore
     public Collection<Project> getCollaboratedProjects() {
         Collection<CollaborationRequest> collaborationRequests = getCollaborationRequests();
         Collection<Project> approved = new ArrayList<>();
@@ -170,8 +173,6 @@ public class User{
                 ", role=" + role +
                 ", verificationTokentoken=" + verificationTokentoken +
                 ", resetToken=" + resetToken +
-                ", ownedProjects=" + ownedProjects +
-                ", collaborationRequests=" + collaborationRequests +
                 '}';
     }
 

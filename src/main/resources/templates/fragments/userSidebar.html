@@ -12,7 +12,7 @@
         </li>
         <li th:classappend="${#httpServletRequest.requestURI} == '/global' ? active : ''" data-toggle="tooltip"
             data-placement="bottom" th:attr="title=#{user.project.menu.globalprojects.tooltip}">
-            <a th:href="@{/projects/global/all}">
+            <a th:href="@{/global}">
                 <i class="fas fa-globe"></i>
                 <span th:utext="#{user.project.menu.globalprojects}">Global</span>
             </a>

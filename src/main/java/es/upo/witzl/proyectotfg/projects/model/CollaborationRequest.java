@@ -1,11 +1,20 @@
 package es.upo.witzl.proyectotfg.projects.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import es.upo.witzl.proyectotfg.users.model.User;
 
 import javax.persistence.*;
 
 @Entity
 public class CollaborationRequest {
+
+    public CollaborationRequest() {}
+
+    public CollaborationRequest(User collaborator, Project project) {
+        this.id = new CollaborationRequestKey();
+        id.setCollaboratorId(collaborator.getEmail());
+        id.setProjectId(project.getId());
+    }
 
     @EmbeddedId
     CollaborationRequestKey id;
@@ -25,6 +34,7 @@ public class CollaborationRequest {
 
     private String requestMessage;
 
+    @JsonIgnore
     public CollaborationRequestKey getId() {
         return id;
     }
@@ -81,9 +91,8 @@ public class CollaborationRequest {
     @Override
     public String toString() {
         return "CollaborationRequest{" +
-                "id=" + id +
-                ", collaborator=" + collaborator +
-                ", project=" + project +
+                "collaborator=" + collaborator.getEmail() +
+                ", project=" + project.getId() +
                 ", requestStatus='" + requestStatus + '\'' +
                 ", requestMessage='" + requestMessage + '\'' +
                 '}';

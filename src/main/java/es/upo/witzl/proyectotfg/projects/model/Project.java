@@ -49,7 +49,6 @@ public class Project {
         this.id = id;
     }
 
-    @JsonIgnore
     public User getUser() {
         return user;
     }
@@ -130,7 +129,6 @@ public class Project {
                 ", startDate=" + startDate +
                 ", labels=" + labels +
                 ", subject=" + subject +
-                ", collaborationRequests=" + collaborationRequests +
                 '}';
     }
 }

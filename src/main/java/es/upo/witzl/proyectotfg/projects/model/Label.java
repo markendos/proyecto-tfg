@@ -49,8 +49,7 @@ public class Label {
     @Override
     public String toString() {
         return "Label{" +
-                ", name='" + name + '\'' +
-                ", projects=" + projects +
+                ", name='" + name +
                 '}';
     }
 }

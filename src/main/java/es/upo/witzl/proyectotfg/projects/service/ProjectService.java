@@ -47,17 +47,12 @@ public class ProjectService implements IProjectService{
     }
 
     @Override
-    public List<Project> getGlobalProjects() {
-        return null;
+    public List<Project> getForeignProjects(User user) {
+        return projectRepository.findByUserNotLike(user);
     }
 
     @Override
     public void saveProject(Project project) {
-
-    }
-
-    @Override
-    public void requestCollaboration(User user, Project project) {
 
     }
 

@@ -85,6 +85,29 @@ public class ProjectController {
         return ResponseEntity.badRequest().build();
     }
 
+    @GetMapping(value = "/project/foreign", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getForeignProjects(Authentication authentication) throws JsonProcessingException {
+        MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
+        Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
+
+        if(userOptional.isPresent()) {
+            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+            User user = userOptional.get();
+            List<Project> foreignProjects = projectService.getForeignProjects(user);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setDateFormat(df);
+            HashMap aux = new HashMap();
+
+            if(foreignProjects != null) {
+                aux.put("all", foreignProjects);
+            }
+
+            return ResponseEntity.ok(mapper.writeValueAsString(aux));
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
     @DeleteMapping(value = "/project/delete/{projectId}")
     public ResponseEntity deleteProject(@PathVariable String projectId, Authentication authentication) {
         MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();

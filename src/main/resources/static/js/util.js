@@ -1,3 +1,5 @@
+let loadingData = false;
+
 $(document).ready(function () {
     markRequiredFields();
 
@@ -5,15 +7,15 @@ $(document).ready(function () {
 });
 $(document).ajaxStart(function () {
     const openModals = $("div.modal[aria-modal='true']");
-    if(openModals.length === 0 && !loadingData) {
+    if (openModals.length === 0 && loadingData === false) {
         showSpinner();
     }
 });
 $(document).ajaxStop(function () {
     hideSpinner();
     const alerts = $(".alert");
-    for(let i = 0; i < alerts.length; i++) {
-        if($(alerts[i]).find($('.fa-window-close')).length === 0) {
+    for (let i = 0; i < alerts.length; i++) {
+        if ($(alerts[i]).find($('.fa-window-close')).length === 0) {
             $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
         }
     }
@@ -35,7 +37,7 @@ function utf8_to_b64(str) {
     return window.btoa(unescape(encodeURIComponent(str)));
 }
 
-function b64_to_utf8( str ) {
+function b64_to_utf8(str) {
     return decodeURIComponent(escape(window.atob(str)));
 }
 

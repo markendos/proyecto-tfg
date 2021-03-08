@@ -42,8 +42,35 @@ i.notification {
 #notificationsPanel {
     position: fixed;
     min-height: 50px;
+    max-height: 300px;
+    overflow: auto;
     min-width: 200px;
+    max-width: 250px;
     z-index: 999;
+    display: flex;
+    background: #00ad5f;
+    opacity: 0.9;
+    border: 1px solid #00ad5f;
+    border-radius: 5px;
+    padding: 1em;
+    font-size: 14px;
+}
+
+#notificationsPanel > a:hover{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#notificationCounter {
+    border-radius: 1rem !important;
+    font-size: 9px !important;
+    margin-right: -5px;
+    opacity: 0.6;
+    vertical-align: top !important;
+}
+
+#notificationModal {
+    z-index: 9999;
 }
 
 /***** Notification Banners *****/
@@ -93,6 +120,11 @@ i.notification {
     height: 5rem;
 }
 
+/***** Breadcrumbs *****/
+ol.breadcrumb {
+    background-color: inherit;
+}
+
 /***** Forms *****/
 select:hover {
     cursor: pointer;
@@ -108,11 +140,6 @@ select:hover {
 
 label {
     font-weight: bold;
-}
-
-.clickable:hover {
-    cursor: pointer;
-    color: red;
 }
 
 .slider {
@@ -143,25 +170,24 @@ label {
     top: -200%;
 }
 .range-value span{
-    width: 30px;
-    height: 24px;
-    line-height: 24px;
+    line-height: 20px;
     text-align: center;
-    background: #03a9f4;
+    background: #007bff;
     color: #fff;
     font-size: 12px;
     display: block;
     position: absolute;
     left: 50%;
     transform: translate(-50%, 0);
-    border-radius: 6px;
+    border-radius: 5px;
+    padding: 2px;
 }
 .range-value span:before{
     content: "";
     position: absolute;
     width: 0;
     height: 0;
-    border-top: 10px solid #03a9f4;
+    border-top: 10px solid #007bff;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     top: 100%;
