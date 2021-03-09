@@ -18,7 +18,9 @@ public interface IProjectService {
 
     List<Project> getOwnedProjects(User user);
 
-    List<Project> getCollaboratedProjects(User user);
+    List<Project> getProjectsRequested(User user);
+
+    List<Project> getProjectsApproved(User user);
 
     List<Project> getForeignProjects(User user);
 

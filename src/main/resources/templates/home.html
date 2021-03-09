@@ -363,12 +363,14 @@
     }
 
     const renderProjectActions = (data, type, row) => {
+        const registerSubjectOpt = `<option value="subject" ${row.subject==='N/A' ? '' : 'disabled'}>
+                                    ${[[#{table.project.option.subject}]]}</option>`;
+        const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.project.option.delete}]]}</option>`;
         return `<select id="project-${row.id}" class="form-control" onChange="handleProjectAction(this)">
                     <option value="" disabled selected>${[[#{table.project.option.default}]]}</option>
                     <option value="labels">${[[#{table.project.option.labels}]]}</option>
-                    <option value="subject" ${row.subject==='N/A' ? '' : 'disabled'}>
-                        ${[[#{table.project.option.subject}]]}</option>
-                    <option class="text-danger" value="delete">${[[#{table.project.option.delete}]]}</option>
+                    ${row.role === 'owner' ? registerSubjectOpt : ''}
+                    ${row.role === 'owner' ? deleteOpt : ''}
                 </select>`;
     };
 
@@ -459,10 +461,9 @@
                 },
                 data: projects,
                 columnDefs: [
-                    {targets: [0], visible: false},
                 ],
                 columns: [
-                    {title: "id", data: "id"},
+                    {title: "#Id", data: "id"},
                     {title: [[#{table.project.column.name}]], data: "name"},
                     {title: [[#{table.project.column.description}]], data: "description"},
                     {title: [[#{table.project.column.subject}]], data: "subject", render: renderSubjectActions},

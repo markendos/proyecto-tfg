@@ -42,9 +42,15 @@ public class ProjectService implements IProjectService{
     }
 
     @Override
-    public List<Project> getCollaboratedProjects(User user) {
-        return (List<Project>)user.getCollaboratedProjects();
+    public List<Project> getProjectsRequested(User user) {
+        return (List) user.getRequestedProjects();
     }
+
+    @Override
+    public List<Project> getProjectsApproved(User user) {
+        return (List) user.getCollaboratedProjects();
+    }
+
 
     @Override
     public List<Project> getForeignProjects(User user) {

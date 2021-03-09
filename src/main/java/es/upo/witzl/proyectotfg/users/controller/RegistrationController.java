@@ -26,11 +26,12 @@ import org.unbescape.html.HtmlEscape;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Locale;
 import java.util.Optional;
 
 @RestController
-public class RegistrationRestController {
+public class RegistrationController {
 
     @Autowired
     private IUserService userService;
@@ -50,7 +51,7 @@ public class RegistrationRestController {
     @Autowired
     private LocaleContextResolver localeResolver;
 
-    public RegistrationRestController() {
+    public RegistrationController() {
         super();
     }
 
@@ -121,8 +122,9 @@ public class RegistrationRestController {
     // Reset password
     @PostMapping("/user/resetPassword")
     public GenericResponse resetPassword(final HttpServletRequest request,
-                                         @RequestParam("email") final String userEmail) {
+                                         @RequestParam("email") final String emailEncoded) {
         Locale locale = localeResolver.resolveLocale(request);
+        String userEmail = decodeBase64(emailEncoded);
         final Optional<User> opt = userService.getUserByEmail(userEmail);
         String message = "";
 
@@ -206,19 +208,27 @@ public class RegistrationRestController {
 
 // ============== NON-API ============
 
-    private SimpleMailMessage constructResendVerificationTokenEmail(final String contextPath, final Locale locale, final VerificationToken newToken, final User user) {
-        final String defaultMessage = "You registered successfully. To confirm your registration, please click on the link bellow:";
-        final String subject = HtmlEscape.unescapeHtml(messages.getMessage("message.confirmation.email.subject", null, "Confirm sign up", locale));
-        final String confirmationUrl = contextPath + "/registrationConfirm?username=" + user.getUsername() + "&token=" + newToken.getToken();
-        final String message = HtmlEscape.unescapeHtml(messages.getMessage("message.regSuccLink", Arrays.asList(user.getUsername()).toArray(), defaultMessage, locale));
+    private SimpleMailMessage constructResendVerificationTokenEmail(final String contextPath, final Locale locale,
+                                                                    final VerificationToken newToken, final User user) {
+        final String defaultMessage = "You registered successfully." +
+                "To confirm your registration, please click on the link bellow:";
+        final String subject = HtmlEscape.unescapeHtml(messages.getMessage("message.confirmation.email.subject",
+                null, "Confirm sign up", locale));
+        final String confirmationUrl = contextPath + "/registrationConfirm?username=" + user.getUsername() + "&token=" +
+                newToken.getToken();
+        final String message = HtmlEscape.unescapeHtml(messages.getMessage("message.regSuccLink",
+                Arrays.asList(user.getUsername()).toArray(), defaultMessage, locale));
 
         return constructEmail(subject, message + " \r\n" + confirmationUrl, user);
     }
 
-    private SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final String token, final User user) {
+    private SimpleMailMessage constructResetTokenEmail(final String contextPath, final Locale locale, final String token,
+                                                       final User user) {
         final String url = contextPath + "/user/changePassword?username=" + user.getUsername() + "&token=" + token;
-        final String message = HtmlEscape.unescapeHtml(messages.getMessage("message.resetPassword.email.body", null, locale));
-        final String subject = HtmlEscape.unescapeHtml(messages.getMessage("message.resetPassword.email.subject", null, locale));
+        final String message = HtmlEscape.unescapeHtml(messages.getMessage("message.resetPassword.email.body",
+                null, locale));
+        final String subject = HtmlEscape.unescapeHtml(messages.getMessage("message.resetPassword.email.subject",
+                null, locale));
         return constructEmail(subject, message + " \r\n" + url, user);
     }
 
@@ -235,11 +245,8 @@ public class RegistrationRestController {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }
 
-    private String getClientIP(HttpServletRequest request) {
-        final String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null) {
-            return request.getRemoteAddr();
-        }
-        return xfHeader.split(",")[0];
+    private String decodeBase64(String encoded) {
+        byte[] decodedBytes = Base64.getDecoder().decode(encoded);
+        return new String(decodedBytes);
     }
 }

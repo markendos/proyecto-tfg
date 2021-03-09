@@ -2,6 +2,7 @@ package es.upo.witzl.proyectotfg.projects.service;
 
 import es.upo.witzl.proyectotfg.projects.dto.CollaborationRequestDto;
 import es.upo.witzl.proyectotfg.projects.model.CollaborationRequest;
+import es.upo.witzl.proyectotfg.projects.model.CollaborationRequestKey;
 import es.upo.witzl.proyectotfg.projects.model.Project;
 import es.upo.witzl.proyectotfg.projects.repository.CollaborationRequestRepository;
 import es.upo.witzl.proyectotfg.users.model.User;
@@ -9,12 +10,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CollaborationRequestService implements ICollaborationRequestService{
 
     @Autowired
     private CollaborationRequestRepository collaborationRequestRepository;
+
+    @Override
+    public Optional<CollaborationRequest> getCollaborationRequestById(String collaboratorEmail, Long projectId) {
+        CollaborationRequestKey crk = new CollaborationRequestKey();
+        crk.setCollaboratorId(collaboratorEmail);
+        crk.setProjectId(projectId);
+        return collaborationRequestRepository.findById(crk);
+    }
 
     @Override
     public CollaborationRequest requestCollaboration(CollaborationRequestDto crDto, User user, Project project) {
@@ -29,5 +39,10 @@ public class CollaborationRequestService implements ICollaborationRequestService
     @Override
     public List<CollaborationRequest> getPendingRequests(User user) {
         return collaborationRequestRepository.findByProjectInAndRequestStatusLike(user.getOwnedProjects(),"created");
+    }
+
+    @Override
+    public CollaborationRequest updateCollaborationRequest(CollaborationRequest cr) {
+        return collaborationRequestRepository.save(cr);
     }
 }

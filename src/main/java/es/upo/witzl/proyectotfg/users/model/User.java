@@ -130,11 +130,21 @@ public class User{
         Collection<CollaborationRequest> collaborationRequests = getCollaborationRequests();
         Collection<Project> approved = new ArrayList<>();
         for(CollaborationRequest cr : collaborationRequests) {
-            if(cr.getCollaborator().equals(this) && cr.getRequestStatus().equals("approved")) {
+            if(cr.getRequestStatus().equals("approved")) {
                 approved.add(cr.getProject());
             }
         }
         return approved;
+    }
+
+    @JsonIgnore
+    public Collection<Project> getRequestedProjects() {
+        Collection<CollaborationRequest> collaborationRequests = getCollaborationRequests();
+        Collection<Project> requested = new ArrayList<>();
+        for(CollaborationRequest cr : collaborationRequests) {
+            requested.add(cr.getProject());
+        }
+        return requested;
     }
 
     @Override

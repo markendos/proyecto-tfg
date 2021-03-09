@@ -158,7 +158,11 @@
             startLoad();
         }
         $.get(serverContext + "project/foreign", function (data) {
-            const projects = data.all;
+            let projects = data.all.map(p => ({
+                ...p,
+                requested: data.requested.find((project) => (project.id === p.id) && project) ? true : false,
+            }));
+            console.log(projects);
             drawProjectsTable(projects);
         }).fail(function (data) {
             alert("ERROR: Could not fetch data");
@@ -175,8 +179,10 @@
     };
 
     const renderProjectActions = (data, type, row) => {
-        return `<button id="project-${row.id}" type="button" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top"
-                title="${[[#{table.project.button.collaboration.tooltip}]]}" onclick="handleProjectAction(this)">
+        return `<button id="project-${row.id}" type="button" class="btn btn-warning btn-sm" data-toggle="tooltip"
+                data-placement="top" title="${row.requested ? [[#{table.project.button.requested.tooltip}]]
+                : [[#{table.project.button.collaboration.tooltip}]]}" onclick="handleProjectAction(this)"
+                ${row.requested ? 'disabled' : ''}>
                 ${[[#{table.project.button.collaboration}]]}
                 <i class="fas fa-hands-helping"></i></button>`;
     };
@@ -188,17 +194,17 @@
     }
 
     function sendCollaborationRequest(event) {
+        $('#requestModal').modal('hide');
         event.preventDefault();
         $(".alert").html("").hide();
         $(".error-list").html("");
         const formData = $('#requestForm').serialize();
         $.post(serverContext + "collaboration/request", formData, function (data) {
-            $('#requestModal').modal('hide');
+            fetchProjects();
             $("#successmsg").show().html(/*[[#{message.request.success}]]*/);
         }).fail(function (data) {
             if (data.responseJSON.error.indexOf("InternalError") > -1) {
                 $("#errormsg").show().append(data.responseJSON.message);
-                $('#requestModal').modal('hide');
             } else {
                 const errors = $.parseJSON(data.responseJSON.message);
                 $.each(errors, function (index, item) {
@@ -235,10 +241,9 @@
                 },
                 data: projects,
                 columnDefs: [
-                    {targets: [0], visible: false},
                 ],
                 columns: [
-                    {title: "id", data: "id"},
+                    {title: "#Id", data: "id"},
                     {title: [[#{table.project.column.name}]], data: "name"},
                     {title: [[#{table.project.column.description}]], data: "description"},
                     {title: [[#{table.project.column.date}]], data: "startDate"},
@@ -246,7 +251,6 @@
                     {title: [[#{table.project.column.labels}]], data: "labels", render: renderProjectLabels},
                     {title: [[#{table.project.column.actions}]], render: renderProjectActions},
                 ],
-                retrieve: true,
                 language: {
                     url: langUrl
                 },

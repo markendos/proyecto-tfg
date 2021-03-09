@@ -66,7 +66,7 @@ public class ProjectController {
             SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
             User user = userOptional.get();
             List<Project> ownedProjects = projectService.getOwnedProjects(user);
-            List<Project> authorizedProjects = projectService.getCollaboratedProjects(user);
+            List<Project> authorizedProjects = projectService.getProjectsApproved(user);
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             HashMap aux = new HashMap();
@@ -94,12 +94,17 @@ public class ProjectController {
             SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
             User user = userOptional.get();
             List<Project> foreignProjects = projectService.getForeignProjects(user);
+            List<Project> projectsRequested = projectService.getProjectsRequested(user);
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             HashMap aux = new HashMap();
 
             if(foreignProjects != null) {
                 aux.put("all", foreignProjects);
+            }
+
+            if(projectsRequested != null) {
+                aux.put("requested", projectsRequested);
             }
 
             return ResponseEntity.ok(mapper.writeValueAsString(aux));

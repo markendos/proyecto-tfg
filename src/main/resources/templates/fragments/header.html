@@ -32,7 +32,8 @@
         <div class="collapse navbar-collapse" id="navbarToggler">
             <ul sec:authorize="hasRole('USER')" class="navbar-nav mr-auto mt-2 mt-lg-0">
                 <li class="nav-item" th:classappend="${#httpServletRequest.requestURI} == '/home' ? active : ''">
-                    <a class="nav-link" th:href="@{/home}" th:utext="#{label.nav.home}"><span class="sr-only">(current)</span></a>
+                    <a class="nav-link" th:href="@{/home}" th:utext="#{label.nav.home}"><span
+                            class="sr-only">(current)</span></a>
                 </li>
             </ul>
             <ul sec:authorize="hasRole('ADMIN')" class="navbar-nav mr-auto mt-2 mt-lg-0">
@@ -49,7 +50,8 @@
                     </div>
                     <div id="notificationsPanel" class="row mr-2" style="display: none"></div>
                 </li>
-                <li class="nav-item" th:classappend="${#httpServletRequest.requestURI} == '/changePassword' ? active : ''">
+                <li class="nav-item"
+                    th:classappend="${#httpServletRequest.requestURI} == '/changePassword' ? active : ''">
                     <a class="nav-link" th:href="@{/changePassword}">
                         <i class="userIcon fas fa-user-circle"></i>
                         <span sec:authentication="name"></span>
@@ -81,56 +83,83 @@
     </nav>
 
     <!-- Collaboration Request Notification Modal Form -->
-    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="notificationModalLabel" th:utext="#{label.pages.title.request.notification}">Modal</h5>
+                    <h5 class="modal-title" id="notificationModalLabel"
+                        th:utext="#{label.pages.title.request.notification}">Modal</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="#" method="POST" enctype="utf8" id="notificationForm">
-                    <div class="modal-body">
-                        <p id="notificationText"></p>
-                        <div class="form-group row align-items-start">
-                            <label for="requestMessage" class="col-sm-3" th:utext="#{label.request.message}">message</label>
-                            <div class="col-sm-9">
-                                <textarea id="requestMessage" class="form-control" name="requestMessage" rows="5" readonly></textarea>
-                            </div>
+                <div class="modal-body">
+                    <p id="notificationText"></p>
+                    <div class="form-group row align-items-start">
+                        <label for="requestMessage" class="col-sm-3" th:utext="#{label.request.message}">message</label>
+                        <div class="col-sm-9">
+                            <textarea id="requestMessage" class="form-control" name="requestMessage" rows="3"
+                                      readonly></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer">
+                </div>
+                <div class="modal-footer">
+                    <form action="#" method="POST" enctype="utf8" id="notificationForm">
                         <input type="text" id="requestProjectId" name="projectId" value="" hidden>
                         <input type="text" id="requestUserEmail" name="userEmail" value="" hidden>
-                        <button type="button" class="btn btn-danger" onclick="denyRequest()"
+                        <button type="button" class="btn btn-danger" onclick="manageRequest('denied')"
                                 th:utext="#{label.form.deny}">
                             cancel
                         </button>
                         <button class="btn btn-success" type="button" th:utext="#{label.form.approve}"
-                                onclick="approveRequest()">
+                                onclick="manageRequest('approved')">
                         </button>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <script sec:authorize="hasRole('USER')"  th:inline="javascript">
+    <script sec:authorize="hasRole('USER')" th:inline="javascript">
         $(document).ready(function () {
             fetchCollaborationRequests();
             $("body").append($("#notificationModal"));
 
-            $("#notifications, #notificationsPanel").click(function(e) {
+            $("#notifications, #notificationsPanel").click(function (e) {
                 e.stopPropagation(); //stops click event from reaching document
             });
-            $(document).click(function() {
+            $(document).click(function () {
                 $("#notificationsPanel").hide(); //click came from somewhere else
             });
         });
 
         function toggleNotificationsPanel() {
             $("#notificationsPanel").toggle();
+        }
+
+        function manageRequest(status) {
+            $("#notificationModal").modal('hide');
+            const serverCtx = /*[[@{/}]]*/;
+            const data = {
+                collaboratorEmail: utf8_to_b64($("#requestUserEmail").val()),
+                projectId: $("#requestProjectId").val(),
+                requestStatus: status,
+            }
+            $.ajax({
+                url: serverCtx + 'collaboration/update',
+                type: 'PUT',
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: (data) => {
+                    $("#successmsg").show().html(/*[[#{message.request.success.update}]]*/);
+                    fetchCollaborationRequests();
+                    fetchProjects();
+                },
+                error: (data) => {
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
         }
 
         function fetchCollaborationRequests() {
@@ -142,7 +171,6 @@
                 showRequests(requests);
                 loadingData = false;
             }).fail(function (data) {
-                console.log(data.responseJSON.message);
                 loadingData = false;
             });
         }
@@ -151,13 +179,16 @@
             const notifications = $("#notificationsPanel");
             requests.forEach(r => {
                 $(notifications).append(`<a id="${utf8_to_b64(JSON.stringify(r))}" onclick="handleCollaborationRequest(this)">` +
-                    `${r.collaborator.username} ${[[#{message.notification.request}]]}`+ '</a>');
+                    `${r.collaborator.username} ${[[#{message.notification.request}]]}` + '</a>');
             });
         }
 
         function handleCollaborationRequest(element) {
             const request = JSON.parse(b64_to_utf8(element.id));
-            $("#notificationText").text(`The user "${request.collaborator.username}" has requested collaboration in your project "${request.project.name}"`);
+            let msg = [[#{message.collaboration.request}]]
+                .replace(/-username-/g, `<strong>${request.collaborator.username}</strong>`)
+                .replace(/-id-/g, `<strong>${request.project.id}</strong>`);
+            $("#notificationText").html(msg);
             $("#requestMessage").val(request.requestMessage);
             $("#requestUserEmail").val(request.collaborator.email);
             $("#requestProjectId").val(request.project.id);
