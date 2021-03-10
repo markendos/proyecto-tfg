@@ -40,7 +40,7 @@ i.notification {
 }
 
 #notificationsPanel {
-    position: fixed;
+    position: absolute;
     min-height: 50px;
     max-height: 300px;
     overflow: auto;
@@ -459,8 +459,9 @@ caption {
     font-size: 1.5em;
 }
 
-tbody > tr:hover {
+#dataTable tbody > tr:hover {
     cursor: pointer;
+    box-shadow: 5px 0px 0px 0px #00ad5f inset;
 }
 
 /***** Footer *****/

@@ -13,4 +13,6 @@ import java.util.List;
 public interface CollaborationRequestRepository extends JpaRepository<CollaborationRequest, CollaborationRequestKey> {
 
     List<CollaborationRequest> findByProjectInAndRequestStatusLike(Collection<Project> projects, String status);
+
+    boolean existsByIdAndRequestStatusLike(CollaborationRequestKey crk, String status);
 }

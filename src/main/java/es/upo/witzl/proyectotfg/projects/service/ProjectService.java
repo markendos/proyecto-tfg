@@ -1,6 +1,7 @@
 package es.upo.witzl.proyectotfg.projects.service;
 
 import es.upo.witzl.proyectotfg.projects.dto.ProjectDto;
+import es.upo.witzl.proyectotfg.projects.model.CollaborationRequest;
 import es.upo.witzl.proyectotfg.projects.model.Label;
 import es.upo.witzl.proyectotfg.projects.model.Project;
 import es.upo.witzl.proyectotfg.projects.repository.ProjectRepository;

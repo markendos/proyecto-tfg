@@ -1,5 +1,6 @@
 <header class="sticky-top" th:fragment="pageHeader">
-    <script>
+    <script th:inline="javascript">
+        const serverContext = /*[[@{/}]]*/;
         function signOut() {
             var auth2 = gapi.auth2.getAuthInstance();
             if (auth2) {

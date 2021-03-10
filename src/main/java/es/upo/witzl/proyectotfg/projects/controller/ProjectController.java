@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.upo.witzl.proyectotfg.projects.dto.ProjectDto;
 import es.upo.witzl.proyectotfg.projects.model.Project;
+import es.upo.witzl.proyectotfg.projects.service.ICollaborationRequestService;
 import es.upo.witzl.proyectotfg.projects.service.IProjectService;
 import es.upo.witzl.proyectotfg.users.model.User;
 import es.upo.witzl.proyectotfg.users.security.MyUserPrincipal;
@@ -14,10 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
 import java.text.SimpleDateFormat;
@@ -34,8 +34,11 @@ public class ProjectController {
     @Autowired
     IUserService userService;
 
+    @Autowired
+    ICollaborationRequestService collaborationRequestService;
+
     @PostMapping(value = "/project/add", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity createProject(@Valid ProjectDto projectDto, Authentication authentication)
+    public ResponseEntity createProject(@Valid ProjectDto projectDto, final Authentication authentication)
             throws JsonProcessingException {
         if(projectDto.getId() == null) {
             MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
@@ -58,7 +61,7 @@ public class ProjectController {
     }
 
     @GetMapping(value = "/project/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getUserProjects(Authentication authentication) throws JsonProcessingException {
+    public ResponseEntity getUserProjects(final Authentication authentication) throws JsonProcessingException {
         MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
         Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
 
@@ -86,7 +89,7 @@ public class ProjectController {
     }
 
     @GetMapping(value = "/project/foreign", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity getForeignProjects(Authentication authentication) throws JsonProcessingException {
+    public ResponseEntity getForeignProjects(final Authentication authentication) throws JsonProcessingException {
         MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
         Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
 
@@ -114,7 +117,7 @@ public class ProjectController {
     }
 
     @DeleteMapping(value = "/project/delete/{projectId}")
-    public ResponseEntity deleteProject(@PathVariable String projectId, Authentication authentication) {
+    public ResponseEntity deleteProject(@PathVariable final String projectId, final Authentication authentication) {
         MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
         Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
 
@@ -139,5 +142,31 @@ public class ProjectController {
         }
 
         return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping("/project/{projectId}")
+    public ModelAndView viewProject(final ModelMap model, @PathVariable String projectId,
+                                    final Authentication authentication) {
+
+        MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
+        Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
+        String redirect = "redirect:/login";
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            Optional<Project> projectOpt = projectService.getProjectById(Long.parseLong(projectId));
+
+            if(projectOpt.isPresent()) {
+                Project project = projectOpt.get();
+                boolean isCollaborator = collaborationRequestService.isCollaborator(project, user);
+                if(project.getUser().equals(user) || isCollaborator) {
+                    redirect =  "/project";
+                    model.addAttribute("project", project);
+                    model.addAttribute("role", isCollaborator ? "collaborator" : "owner");
+                    return new ModelAndView(redirect, model);
+                }
+            }
+        }
+        return new ModelAndView(redirect, model);
     }
 }

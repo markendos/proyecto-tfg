@@ -1,0 +1,151 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+
+    <!-- Bootstrap4 CSS -->
+    <link rel="stylesheet" type="text/css" href="/resources/css/bootstrap.min.css"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="/resources/css/style.css"/>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/dataTables.bootstrap4.min.css"/>
+    <!-- Select2 CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+
+    <!-- JQuery -->
+    <script src="/resources/js/jquery-3.5.1.min.js"></script>
+    <!-- DataTables JS -->
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.23/js/dataTables.bootstrap4.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.22/dataRender/ellipsis.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/rowgroup/1.1.2/js/dataTables.rowGroup.min.js"></script>
+    <!--  Cookie JS -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
+    <!--  Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/es.min.js"
+            integrity="sha512-xntXNPHoIOoLxuqmYhDB6MA67yimB0HxKb20FTgBcAO7RUk2jwctNYIkencPjG4hdxde8ee6FHqACJqGYYSiSg=="
+            crossorigin="anonymous"></script>
+    <!-- Custom JS -->
+    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:src="@{/resources/js/util.js}"></script>
+    <script th:src="@{/resources/js/sideBar.js}"></script>
+</head>
+
+<body sec:authorize="hasRole('USER')">
+
+<!--Load Wrapper-->
+<div th:replace="/fragments/loadingWrapper :: loadingWrapper"></div>
+
+<!--Page Header-->
+<header th:replace="/fragments/header :: pageHeader"></header>
+
+<!--Notificaction Banners-->
+<div th:with="msg=${param.message}">
+    <div class="alert alert-info" th:utext="#{${msg}}"
+         th:unless="${msg == null}">message
+    </div>
+</div>
+<div id="errormsg" class="alert alert-danger" style="display:none"></div>
+<div id="successmsg" class="alert alert-success" style="display:none"></div>
+
+<!-- Project Labels Modal Form -->
+<div th:replace="/fragments/labelsModal :: labelsModal"></div>
+
+<!-- Project Subject Modal Form -->
+<div th:replace="/fragments/subjectModal :: subjectModal"></div>
+
+<div class="container-fluid row w-100 pr-0">
+    <!-- Sidebar  -->
+    <div th:replace="/fragments/userSidebar :: userSidebar"></div>
+
+    <!--Main Section Container-->
+    <main id="content" role="main" class="col pr-0 pl-2">
+        <div class="container-fluid px-0 d-flex">
+            <button type="button" id="sidebarCollapse" class="btn btn-light mt-2">
+                <i class="fas fa-align-left"></i>
+            </button>
+            <!--Language Selector-->
+            <div th:replace="/fragments/languageSelector :: languageSelector"></div>
+        </div>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a></li>
+                    <li class="breadcrumb-item active" aria-current="page"
+                        th:utext="#{user.project.menu.project(${project.id})}"></li>
+                </ol>
+            </nav>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#projectModal"
+                        onclick="clearForm()">
+                    <span th:utext="#{label.pages.button.sample.add}"></span>
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
+        </div>
+        <div class="pb-2 mb-3 border-bottom">
+            <div class="row my-2">
+                <div class="col-4" th:inline="text">
+                    <i class="fas fa-user-lock"></i>
+                    [[#{table.project.column.role.owner}]]: [[${project.user.username}]]
+                </div>
+                <div class="col-4" th:inline="text">
+                    <i class="fas fa-user-lock"></i>
+                    [[#{table.project.column.role.owner}]]: [[${project.user.username}]]
+                </div>
+                <div class="col-4" th:inline="text">
+                    <button id="addLabelsBtn" class="p-0 btn btn-link" th:utext="#{label.pages.title.project.labels}"
+                            th:onclick="addOrRemoveLabels([[${project.id}]])" >subject</button>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-4" th:inline="text">
+                    <i class="fas fa-user-friends"></i>
+                    [[#{project.title.collaborators}]]
+                    <div>
+                        <ul th:each="collab : ${project.collaborationRequests}">
+                            <li th:utext="${collab.collaborator.username}"
+                                th:unless="${collab.requestStatus} != 'approved'"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <button>subject</button>
+                </div>
+                <div class="col-4">
+                    <button id="userBtn" class="p-0 btn btn-link" th:utext="#{label.pages.title.project.subject}"
+                            onclick="showSubjectForm(this)">subject</button>
+                </div>
+            </div>
+        </div>
+        <section>
+            <div id="tableSpinner" class="spinner-border" role="status" style="display: none">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <table id="dataTable" class="table table-striped table-bordered" style="width:100%">
+                <caption th:inline="text">
+                    <i class="fab fa-mendeley"></i>
+                    [[#{label.pages.title.samples}]]
+                </caption>
+            </table>
+        </section>
+    </main>
+</div>
+
+<!--Page Footer-->
+<footer th:replace="/fragments/footer :: pageFooter"></footer>
+
+<script th:inline="javascript">
+    const encoded = utf8_to_b64(JSON.stringify(/*[[${project}]]*/));
+    $("#userBtn").attr("id", encoded);
+
+</script>
+</body>
+</html>

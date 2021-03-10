@@ -17,4 +17,6 @@ public interface ICollaborationRequestService {
     List<CollaborationRequest> getPendingRequests(User user);
 
     CollaborationRequest updateCollaborationRequest(CollaborationRequest cr);
+
+    boolean isCollaborator(Project project, User user);
 }

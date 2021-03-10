@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import es.upo.witzl.proyectotfg.projects.dto.LabelsDto;
 import es.upo.witzl.proyectotfg.projects.model.Label;
 import es.upo.witzl.proyectotfg.projects.model.Project;
+import es.upo.witzl.proyectotfg.projects.service.ICollaborationRequestService;
 import es.upo.witzl.proyectotfg.projects.service.ILabelService;
 import es.upo.witzl.proyectotfg.projects.service.IProjectService;
 import es.upo.witzl.proyectotfg.users.model.User;
@@ -38,6 +39,9 @@ public class LabelController {
     @Autowired
     IUserService userService;
 
+    @Autowired
+    ICollaborationRequestService collaborationRequestService;
+
     @PostMapping("/labels/add")
     public ResponseEntity addOrRemoveLabelsToProject(@Valid LabelsDto labelsDto, Authentication authentication) {
         MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
@@ -48,7 +52,7 @@ public class LabelController {
             Optional<Project> projectOptional = projectService.getProjectById(labelsDto.getProjectId());
             if(projectOptional.isPresent()) {
                 Project project = projectOptional.get();
-                if(user.equals(project.getUser())) {
+                if(user.equals(project.getUser()) || collaborationRequestService.isCollaborator(project, user)) {
                     projectService.assignLabels(labelsDto.getNames(), project);
                     return ResponseEntity.ok().build();
                 }else {

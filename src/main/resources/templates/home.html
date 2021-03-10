@@ -100,138 +100,10 @@
 </div>
 
 <!-- Project Labels Modal Form -->
-<div class="modal fade" id="labelsModal" tabindex="-1" aria-labelledby="labelsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="labelsModalLabel" th:utext="#{label.pages.title.project.labels}">Modal
-                    title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="#" method="POST" enctype="utf8" id="labelsForm">
-                <div class="modal-body">
-                    <div class="form-group row">
-                        <div id="labelError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="labels" class="col-sm-3" th:utext="#{label.project.label}">label</label>
-                        <div class="col-sm-9">
-                            <select id="labels" name="names" multiple>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <input type="text" id="labelsProjectId" name="projectId" value="" hidden>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                            th:utext="#{label.form.cancel}">
-                        cancel
-                    </button>
-                    <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<div th:replace="/fragments/labelsModal :: labelsModal"></div>
 
 <!-- Project Subject Modal Form -->
-<div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="subjectModalLabel" th:utext="#{label.pages.title.project.subject}">Modal
-                    title</h5>
-                <span id="editSubjectBtn" class='d-flex align-self-center ml-3' style="display:none">
-                    <button class="btn btn-warning btn-sm" onclick='makeSubjectEditable()'>
-                        <i class='fas fa-edit'></i>
-                    </button>
-                </span>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="#" method="POST" enctype="utf8" id="subjectForm">
-                <div class="modal-body">
-                    <div class="form-group row">
-                        <div id="genderError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label class="col-sm-4" th:utext="#{label.form.subject.gender}"></label>
-                            <div class="col-sm-3">
-                                <input type="radio" name="gender" id="genderMale" value="m"
-                                       required>
-                                <label class="font-weight-normal" for="genderMale"
-                                       th:utext="#{label.form.subject.gender.male}">m</label>
-                            </div>
-                            <div class="col-sm-3">
-                                <input type="radio" name="gender" id="genderFemale"
-                                       value="f" required>
-                                <label class="font-weight-normal" for="genderFemale"
-                                       th:utext="#{label.form.subject.gender.female}"></label>
-                            </div>
-                    </div>
-                    <div class="form-group row">
-                        <div id="birthDateError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="birthDate" class="col-sm-4" th:utext="#{label.form.subject.birth}">date</label>
-                        <div class="col-sm-8">
-                            <input id="birthDate" class="form-control" name="birthDate" type="date" value="" required/>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div id="weightError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="weight" class="col-sm-4" th:utext="#{label.form.subject.weight}">weight</label>
-                        <div class="col-sm-8">
-                            <input id="weight" class="form-control" name="weight" type="number" value=""
-                                   min="0" step="0.1"/>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div id="heightError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="height" class="col-sm-4" th:utext="#{label.form.subject.height}">height</label>
-                        <div class="col-sm-8">
-                            <input id="height" class="form-control" name="height" type="number" value=""
-                                   min="0" step="1"/>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div id="smokerError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="smoker" class="col-sm-4" th:utext="#{label.form.subject.smoker}">
-                            smoker
-                        </label>
-                        <div class="col">
-                            <input id="smoker" name="smoker" type="checkbox"/>
-                        </div>
-                    </div>
-                    <div id="derivedFields" style="display: none">
-                        <hr/>
-                        <div class="form-group row">
-                            <div id="bmiError" class="text-danger row col offset-3" style="display:none"></div>
-                            <label for="bmi" class="col-sm-4" th:utext="#{label.form.subject.bmi}">bmi</label>
-                            <div class="col-sm-8">
-                                <div class="range-value" id="bmiVal"></div>
-                                <input id="bmi" name="bmi" type="range" class="slider" value="" min="0" max="40">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div id="bfpError" class="text-danger row col offset-3" style="display:none"></div>
-                            <label for="bfp" class="col-sm-4" th:utext="#{label.form.subject.bfp}">bfp</label>
-                            <div class="col-sm-8">
-                                <div class="range-value" id="bfpVal"></div>
-                                <input id="bfp" name="bfp" type="range" class="slider" value="" min="0" max="40">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <input type="text" id="subjectProjectId" name="projectId" value="" hidden>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                            th:utext="#{label.form.cancel}">
-                        cancel
-                    </button>
-                    <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+<div th:replace="/fragments/subjectModal :: subjectModal"></div>
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
@@ -250,7 +122,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page" th:utext="#{user.project.menu.myprojects}"></li>
+                    <li class="breadcrumb-item active" aria-current="page"
+                        th:utext="#{user.project.menu.myprojects}"></li>
                 </ol>
             </nav>
             <div class="btn-toolbar mb-2 mb-md-0">
@@ -280,46 +153,9 @@
 
 <!--DataTables JS Functionalities-->
 <script th:inline="javascript">
-    const serverContext = /*[[@{/}]]*/;
-    const lang = Cookies.get("language");
-    let langUrl = '';
     $(document).ready(() => {
         startLoad();
         fetchProjects();
-        $('#labels').select2({
-            theme: 'bootstrap4',
-            width: 'resolve',
-            closeOnSelect: false,
-            tags: true,
-            language: lang,
-            tokenSeparators: [',', ' '],
-            ajax: {
-                url: serverContext + 'labels/all',
-                dataType: 'json',
-                processResults: function (data) {
-
-                    return {
-                        results: data.all.map(({ name: id, name: text })=>({ id, text }))
-                    };
-                }
-            },
-            minimumInputLength: 1,
-            cache: true,
-            createTag: function (params) {
-                const term = $.trim(params.term);
-
-                if (term === '') {
-                    return null;
-                }
-
-                return {
-                    id: term,
-                    text: term,
-                    newTag: true // add additional parameters
-                }
-            }
-        });
-
     });
 
     function startLoad() {
@@ -336,34 +172,8 @@
         loadingData = false;
     }
 
-    function fetchProjects() {
-        if (!loadingData) {
-            startLoad();
-        }
-        $.get(serverContext + "project/all", function (data) {
-            let owned = data.owned.map(p => true ? {...p, role: 'owner'} : {...p});
-            let auth = data.auth.map(p => true ? {...p, role: 'collaborator'} : {...p});
-            const projects = [...owned, ...auth].map(p => p.subject ? {...p} : {...p, subject: 'N/A'});
-            drawProjectsTable(projects);
-        }).fail(function (data) {
-            alert("ERROR: Could not fetch data");
-            endLoad();
-        });
-    }
-
-    function handleProjectAction(element) {
-        const selectedOption = element.options[element.selectedIndex].value;
-        const id = element.id.substring(element.id.indexOf('-') + 1);
-        switch (selectedOption) {
-            case 'labels': addOrRemoveLabels(id); break;
-            case 'subject': registerSubject(id); break;
-            case 'delete': deleteProject(id); break;
-        }
-        $(element).prop('selectedIndex', 0);
-    }
-
     const renderProjectActions = (data, type, row) => {
-        const registerSubjectOpt = `<option value="subject" ${row.subject==='N/A' ? '' : 'disabled'}>
+        const registerSubjectOpt = `<option value="subject" ${row.subject ? 'disabled' : ''}>
                                     ${[[#{table.project.option.subject}]]}</option>`;
         const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.project.option.delete}]]}</option>`;
         return `<select id="project-${row.id}" class="form-control" onChange="handleProjectAction(this)">
@@ -376,67 +186,25 @@
 
     const renderProjectLabels = (data, type, row) => {
         let labels = '';
-        for(let i = 0; i < data.length; i++) {
-           labels += `<span class="badge badge-pill badge-${getRandomColor()}">${data[i].name}</span>&nbsp;`;
+        for (let i = 0; i < data.length; i++) {
+            labels += `<span class="badge badge-pill badge-${getRandomColor()}">${data[i].name}</span>&nbsp;`;
         }
         return labels;
     };
 
     const renderProjectRole = (data, type, row) => {
-        let role = data === 'owner' ? /*[[#{table.project.column.role.owner}]]*/
+        const role = data === 'owner' ? /*[[#{table.project.column.role.owner}]]*/
             : /*[[#{table.project.column.role.collaborator}]]*/;
-        return `<span>
-                    ${role}
-                    ${data === 'owner' ? `<i class="fas fa-lock-open"></i>` : `<i class="fas fa-lock"></i>`}
+        return `<span>${role} ${data === 'owner' ? "<i class='fas fa-lock-open'></i>" : "<i class='fas fa-lock'></i>"}
                 </span>`;
     };
 
     const renderSubjectActions = (data, type, row) => {
-        return `<a id="${utf8_to_b64(JSON.stringify(data))}" onclick="showSubjectForm(this)"class="btn btn-info btn-sm">
-                ${[[#{table.column.action.view}]]}</a>`;
+        return `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
+                onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? ''
+                : `disabled data-toggle="tooltip" data-placement="top" title="${[[#{table.project.column.subject.tooltip}]]}"`}>
+                ${[[#{table.column.action.view}]]}</button>`;
     };
-
-    function showSubjectForm(element) {
-        const subject = JSON.parse(b64_to_utf8(element.id));
-        if(subject) {
-            if(subject.gender === "m") {
-                $("#genderMale").attr("checked", true);
-            } else if(subject.gender === "f") {
-                $("#genderFemale").attr("checked", true);
-            }
-            $("#birthDate").val(subject.birthDate);
-            $("#weight").val(subject.weight);
-            $("#height").val(subject.height);
-            $("#smoker").attr("checked", subject.smoker);
-            $("#derivedFields").show();
-            $("#bmi").val(subject.bmi);
-            $("#bfp").val(subject.bfp);
-            $("#subjectProjectId").val(subject.id);
-            $("#subjectForm input, #subjectForm button[type='submit']").attr("disabled", true);
-            $("#editSubjectBtn").show();
-
-            representRangeValue($("#bmi"), $("#bmiVal"), subject.bmi);
-            representRangeValue($("#bfp"), $("#bfpVal"), subject.bfp);
-            $("#subjectModal").modal('show');
-        }
-    }
-
-    function representRangeValue(rangeElement, valueElement, value) {
-        const min = Number.parseFloat($(rangeElement).attr("min"));
-        const max = Number.parseFloat($(rangeElement).attr("max"));
-        const newValue = (value - min) * 100 / (max - min);
-        const newPosition = 10 - (newValue * 0.2);
-        $(valueElement).append(`<span>${value}</span>`);
-        $(valueElement).css("left", `calc(${newValue}% + (${newPosition}px))`);
-    }
-
-    function makeSubjectEditable() {
-        const status = $("#subjectForm input").attr("disabled");
-        $("#subjectForm").change(function() {
-            $("#subjectForm button[type='submit']").attr("disabled", false);
-        });
-        $("#subjectForm :not(input[type='range'])").attr("disabled", !status);
-    }
 
     function drawProjectsTable(projects) {
         if (lang && lang === 'es') {
@@ -458,10 +226,17 @@
                 drawCallback: () => {
                     $('[data-toggle="tooltip"]').tooltip();
                     endLoad();
+                    const table = $('#dataTable').DataTable();
+                    $("#dataTable button, #dataTable select").click(function(event){
+                        event.stopPropagation();
+                    });
+                    $('#dataTable tbody tr').on('click', 'td', function () {
+                        const data = table.row(this).data();
+                        goToProject(data.id);
+                    });
                 },
                 data: projects,
-                columnDefs: [
-                ],
+                columnDefs: [],
                 columns: [
                     {title: "#Id", data: "id"},
                     {title: [[#{table.project.column.name}]], data: "name"},
@@ -488,52 +263,50 @@
         $('#projectForm').submit(function (event) {
             saveProject(event);
         });
-        $('#labelsForm').submit(function (event) {
-            saveProjectLabels(event);
-        });
-        $('#subjectForm').submit(function (event) {
-            saveProjectSubject(event);
-        });
     });
+
+    function goToProject(projectId) {
+        window.location.href = serverContext + 'project/' + projectId;
+    }
 
     function clearForm() {
         $("#projectForm")[0].reset();
     }
 
-    function addOrRemoveLabels(projectId){
-        $('#labels').empty();
-        $('#labelsProjectId').val(projectId);
-        $('#labelsModal').modal('show');
-        // Fetch the preselected item, and add to the control
-        const labelsSelect = $('#labels');
-        $.ajax({
-            type: 'GET',
-            url: serverContext + 'labels/' + projectId
-        }).then(function (data) {
-            // create the option and append to Select2
-            data.tagged.forEach(tag => {
-                let option = new Option(tag.name, tag.name, true, true);
-                labelsSelect.append(option).trigger('change');
-
-                // manually trigger the `select2:select` event
-                labelsSelect.trigger({
-                    type: 'select2:select',
-                    params: {
-                        data: data
-                    }
-                });
-            });
+    function fetchProjects() {
+        if (!loadingData) {
+            startLoad();
+        }
+        $.get(serverContext + "project/all", function (data) {
+            let owned = data.owned.map(p => true ? {...p, role: 'owner'} : {...p});
+            let auth = data.auth.map(p => true ? {...p, role: 'collaborator'} : {...p});
+            const projects = [...owned, ...auth];
+            drawProjectsTable(projects);
+        }).fail(function (data) {
+            alert("ERROR: Could not fetch data");
+            endLoad();
         });
     }
 
-    function registerSubject(projectId){
-        $('#subjectForm')[0].reset();
-        $('#subjectProjectId').val(projectId);
-        $('#subjectModal').modal('show');
+    function handleProjectAction(element) {
+        const selectedOption = element.options[element.selectedIndex].value;
+        const id = element.id.substring(element.id.indexOf('-') + 1);
+        switch (selectedOption) {
+            case 'labels':
+                addOrRemoveLabels(id);
+                break;
+            case 'subject':
+                registerSubject(id);
+                break;
+            case 'delete':
+                deleteProject(id);
+                break;
+        }
+        $(element).prop('selectedIndex', 0);
     }
 
     function deleteProject(projectId) {
-        if(confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
+        if (confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
             $.ajax({
                 type: 'DELETE',
                 url: serverContext + 'project/delete/' + projectId,
@@ -559,83 +332,22 @@
             $("#successmsg").show().html(/*[[#{message.project.success.create}]]*/);
             addOrRemoveLabels(data.new.id);
         }).fail(function (data) {
-                 if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                    $("#errormsg").show().append(data.responseJSON.message);
-                    $('#projectModal').modal('hide');
-                } else {
-                    const errors = $.parseJSON(data.responseJSON.message);
-                    $.each(errors, function (index, item) {
-                        if (item.field) {
-                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                        } else {
-                            $("#globalError").show().append(item.defaultMessage + "<br/>");
-                        }
-                    });
-                }
-            });
-    }
-
-    function saveProjectLabels(event) {
-        event.preventDefault();
-        $(".alert").html("").hide();
-        $(".error-list").html("");
-        const formData = $('#labelsForm').serialize();
-        $.post(serverContext + "labels/add", formData, function (data) {
-            $('#labelsModal').modal('hide');
-            fetchProjects();
-            $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
-        }).fail(function (data) {
-                if(data.responseJSON) {
-                    if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                        $("#errormsg").show().append(data.responseJSON.message);
-                        $('#labelsModal').modal('hide');
+            if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                $("#errormsg").show().append(data.responseJSON.message);
+                $('#projectModal').modal('hide');
+            } else {
+                const errors = $.parseJSON(data.responseJSON.message);
+                $.each(errors, function (index, item) {
+                    if (item.field) {
+                        $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
                     } else {
-                        const errors = $.parseJSON(data.responseJSON.message);
-                        $.each(errors, function (index, item) {
-                            if (item.field) {
-                                $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                            } else {
-                                $("#globalError").show().append(item.defaultMessage + "<br/>");
-                            }
-                        });
+                        $("#globalError").show().append(item.defaultMessage + "<br/>");
                     }
-                }else {
-                    $("#errormsg").show().append(`ERROR: ${data.status}`);
-                    $('#labelsModal').modal('hide');
-                }
-            });
-    }
-
-    function saveProjectSubject(event) {
-        event.preventDefault();
-        $(".alert").html("").hide();
-        $(".error-list").html("");
-        const formData = $('#subjectForm').serialize();
-        $.post(serverContext + "subject/add", formData, function (data) {
-            $('#subjectModal').modal('hide');
-            fetchProjects();
-            $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
-        }).fail(function (data) {
-                if(data.responseJSON) {
-                    if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                        $("#errormsg").show().append(data.responseJSON.message);
-                        $('#subjectModal').modal('hide');
-                    } else {
-                        const errors = data.responseJSON.message;
-                        $.each(errors, function (index, item) {
-                            if (item.field) {
-                                $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                            } else {
-                                $("#globalError").show().append(item.defaultMessage + "<br/>");
-                            }
-                        });
-                    }
-                }else {
-                    $("#errormsg").show().append(`ERROR: ${data.status}`);
-                    $('#subjectModal').modal('hide');
-                }
-            });
+                });
+            }
+        });
     }
 </script>
+
 </body>
 </html>

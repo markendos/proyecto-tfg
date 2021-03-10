@@ -45,4 +45,10 @@ public class CollaborationRequestService implements ICollaborationRequestService
     public CollaborationRequest updateCollaborationRequest(CollaborationRequest cr) {
         return collaborationRequestRepository.save(cr);
     }
+
+    @Override
+    public boolean isCollaborator(Project project, User user) {
+        CollaborationRequest cr = new CollaborationRequest(user, project);
+        return collaborationRequestRepository.existsByIdAndRequestStatusLike(cr.getId(), "approved");
+    }
 }
