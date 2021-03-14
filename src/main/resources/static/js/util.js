@@ -1,6 +1,4 @@
 let loadingData = false;
-const lang = Cookies.get("language");
-let langUrl = '';
 
 $(document).ready(function () {
     markRequiredFields();

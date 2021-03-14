@@ -5,7 +5,7 @@
         <i class="fas fa-project-diagram"></i>
     </h3>
     <ul class="pt-0 list-unstyled components">
-        <li th:classappend="${url} == '/home'  ? active : (${#strings.contains(url,'/project')} ? active : '')">
+        <li th:classappend="${url} != '/global'  ? active : ''">
             <a th:href="@{/home}">
                 <i class="fas fa-folder-open"></i>
                 <span th:utext="#{user.project.menu.myprojects}">Projects</span>

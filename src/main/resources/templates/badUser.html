@@ -34,7 +34,6 @@
                     th:utext="#{label.form.resendRegistrationToken}">
             </button>
             <script th:inline="javascript">
-                const serverContext = /*[[@{/}]]*/;
 
                 function resendToken() {
                     const token = [[${token}]];

@@ -95,7 +95,6 @@
                 'onsuccess': onSuccess,
                 'onfailure': onFailure
             });
-            const serverContext = /*[[@{/}]]*/;
                 function onSuccess(googleUser) {
                     var idToken = googleUser.getAuthResponse().id_token;
                     var email = googleUser.getBasicProfile().getEmail();

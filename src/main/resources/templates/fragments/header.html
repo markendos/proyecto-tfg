@@ -67,7 +67,7 @@
             </ul>
             <ul sec:authorize="!hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/signUp}" th:unless="${#httpServletRequest.requestURI == '/signUp'}">
+                    <a class="nav-link" th:unless="${#httpServletRequest.requestURI == '/signUp'}">
                         <i class="fas fa-user-plus"></i>
                         <span th:utext="#{label.form.loginSignUp}"></span>
                     </a>
@@ -169,7 +169,11 @@
             $.get(serverCtx + "collaboration/all", function (data) {
                 const requests = data.all;
                 $("#notificationCounter").text(requests.length);
-                showRequests(requests);
+                if(requests.length) {
+                    showRequests(requests);
+                } else {
+                    $("#notificationsPanel").append(`<span>${[[#{message.notification.empty}]]}</span>`);
+                }
                 loadingData = false;
             }).fail(function (data) {
                 loadingData = false;
@@ -177,6 +181,7 @@
         }
 
         function showRequests(requests) {
+            $("#notificationsPanel").empty();
             const notifications = $("#notificationsPanel");
             requests.forEach(r => {
                 $(notifications).append(`<a id="${utf8_to_b64(JSON.stringify(r))}" onclick="handleCollaborationRequest(this)">` +

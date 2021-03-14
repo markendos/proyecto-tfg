@@ -50,6 +50,7 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/login");
         registry.addViewController("/logout");
         registry.addViewController("/project");
+        registry.addViewController("/registerSample");
         registry.addViewController("/resetPassword");
         registry.addViewController("/signUp");
         registry.addViewController("/successRegister");

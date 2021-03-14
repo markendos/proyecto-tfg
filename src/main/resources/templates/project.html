@@ -2,7 +2,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title th:inline="text">Project #[[${project.id}]]</title>
 
     <!-- Bootstrap4 CSS -->
     <link rel="stylesheet" type="text/css" href="/resources/css/bootstrap.min.css"/>
@@ -23,8 +23,6 @@
     <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.10.22/dataRender/ellipsis.js"></script>
     <script type="text/javascript"
             src="https://cdn.datatables.net/rowgroup/1.1.2/js/dataTables.rowGroup.min.js"></script>
-    <!--  Cookie JS -->
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 
     <!--  Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
@@ -83,11 +81,10 @@
                 </ol>
             </nav>
             <div class="btn-toolbar mb-2 mb-md-0">
-                <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#projectModal"
-                        onclick="clearForm()">
+                <a th:href="@{/registerSample/{id}(id=${project.id})}" class="btn btn-outline-primary">
                     <span th:utext="#{label.pages.button.sample.add}"></span>
                     <i class="fas fa-plus-circle"></i>
-                </button>
+                </a>
             </div>
         </div>
         <div class="pb-2 mb-3 border-bottom">
@@ -97,31 +94,44 @@
                     [[#{table.project.column.role.owner}]]: [[${project.user.username}]]
                 </div>
                 <div class="col-4" th:inline="text">
-                    <i class="fas fa-user-lock"></i>
-                    [[#{table.project.column.role.owner}]]: [[${project.user.username}]]
+                    <i class="fas fa-calendar-day"></i>
+                    <span th:utext="#{table.project.column.date}"></span>:
+                    <span th:text="${#dates.format(project.startDate, 'dd-MM-yyyy')}"></span>
                 </div>
-                <div class="col-4" th:inline="text">
-                    <button id="addLabelsBtn" class="p-0 btn btn-link" th:utext="#{label.pages.title.project.labels}"
-                            th:onclick="addOrRemoveLabels([[${project.id}]])" >subject</button>
+                <div class="col-4 text-right">
+                    <button id="userBtn" class="p-0 btn btn-link text-left" th:utext="#{label.pages.title.project.subject}"
+                            onclick="showSubjectForm(this)">subject</button>
                 </div>
             </div>
             <div class="row my-2">
-                <div class="col-4" th:inline="text">
+                <div id="collaboratorTitle" class="col-4" th:inline="text">
                     <i class="fas fa-user-friends"></i>
                     [[#{project.title.collaborators}]]
-                    <div>
-                        <ul th:each="collab : ${project.collaborationRequests}">
-                            <li th:utext="${collab.collaborator.username}"
-                                th:unless="${collab.requestStatus} != 'approved'"></li>
+                    <div id="collaborators">
+                        <ul>
+                            <li th:each="collab : ${project.collaborationRequests}"
+                                th:utext="${collab.collaborator.username}"
+                                th:unless="${collab.requestStatus} != 'approved'">
+                            </li>
                         </ul>
                     </div>
                 </div>
-                <div class="col-4">
-                    <button>subject</button>
+                <div class="col-4 d-flex align-items-center">
+                    <i class="fas fa-tags"></i>
+                    <button th:inline="text" data-toggle="tooltip" data-placement="top" class="p-0 btn btn-link text-left"
+                            th:onclick="addOrRemoveLabels([[${project.id}]])"
+                            th:attr="title=#{label.pages.title.project.labels}">[[#{table.project.column.labels}]]:
+                    </button>
+                    <ul class="list-unstyled my-0">
+                        <li th:each="label : ${project.labels}"
+                                  th:utext="${label.name}" class="mx-1 tag badge badge-pill">
+                        </li>
+                    </ul>
                 </div>
-                <div class="col-4">
-                    <button id="userBtn" class="p-0 btn btn-link" th:utext="#{label.pages.title.project.subject}"
-                            onclick="showSubjectForm(this)">subject</button>
+                <div class="col-4 text-right">
+                    <button id="deleteBtn" class="p-0 btn text-danger btn-link text-left"
+                            th:utext="#{table.project.option.delete}"
+                            th:onclick="deleteProject([[${project.id}]])">subject</button>
                 </div>
             </div>
         </div>
@@ -146,6 +156,35 @@
     const encoded = utf8_to_b64(JSON.stringify(/*[[${project}]]*/));
     $("#userBtn").attr("id", encoded);
 
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        $("#collaboratorTitle").mouseenter(function () {
+            $("#collaborators").show();
+        });
+        $("#collaboratorTitle").mouseleave(function () {
+            $("#collaborators").hide();
+        });
+        const tags = $(".tag").toArray();
+        tags?.forEach(tag => {
+            $(tag).addClass(`badge-${getRandomColor()}`);
+        })
+    });
+
+    function deleteProject(projectId) {
+        if (confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
+            $.ajax({
+                type: 'DELETE',
+                url: serverContext + 'project/delete/' + projectId,
+                success: (data) => {
+                    alert(/*[[#{message.project.success.delete}]]*/);
+                    window.location.href = serverContext + "home";
+                },
+                error: (data) => {
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
+        }
+    }
 </script>
 </body>
 </html>

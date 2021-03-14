@@ -63,11 +63,15 @@
                         <div id="derivedFields" style="display: none">
                             <hr/>
                             <div class="form-group row">
+                                <label class="col-sm-4" th:utext="#{label.form.subject.age}">age</label>
+                                <span id="age" class="col-sm-8"></span>
+                            </div>
+                            <div class="form-group row">
                                 <div id="bmiError" class="text-danger row col offset-3" style="display:none"></div>
                                 <label for="bmi" class="col-sm-4" th:utext="#{label.form.subject.bmi}">bmi</label>
                                 <div class="col-sm-8">
                                     <div class="range-value" id="bmiVal"></div>
-                                    <input id="bmi" name="bmi" type="range" class="slider" value="" min="0" max="40">
+                                    <input id="bmi" name="bmi" type="range" class="slider" value="" min="0" max="50">
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -75,7 +79,7 @@
                                 <label for="bfp" class="col-sm-4" th:utext="#{label.form.subject.bfp}">bfp</label>
                                 <div class="col-sm-8">
                                     <div class="range-value" id="bfpVal"></div>
-                                    <input id="bfp" name="bfp" type="range" class="slider" value="" min="0" max="40">
+                                    <input id="bfp" name="bfp" type="range" class="slider" value="" min="0" max="50">
                                 </div>
                             </div>
                         </div>
@@ -160,6 +164,7 @@
                 $("#bfp").val(subject.bfp);
                 $("#subjectProjectId").val(subject.id);
                 $("#subjectForm input, #subjectForm button[type='submit']").attr("disabled", true);
+                $("#age").text(calculateAge(new Date(subject.birthDate)));
                 representRangeValue($("#bmi"), $("#bmiVal"), subject.bmi);
                 representRangeValue($("#bfp"), $("#bfpVal"), subject.bfp);
                 const editBtnExists = $("#editSubjectBtn").length > 0;
@@ -175,12 +180,18 @@
             }
         }
 
+        function calculateAge(birthday) { // birthday is a date
+            const ageDifMs = Date.now() - birthday.getTime();
+            const ageDate = new Date(ageDifMs); // miliseconds from epoch
+            return Math.abs(ageDate.getUTCFullYear() - 1970);
+        }
+
         function representRangeValue(rangeElement, valueElement, value) {
 
             const min = Number.parseFloat($(rangeElement).attr("min"));
             const max = Number.parseFloat($(rangeElement).attr("max"));
             const newValue = (value - min) * 100 / (max - min);
-            const newPosition = 10 - (newValue * 0.2);
+            const newPosition = 10 - (newValue * 0.3);
             $(valueElement).empty().append(`<span>${value}</span>`);
             $(valueElement).css("left", `calc(${newValue}% + (${newPosition}px))`);
         }

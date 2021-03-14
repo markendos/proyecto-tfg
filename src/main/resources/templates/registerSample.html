@@ -1,0 +1,842 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Sample</title>
+
+    <!-- Bootstrap4 CSS -->
+    <link rel="stylesheet" type="text/css" href="/resources/css/bootstrap.min.css"/>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="/resources/css/style.css"/>
+    <link rel="stylesheet" type="text/css" href="/resources/css/data-sample/main.css">
+    <!-- JQuery -->
+    <script src="/resources/js/jquery-3.5.1.min.js"></script>
+    <!-- Google Charts JS -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <!-- FileSaver JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"
+            integrity="sha512-k8F8QynmFNURwbUJC8drKA+fo3YfNvjqKzStdydD6au+MzvxBoRnxH8E31RJXwDY9DrnEiPhh9wBoDSIxhkyHQ=="
+            crossorigin="anonymous"></script>
+    <!-- Custom JS -->
+    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:src="@{/resources/js/util.js}"></script>
+    <script th:src="@{/resources/js/sideBar.js}"></script>
+</head>
+
+<body sec:authorize="hasRole('USER')">
+
+<!--Load Wrapper-->
+<div th:replace="/fragments/loadingWrapper :: loadingWrapper"></div>
+
+<!--Page Header-->
+<header th:replace="/fragments/header :: pageHeader"></header>
+
+<!--Notificaction Banners-->
+<div th:with="msg=${param.message}">
+    <div class="alert alert-info" th:utext="#{${msg}}"
+         th:unless="${msg == null}">message
+    </div>
+</div>
+<div id="errormsg" class="alert alert-danger" style="display:none"></div>
+<div id="successmsg" class="alert alert-success" style="display:none"></div>
+
+<!-- Save Sample Modal Form -->
+<div class="modal fade" id="modalFileSave" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Save data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="fileSaveForm">
+                    <div class="row text-center">
+                        <div class="col-2"><strong>Channel</strong></div>
+                        <div class="col-3"><strong>Sensor</strong></div>
+                        <div class="col-5"><strong>Label</strong></div>
+                        <div class="col-2"><strong>Save</strong></div>
+                    </div>
+                    <hr>
+                    <textarea id="saveComments" class="form-control" placeholder="Comments..."></textarea>
+                    <div class="input-group mt-4">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Local:</span>
+                        </div>
+                        <div class="custom-control custom-switch ml-2 my-auto">
+                            <input type="checkbox" class="custom-control-input" id="txtSwitch">
+                            <label class="custom-control-label" for="txtSwitch" data-toggle="tooltip"
+                                   data-placement="top" title="OpenSignals formatted data text file">.txt</label>
+                        </div>
+                        <div class="custom-control custom-switch mx-4 my-auto">
+                            <input type="checkbox" class="custom-control-input" id="csvSwitch">
+                            <label class="custom-control-label" for="csvSwitch" data-toggle="tooltip"
+                                   data-placement="top" title="CSV data file">.csv</label>
+                        </div>
+
+                        <div class="input-group-prepend">
+                            <span class="input-group-text rounded-left">Remote:</span>
+                        </div>
+                        <div class="custom-control custom-switch ml-2 my-auto">
+                            <input type="checkbox" class="custom-control-input" id="dbSwitch" disabled>
+                            <label class="custom-control-label" for="dbSwitch" data-toggle="tooltip"
+                                   data-placement="top" title="Save data to remote database">Database</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSaveBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Modal -->
+
+<div class="container-fluid row w-100 pr-0">
+    <!-- Sidebar  -->
+    <div th:replace="/fragments/userSidebar :: userSidebar"></div>
+
+    <!--Main Section Container-->
+    <main id="content" role="main" class="col pr-0 pl-2">
+        <div class="container-fluid px-0 d-flex">
+            <button type="button" id="sidebarCollapse" class="btn btn-light mt-2">
+                <i class="fas fa-align-left"></i>
+            </button>
+            <!--Language Selector-->
+            <div th:replace="/fragments/languageSelector :: languageSelector"></div>
+        </div>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a th:href="@{/project/{id}(id=${project.id})}"
+                           th:utext="#{user.project.menu.project(${project.id})}"></a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page"
+                        th:utext="#{label.pages.sample.new}">
+                    </li>
+                </ol>
+            </nav>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <button th:inline="text" class="btn btn-info mr-2" id="saveDataBtn" data-toggle="modal"
+                        data-target="#modalFileSave" disabled>
+                    [[#{sample.button.save}]]
+                    <i class="far fa-save"></i>
+                </button>
+                <input type="button" class="btn btn-secondary ml-2" id="resetBtn" th:value="#{sample.button.reset}" disabled/>
+            </div>
+        </div>
+        <div class="pb-2 mb-3 border-bottom">
+            <div class="d-flex my-0">
+                <button type="button" class="btn btn-primary btn-sm" id="connectBtn" th:inline="text">
+                    [[#{sample.device.button}]]
+                    <i class="fab fa-bluetooth-b"></i>
+                </button>
+                <span th:utext="#{sample.device.status.disconnected}" id="status" class="disconnected my-auto mx-2"></span>
+            </div>
+            <div id="controlBtns" class="d-flex my-4 align-items-center">
+                <div class="pl-0 col">
+                    <label class="my-auto mr-1" for="numSamples">Nº Samples:</label>
+                    <input class="form-control form-control-sm d-inline" id="numSamples" type="number" value=0 min="0"
+                           step="5" style="width:100px" data-toggle="tooltip" data-placement="top"
+                           th:attr="title=#{sample.label.number.tooltip}" disabled/>
+                </div>
+                <div class="col text-center">
+                    <label class="my-auto" for="isSimulated" th:utext="#{sample.label.simulate}">simulate</label>
+                    <input class="my-auto mx-1" id="isSimulated" type="checkbox" disabled>
+
+                    <label class="my-auto ml-2 mr-1" for="isPlot" th:utext="#{sample.label.plot}">plot</label>
+                    <input class="my-auto" id="isPlot" type="checkbox"  disabled>
+                </div>
+                <div class="col text-center">
+                    <label class="my-auto" for="samplingRate" th:utext="#{sample.label.samplingRate}"></label>
+                    <select id="samplingRate" class="form-control form-control-sm d-inline ml-1" style="width: auto" disabled>
+                        <option value=1>1</option>
+                        <option value=10>10</option>
+                        <option value=100 disabled>100</option>
+                        <option value=1000 disabled>1000</option>
+                    </select>
+                </div>
+                <div class="col text-center">
+                    <button type="button" class="btn btn-success btn-sm mr-2" id="startSamplingBtn" disabled>START</button>
+                    <button type="button" class="btn btn-warning btn-sm ml-2" id="stopSamplingBtn" disabled>STOP</button>
+                </div>
+                <div class="col progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="sampling-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <div class="limiter d-flex m-0">
+                <div class="container-table100">
+                    <div class="wrap-table100">
+                        <div class="table100 ver3 m-b-110">
+                            <div class="table100-head" data-toggle="tooltip" data-placement="top"
+                                 th:attr="title=#{sample.table.channels.tooltip}">
+                                <table>
+                                    <thead>
+                                    <tr class="row100 head">
+                                        <th class="cell100 column border-left-0" th:utext="#{sample.table.column.id}"></th>
+                                        <th id="ch-1" class="cell100 column channel clickeable">A1</th>
+                                        <th id="ch-2" class="cell100 column channel clickeable">A2</th>
+                                        <th id="ch-3" class="cell100 column channel clickeable">A3</th>
+                                        <th id="ch-4" class="cell100 column channel clickeable">A4</th>
+                                        <th id="ch-5" class="cell100 column channel clickeable">A5</th>
+                                        <th id="ch-6" class="cell100 column channel clickeable border-right-0">A6</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                            <div id="sampleContainer" class="table100-body js-pscroll">
+                                <table id="samples">
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex mt-4" id="linechart"></div>
+        </div>
+    </main>
+</div>
+
+<!--Page Footer-->
+<footer th:replace="/fragments/footer :: pageFooter"></footer>
+
+<script th:inline="javascript">
+    let device = null;
+    let commands = null;
+    let frames = null;
+    let version = "";
+    const lastSeq = -1;
+    let count = 0;
+    let limit = -1;
+    const numChannels = 6
+    const aChannels = new Array(numChannels);
+    aChannels.fill(false)
+    let sampling = false;
+    let sampledData = null;
+    let sampledFrames = null;
+    let chart = null;
+    const disconnected = /*[[#{sample.device.status.disconnected}]]*/;
+    const connecting = /*[[#{sample.device.status.connecting}]]*/;
+    const ready = htmlDecode(/*[[#{sample.device.status.ready}]]*/);
+    const acquiring = /*[[#{sample.device.status.acquiring}]]*/;
+
+    Frame.prototype.toString = function frameToString() {
+        const str = "Frame{" + "CRC=" + this.crc + ", seq=" + this.seq + ", analog=" + this.analog + ", digital=" + this.digital + "}";
+
+        return str;
+    }
+
+    async function discoverDevices() {
+        try {
+            const serviceUuid = 'c566488a-0882-4e1b-a6d0-0b717e652234';
+            let options = {
+                filters: [
+                    {services: [serviceUuid]},
+                    {namePrefix: 'BITalino'}
+                ]
+            }
+            $("#status").text(connecting).removeClass().addClass("connecting my-auto mx-2");
+            console.log('Requesting Bluetooth Device...');
+            device = await navigator.bluetooth.requestDevice(options);
+
+            console.log('Connecting to GATT Server...');
+            const server = await device.gatt.connect();
+
+            console.log('Getting Service...');
+            const service = await server.getPrimaryService(serviceUuid);
+
+            console.log('Getting Characteristics...');
+
+            //Get the Bitalino Frames characteristic to recieve data from the device
+            frames = await service.getCharacteristic('40fdba6b-672e-47c4-808a-e529adff3633');
+
+            //Start notifications for Bitalino events
+            await frames.startNotifications();
+            console.log('Notifications have been started.');
+
+            //Get the Bitalino Commands characteristic to send commands to the device
+            commands = await service.getCharacteristic('4051eb11-bf0a-4c74-8730-a48f4193fcea');
+
+            version = getVersion();
+
+            $("#status").text(ready);
+            $("#status").addClass("ready my-auto mx-2");
+
+            // Set up event listener for when device gets disconnected.
+            device.addEventListener('gattserverdisconnected', onDisconnected);
+
+            $("#startSamplingBtn").attr("disabled", false);
+            $("input").attr("disabled", false);
+            $("select").attr("disabled", false);
+
+        } catch (error) {
+            $("#status").text(disconnected).removeClass().addClass("disconnected my-auto mx-2");
+            console.log('Argh! ' + error);
+        }
+    }
+
+    function onDisconnected(event) {
+        const device = event.target;
+        console.log(`Device ${device.name} is disconnected.`);
+        $("#status").text(disconnected).removeClass().addClass("disconnected my-auto mx-2");
+    }
+
+    async function getVersion() {
+        console.log("Getting firmware version...");
+
+        //Set event handler function for the 'firmware version' command
+        await frames.addEventListener('characteristicvaluechanged', handleFirmwareVersionNotification);
+
+        //Send 'firmware version' command to Bitalino
+        await commands.writeValue(new Uint8Array([7]));
+    }
+
+    async function startSampling() {
+        //Get sample limit
+        limit = Number.parseInt($("#numSamples").val());
+
+        if (limit > 0) {
+            limit += count;
+        } else {
+            $("#numSamples").val(0);
+        }
+
+        $("#startSamplingBtn").attr("disabled", true);
+        $("#stopSamplingBtn").attr("disabled", false);
+        $("#saveDataBtn").attr("disabled", true);
+
+        //Set event handler function for data acquisition on the selected channels
+        await frames.addEventListener('characteristicvaluechanged', handleDataSampleNotification);
+
+        //Set sampling rate
+        const selected = Number.parseInt($("#samplingRate").val());
+        let sr = 0;
+
+        switch (selected) {
+            case 1:
+                sr = 0;
+                break;
+            case 10:
+                sr = 1;
+                break;
+            case 100:
+                sr = 2;
+                break;
+            case 1000:
+                sr = 3;
+                break;
+        }
+        try {
+            await commands.writeValue(new Uint8Array([(sr << 6) | 0x3]));
+            sampling = true;
+            $("#status").text(acquiring);
+            $("#status").css("animation", `blinker ${1/selected}s linear infinite`);
+        } catch (error) {
+            console.log("Error:" + error);
+        }
+
+        //Start acquiring data on selected channels
+
+        //Set bit to 1|2 for live|simulated sampling mode
+        let bit = 1;
+
+        if ($("#isSimulated").is(":checked")) {
+            bit = 2;
+        }
+
+        //Add acquisition info to the sampled frames array
+        let status = [aChannels.slice(), selected];
+        sampledFrames.push(status);
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                bit = bit | 1 << (2 + i);
+            }
+        }
+        try {
+            await commands.writeValue(new Uint8Array([bit]));
+        } catch (error) {
+            console.log("Error: " + error);
+        }
+    }
+
+    async function stopSampling() {
+        $("#startSamplingBtn").attr("disabled", false);
+        $("#stopSamplingBtn").attr("disabled", true);
+        $("#saveDataBtn").attr("disabled", false);
+
+        //Remove event handler function for data acquisition
+        await frames.removeEventListener('characteristicvaluechanged', handleDataSampleNotification);
+
+        //Send 'set idle mode' command to Bitalino
+        try {
+            await commands.writeValue(new Uint8Array([0]));
+            sampling = false;
+            $("#status").text(ready);
+            $("#status").css("animation", "none");
+        } catch (error) {
+            console.log("Error:" + error);
+        }
+    }
+
+    async function handleFirmwareVersionNotification(event) {
+        let value = event.target.value;
+
+        let str = "";
+
+        for (let i = 0; i < value.byteLength; i++) {
+            let test = String.fromCharCode(value.getUint8(i));
+            if (test == "\n") {
+                break;
+            }
+            if (test == "B" || str !== "") {
+                str += test;
+            }
+        }
+        console.log('> ' + str);
+        version = str.slice(str.indexOf("v") + 1);
+
+        //Remove event handler function for the 'firmware version' command
+        await frames.removeEventListener('characteristicvaluechanged', handleFirmwareVersionNotification);
+    }
+
+    function handleDataSampleNotification(event) {
+        const analogChannels = aChannels.filter(function (x) {
+            return x == true
+        }).length;
+        let value = event.target.value;
+        let frame = null;
+        let number_bytes = null;
+
+        if (analogChannels <= 4) {
+            number_bytes = Math.ceil((12. + 10. * analogChannels) / 8.);
+        } else {
+            number_bytes = Math.ceil((52. + 6. * (analogChannels - 4)) / 8.);
+        }
+
+        const j = number_bytes - 1;
+        const i = 0;
+        let CRC = 0;
+        let x0 = 0;
+        let x1 = 0;
+        let x2 = 0;
+        let x3 = 0;
+        let out = 0;
+        let inp = 0;
+
+        //Check CRC
+        CRC = (value.getUint8(j) & 0x0F) & 0xFF;
+        for (let bytes = 0; bytes < number_bytes; bytes++) {
+            for (let bit = 7; bit > -1; bit--) {
+                inp = (value.getUint8(bytes)) >> bit & 0x01;
+                if (bytes == (number_bytes - 1) && bit < 4) {
+                    inp = 0;
+                }
+                out = x3;
+                x3 = x2;
+                x2 = x1;
+                x1 = out ^ x0;
+                x0 = inp ^ out;
+            }
+        }
+        //If the message was correctly received, it starts decoding
+        if (CRC == ((x3 << 3) | (x2 << 2) | (x1 << 1) | x0)) {
+            const digital = new Array();
+            const analog = new Array();
+
+            /*parse frames*/
+            const seq = ((value.getUint8(j - 0) & 0xF0) >> 4) & 0xF;
+
+            digital[0] = (value.getUint8(j - 1) >> 7) & 0x01;
+            digital[1] = (value.getUint8(j - 1) >> 6) & 0x01;
+            digital[2] = (value.getUint8(j - 1) >> 5) & 0x01;
+            digital[3] = (value.getUint8(j - 1) >> 4) & 0x01;
+
+            /*parse buffer frame*/
+            switch (analogChannels) {
+                case 6:
+                    analog[5] = value.getUint8(j - 7) & 0x3F;
+                case 5:
+                    analog[4] = ((value.getUint8(j - 6) & 0x0F) << 2) | (value.getUint8(j - 7) >> 6);
+                case 4:
+                    analog[3] = ((value.getUint8(j - 5) & 0x3F) << 4) | (value.getUint8(j - 6) >> 4);
+                case 3:
+                    analog[2] = (value.getUint8(j - 4) << 2) | (value.getUint8(j - 5) >> 6);
+                case 2:
+                    analog[1] = ((value.getUint8(j - 2) & 0x3) << 8) | value.getUint8(j - 3);
+                case 1:
+                    analog[0] = ((value.getUint8(j - 1) & 0xF) << 6) | (value.getUint8(j - 2) >> 2);
+            }
+
+            frame = new Frame(0, seq, analog, digital);
+            sampledFrames.push(frame);
+            ++count;
+            addSampleRow(frame);
+
+            if (limit > 0) {
+                const percentage = ((count / limit) * 100.00).toFixed(2);
+                $("#sampling-progress").attr("aria-valuenow", percentage);
+                $("#sampling-progress").css("width", percentage + "%");
+                $("#sampling-progress").text(percentage + "%");
+
+                if (count >= limit) {
+                    stopSampling();
+                }
+            }
+        } else {
+            console.error("Data frame lost");
+        }
+    }
+
+    function sleep(milliseconds) {
+        const date = Date.now();
+        let currentDate = null;
+        do {
+            currentDate = Date.now();
+        } while (currentDate - date < milliseconds);
+    }
+
+    function Frame(crc, seq, analog, digital) {
+        this.crc = crc;
+        this.seq = seq;
+        this.analog = analog;
+        this.digital = digital;
+    }
+
+    async function addSampleRow(frame) {
+        const row = $("<tr class='row100 body'></tr>");
+        $(row).attr("id", "sample_" + count);
+        let cell = $("<td class='cell100 column'></td>");
+
+        $(cell).text(count);
+        $(row).append(cell);
+
+        let aux = 0;
+        for (let i = 0; i < aChannels.length; i++) {
+            cell = $("<td class='cell100 column'></td>");
+            if (aChannels[i]) {
+                $(cell).text(frame.analog[aux++]);
+            } else {
+                $(cell).text("-");
+            }
+            $(row).append(cell);
+        }
+
+        $('#samples tbody').append(row);
+        const div = document.getElementById("sampleContainer");
+        div.scrollTop = div.scrollHeight - div.clientHeight;
+
+        aux = [count, frame.seq];
+        for (let i = 0; i < frame.analog.length; i++) {
+            aux.push(frame.analog[i]);
+        }
+        sampledData.push(aux);
+
+        if ($("#isPlot").is(":checked") && count % 5 == 0) {
+            drawChart();
+        }
+    }
+</script>
+<script>
+    $("#connectBtn").click(function () {
+        if (isWebBluetoothEnabled()) {
+            discoverDevices();
+        }
+    });
+    $("#getVersionBtn").click(function () {
+        getVersion();
+    });
+
+    $("#startSamplingBtn").click(function () {
+        if (aChannels.indexOf(true) >= 0) {
+            let clear = true;
+            if ((sampledData !== null && sampledData.length > 0) || (sampledFrames !== null && sampledFrames.length > 1)) {
+                clear = confirm("All unsaved data will be lost, continue?");
+            }
+            if (clear) {
+                clearData();
+                startSampling();
+            }
+        } else {
+            alert("At least one analog channel (A1-A6) must be enabled to start data acquisition.");
+        }
+    });
+    $("#stopSamplingBtn").click(function () {
+        stopSampling();
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        google.charts.load('current', {'packages': ['line']});
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+
+        $("th.channel").click(function () {
+            $(this).fadeOut(100).toggleClass("channel").fadeIn(100);
+
+            if (sampling) {
+                stopSampling();
+            }
+
+            let id = $(this).attr("id");
+            let ch = Number.parseInt(id.split("ch-")[1]);
+            aChannels[ch - 1] = (aChannels[ch - 1] == 0);
+        });
+
+        $("#isPlot").change(function () {
+            if (this.checked && sampledData != null && sampledData.length > 0) {
+                drawChart();
+            }
+        });
+
+        $("#modalFileSave").on('shown.bs.modal', function () {
+            let sensors = ["RAW", "S1", "S2", "S3"];
+            let aChannels = sampledFrames[0][0];
+
+            for (let i = 0; i < aChannels.length; i++) {
+                if (aChannels[i]) {
+                    let row = $("<div class='row my-2 text-center'></div>");
+
+                    let col = $("<div class='col-2 align-middle py-2'></div>");
+                    $(col).text("[A" + (i + 1) + "]");
+
+                    $(row).append(col);
+
+                    col = $("<div class='col-3'></div>");
+                    let sensorSelector = $("<select class='form-control'></select>");
+
+                    for (let j = 0; j < sensors.length; j++) {
+                        let opt = $("<option>" + sensors[j] + "</option>");
+                        $(opt).val(sensors[j]);
+                        $(sensorSelector).append(opt);
+                    }
+                    $(col).append(sensorSelector);
+                    $(row).append(col);
+
+                    col = $("<div class='col-5'></div>");
+                    let label = $("<input class='form-control chLabel' type='text'/>");
+                    $(label).css("width", "100%");
+                    $(label).val("A" + (i + 1));
+
+                    $(col).append(label);
+                    $(row).append(col);
+
+                    col = $("<div class='col-2'></div>");
+                    let check = $("<input class='form-control mx-auto channelCheck' type='checkbox'/>");
+                    $(check).attr("checked", true);
+                    $(check).css("width", "30%");
+
+                    $(col).append(check);
+                    $(row).append(col);
+
+                    $("#fileSaveForm>hr").before(row);
+                }
+            }
+        });
+
+        $('#modalFileSave').on('hidden.bs.modal', function () {
+            let ch = $("#fileSaveForm").find($("div.row"));
+            for (let i = 1; i < ch.length; i++) {
+                $(ch[i]).remove();
+            }
+        });
+
+        $("#confirmSaveBtn").click(function () {
+            if ($("#txtSwitch").is(":checked")) {
+                saveOpenSignalsData();
+            }
+            $(function () {
+                $('#modalFileSave').modal('toggle');
+            });
+        });
+
+        $("#resetBtn").click(function () {
+            $("th.clickeable").addClass("channel");
+            aChannels.fill(false);
+            clearData();
+        });
+
+    });
+</script>
+<script th:inline="javascript">
+    function isWebBluetoothEnabled() {
+        return (navigator.bluetooth);
+    }
+
+    function clearData() {
+        if (sampling) {
+            stopSampling();
+        }
+        $("#samples tbody").empty();
+        sampledData = new Array();
+        sampledFrames = new Array();
+        $("#linechart").empty();
+        $("#saveDataBtn").attr("disabled", true);
+        $("#sampling-progress").attr("aria-valuenow", 0);
+        $("#sampling-progress").css("width", 0 + "%");
+        $("#sampling-progress").text("");
+        count = 0;
+    }
+
+    function drawChart() {
+        const data = new google.visualization.DataTable();
+        data.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
+        data.addColumn('number', 'Seq');
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                data.addColumn('number', 'A' + (i + 1));
+            }
+        }
+
+        data.addRows(sampledData);
+
+        const options = {
+            chart: {
+                title: htmlDecode(/*[[#{sample.title.plot}]]*/),
+                subtitle: ''
+            },
+            height: 500,
+            hAxis: {gridlines: {count: -1}},
+        };
+
+        if (chart == null) {
+            chart = new google.charts.Line(document.getElementById("linechart"));
+        }
+
+        //Hide the 'nSeq' column from the chart
+        data.removeColumn(1);
+
+        chart.draw(data, google.charts.Line.convertOptions(options));
+    }
+
+    function saveOpenSignalsData() {
+        const comments = $("#saveComments").val();
+        let sensors = $("#fileSaveForm").find("select");
+        let labels = $("#fileSaveForm").find("input.chLabel");
+        let checks = $("#fileSaveForm").find("input.channelCheck");
+
+        let d = new Date();
+        let month = (d.getMonth() + 1).toString().padStart(2, 0);
+        let day = d.getDate().toString().padStart(2, 0);
+
+        let hours = d.getHours().toString().padStart(2, 0);
+        let minutes = d.getMinutes().toString().padStart(2, 0);
+        let seconds = d.getSeconds().toString().padStart(2, 0);
+
+        let aChannels = sampledFrames[0][0];
+        let sRate = sampledFrames[0][1];
+
+        let aux = 0;
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                if (!$(checks[aux++]).is(":checked")) {
+                    aChannels[i] = false;
+                }
+            }
+        }
+
+        let txt = '# OpenSignals Text File Format\n';
+        txt += '# {"' + device.name + '": {"sensor": [';
+
+        for (let i = 0; i < sensors.length; i++) {
+            if ($(checks[i]).is(":checked")) {
+                txt += '"' + $(sensors[i]).val() + '", ';
+            }
+        }
+
+        txt = txt.slice(0, -2);
+        txt += '], "device name": "' + device.name + '", "column": ["nSeq", "I1", "I2", "O1", "O2", ';
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                txt += '"A' + (i + 1) + '", ';
+            }
+        }
+
+        txt = txt.slice(0, -2);
+        txt += '], "sync interval": 2, "time": "' + hours + ":" + minutes + ":" + seconds + "." + d.getMilliseconds();
+        txt += '", "comments": "' + comments + '", "device connection": "' + device.name + '", "channels": [';
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                txt += (i + 1) + ', ';
+            }
+        }
+
+        txt = txt.slice(0, -2);
+        txt += '], "date": "' + d.getFullYear() + "-" + month + "-" + day + '"';
+        txt += ', "mode": 0, "digital IO": [0, 0, 1, 1], "firmware version": "' + version + '", "device": "bitalino_rev", "position": 0, ';
+        txt += '"sampling rate": ' + sRate + ', "label": [';
+
+        for (let i = 0; i < labels.length; i++) {
+            if ($(checks[i]).is(":checked")) {
+                txt += '"' + $(labels[i]).val() + '", ';
+            }
+        }
+
+        txt = txt.slice(0, -2);
+        txt += '], "resolution": [4, 1, 1, 1, 1, ';
+
+        let active = aChannels.filter(function (x) {
+            return x == true
+        });
+
+        for (let i = 0; i < active.length; i++) {
+            if (active.length == 6 && i >= 4) {
+                txt += 6;
+            } else {
+                txt += 10;
+            }
+
+            txt += ", ";
+        }
+
+        txt = txt.slice(0, -2);
+        txt += '], "special": [';
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                txt += '{}, ';
+            }
+        }
+
+        txt = txt.slice(0, -2);
+        txt += ']}}\n' + "# EndOfHeader\n";
+
+        for (let i = 1; i < sampledFrames.length; i++) {
+            txt += sampledFrames[i].seq + "\t" + sampledFrames[i].digital[0] + "\t" + sampledFrames[i].digital[1] + "\t" + sampledFrames[i].digital[2] + "\t" + sampledFrames[i].digital[3];
+            for (let j = 0; j < sampledFrames[i].analog.length; j++) {
+                if ($(checks[j]).is(":checked")) {
+                    txt += "\t" + sampledFrames[i].analog[j];
+                }
+            }
+            txt += "\n";
+        }
+
+        const blob = new Blob([txt],
+            {type: "text/plain;charset=ascii"});
+
+        let filename = "opensignals_" + device.name + "_" + d.getFullYear() + month + day;
+        filename += "_" + hours + "_" + minutes + "_" + seconds + ".txt";
+
+        saveAs(blob, filename);
+    }
+</script>
+</body>
+</html>
