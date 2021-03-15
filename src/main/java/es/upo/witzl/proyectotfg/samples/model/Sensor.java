@@ -1,6 +1,9 @@
-package es.upo.witzl.proyectotfg.users.model;
+package es.upo.witzl.proyectotfg.samples.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -17,6 +20,9 @@ public class Sensor {
     private String alias;
 
     private String description;
+
+    @OneToMany(mappedBy = "sensor")
+    private Collection<DataChannel> dataChannels;
 
     public Long getId() {
         return id;
@@ -50,17 +56,26 @@ public class Sensor {
         this.description = description;
     }
 
+    @JsonIgnore
+    public Collection<DataChannel> getDataSources() {
+        return dataChannels;
+    }
+
+    public void setDataSources(Collection<DataChannel> dataChannels) {
+        this.dataChannels = dataChannels;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Sensor sensor = (Sensor) o;
-        return name.equals(sensor.name) && alias.equals(sensor.alias);
+        return id.equals(sensor.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, alias);
+        return Objects.hash(id);
     }
 
     @Override

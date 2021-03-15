@@ -1,6 +1,6 @@
-package es.upo.witzl.proyectotfg.users.repository;
+package es.upo.witzl.proyectotfg.samples.repository;
 
-import es.upo.witzl.proyectotfg.users.model.Sensor;
+import es.upo.witzl.proyectotfg.samples.model.Sensor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

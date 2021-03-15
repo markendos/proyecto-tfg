@@ -1,9 +1,9 @@
-package es.upo.witzl.proyectotfg.users.service;
+package es.upo.witzl.proyectotfg.samples.service;
 
-import es.upo.witzl.proyectotfg.users.dto.SensorDto;
-import es.upo.witzl.proyectotfg.users.error.SensorAlreadyExistsException;
-import es.upo.witzl.proyectotfg.users.model.Sensor;
-import es.upo.witzl.proyectotfg.users.repository.SensorRepository;
+import es.upo.witzl.proyectotfg.samples.dto.SensorDto;
+import es.upo.witzl.proyectotfg.samples.error.SensorAlreadyExistsException;
+import es.upo.witzl.proyectotfg.samples.model.Sensor;
+import es.upo.witzl.proyectotfg.samples.repository.SensorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

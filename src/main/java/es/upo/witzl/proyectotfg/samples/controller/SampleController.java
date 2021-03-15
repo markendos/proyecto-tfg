@@ -3,10 +3,12 @@ package es.upo.witzl.proyectotfg.samples.controller;
 import es.upo.witzl.proyectotfg.projects.model.Project;
 import es.upo.witzl.proyectotfg.projects.service.ICollaborationRequestService;
 import es.upo.witzl.proyectotfg.projects.service.IProjectService;
+import es.upo.witzl.proyectotfg.samples.service.ISampleService;
 import es.upo.witzl.proyectotfg.users.model.User;
 import es.upo.witzl.proyectotfg.users.security.MyUserPrincipal;
 import es.upo.witzl.proyectotfg.users.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -27,6 +29,9 @@ public class SampleController {
 
     @Autowired
     ICollaborationRequestService collaborationRequestService;
+
+    @Autowired
+    ISampleService sampleService;
 
     @GetMapping("/registerSample/{projectId}")
     public ModelAndView registerSample(final ModelMap model, @PathVariable String projectId,
@@ -51,5 +56,13 @@ public class SampleController {
             }
         }
         return new ModelAndView(redirect, model);
+    }
+
+    @GetMapping("/test/mongo")
+    public ResponseEntity testMongo() {
+        System.out.println("HOLAAAAA");
+        sampleService.test();
+
+        return ResponseEntity.ok().build();
     }
 }

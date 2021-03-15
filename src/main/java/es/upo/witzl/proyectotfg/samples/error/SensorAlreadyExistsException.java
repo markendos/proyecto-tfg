@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.users.error;
+package es.upo.witzl.proyectotfg.samples.error;
 
 public final class SensorAlreadyExistsException extends RuntimeException {
 

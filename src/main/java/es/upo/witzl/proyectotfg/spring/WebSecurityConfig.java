@@ -50,7 +50,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "/login*", "/logout*", "/signUp*", "/user/registration*","/badUser*",
                         "/emailError*", "/successRegister*", "/registrationConfirm*", "/resetPassword*", "/user/resetPassword*",
                         "/user/changePassword*", "/user/resendRegistrationToken*", "/oauth_login*").permitAll()
-                .antMatchers("/invalidSession*").anonymous()
+                .antMatchers("/invalidSession*", "/test/**").anonymous()
                 .anyRequest().hasAnyRole("USER", "ADMIN")
                 .and()
                 .formLogin()

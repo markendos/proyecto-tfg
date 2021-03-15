@@ -1,10 +1,10 @@
-package es.upo.witzl.proyectotfg.users.controller;
+package es.upo.witzl.proyectotfg.samples.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.upo.witzl.proyectotfg.users.dto.SensorDto;
-import es.upo.witzl.proyectotfg.users.model.Sensor;
-import es.upo.witzl.proyectotfg.users.service.ISensorService;
+import es.upo.witzl.proyectotfg.samples.dto.SensorDto;
+import es.upo.witzl.proyectotfg.samples.model.Sensor;
+import es.upo.witzl.proyectotfg.samples.service.ISensorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

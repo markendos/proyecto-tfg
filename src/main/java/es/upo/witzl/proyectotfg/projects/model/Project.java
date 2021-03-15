@@ -1,6 +1,7 @@
 package es.upo.witzl.proyectotfg.projects.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import es.upo.witzl.proyectotfg.samples.model.DataSample;
 import es.upo.witzl.proyectotfg.users.model.User;
 
 import javax.persistence.*;
@@ -40,6 +41,9 @@ public class Project {
 
     @OneToMany(mappedBy = "project")
     private Collection<CollaborationRequest> collaborationRequests;
+
+    @OneToMany(mappedBy = "project")
+    private Collection<DataSample> dataSamples;
 
     public Long getId() {
         return id;
@@ -104,6 +108,15 @@ public class Project {
 
     public void setCollaborationRequests(Collection<CollaborationRequest> collaborationRequests) {
         this.collaborationRequests = collaborationRequests;
+    }
+
+    @JsonIgnore
+    public Collection<DataSample> getDataSamples() {
+        return dataSamples;
+    }
+
+    public void setDataSamples(Collection<DataSample> dataSamples) {
+        this.dataSamples = dataSamples;
     }
 
     @Override

@@ -24,8 +24,7 @@
 
 <!--Main Section Container-->
 <main class="container-md mt-2 mb-4" th:with="email=${param.email}">
-    <h3 class="alert alert-success" th:utext="#{message.regSucc(${email})}">success</h3>
-    <a class="btn btn-primary" th:href="@{/login}" th:utext="#{label.login}">login</a>
+    <h4 class="alert alert-success" th:utext="#{message.regSucc(${email})}">success</h4>
 </main>
 
 <!--Page Footer-->

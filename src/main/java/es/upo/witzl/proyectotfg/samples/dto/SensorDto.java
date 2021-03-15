@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.users.dto;
+package es.upo.witzl.proyectotfg.samples.dto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Positive;

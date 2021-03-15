@@ -478,7 +478,7 @@ a.article:hover {
     padding-left: 10px;
 }
 
-/***** Data Tables *****/
+/***** DataValue Tables *****/
 #dataTable_wrapper > div:nth-child(2) > div {
     overflow-x: auto;
 }
