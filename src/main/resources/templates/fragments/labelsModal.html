@@ -107,11 +107,13 @@
             $(".error-list").html("");
             const formData = $('#labelsForm').serialize();
             $.post(serverContext + "labels/add", formData, function (data) {
+                $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
                 $('#labelsModal').modal('hide');
                 if(window.location.pathname.includes('/home')) {
                     fetchProjects();
+                }else if((window.location.pathname.includes('/project'))) {
+                    location.reload();
                 }
-                $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
             }).fail(function (data) {
                 if (data.responseJSON) {
                     if (data.responseJSON.error.indexOf("InternalError") > -1) {

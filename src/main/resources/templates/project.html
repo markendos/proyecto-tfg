@@ -99,8 +99,14 @@
                     <span th:text="${#dates.format(project.startDate, 'dd-MM-yyyy')}"></span>
                 </div>
                 <div class="col-4 text-right">
-                    <button id="userBtn" class="p-0 btn btn-link text-left" th:utext="#{label.pages.title.project.subject}"
-                            onclick="showSubjectForm(this)">subject</button>
+                    <button th:unless="${project.subject} == null" id="userBtn" class="p-0 btn btn-link text-left"
+                            th:utext="#{label.pages.title.project.subject}"
+                            onclick="showSubjectForm(this)">
+                    </button>
+                    <button th:unless="${project.subject} != null" class="p-0 btn btn-link text-left"
+                            th:utext="#{table.project.option.subject}"
+                            th:onclick="registerSubject([[${project.id}]])">
+                    </button>
                 </div>
             </div>
             <div class="row my-2">
@@ -118,10 +124,11 @@
                 </div>
                 <div class="col-4 d-flex align-items-center">
                     <i class="fas fa-tags"></i>
-                    <button th:inline="text" data-toggle="tooltip" data-placement="top" class="p-0 btn btn-link text-left"
-                            th:onclick="addOrRemoveLabels([[${project.id}]])"
-                            th:attr="title=#{label.pages.title.project.labels}">[[#{table.project.column.labels}]]:
+                    <button id="labelsBtn" data-toggle="tooltip" data-placement="top" class="p-0 btn btn-link text-left"
+                            th:inline="text"
+                            th:onclick="addOrRemoveLabels([[${project.id}]])">[[#{table.project.column.labels}]]:
                     </button>
+                    <span th:if="${project.labels == null or project.labels.empty}">&nbsp;-</span>
                     <ul class="list-unstyled my-0">
                         <li th:each="label : ${project.labels}"
                                   th:utext="${label.name}" class="mx-1 tag badge badge-pill">
@@ -129,9 +136,11 @@
                     </ul>
                 </div>
                 <div class="col-4 text-right">
-                    <button id="deleteBtn" class="p-0 btn text-danger btn-link text-left"
+                    <button th:if="${role} == 'owner'"
                             th:utext="#{table.project.option.delete}"
-                            th:onclick="deleteProject([[${project.id}]])">subject</button>
+                            th:onclick="deleteProject([[${project.id}]])"
+                            id="deleteBtn" class="p-0 btn text-danger btn-link text-left">
+                    </button>
                 </div>
             </div>
         </div>
@@ -157,7 +166,12 @@
     $("#userBtn").attr("id", encoded);
 
     $(document).ready(function () {
+        startLoad();
+        fetchSamples();
+
+        $("#labelsBtn").attr("title",htmlDecode([[#{label.pages.title.project.labels}]]));
         $('[data-toggle="tooltip"]').tooltip();
+
         $("#collaboratorTitle").mouseenter(function () {
             $("#collaborators").show();
         });
@@ -165,9 +179,18 @@
             $("#collaborators").hide();
         });
         const tags = $(".tag").toArray();
-        tags?.forEach(tag => {
-            $(tag).addClass(`badge-${getRandomColor()}`);
-        })
+        if(tags) {
+            tags?.forEach(tag => {
+                $(tag).addClass(`badge-${getRandomColor()}`);
+            })
+        } else {
+
+        }
+
+        const collaborators = $("#collaborators ul li").toArray();
+        if(collaborators.length === 0) {
+            $("#collaborators").empty().text(htmlDecode([[#{project.title.collaborators.none}]]));
+        }
     });
 
     function deleteProject(projectId) {
@@ -182,6 +205,63 @@
                 error: (data) => {
                     $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
                 }
+            });
+        }
+    }
+
+    function fetchSamples() {
+        if (!loadingData) {
+            startLoad();
+        }
+        $.get(serverContext + `samples/all?projectId=${[[${project.id}]]}`, function (data) {
+            const samples = data.all;
+            drawSamplesTable(samples);
+        }).fail(function (data) {
+            alert("ERROR: Could not fetch data");
+            endLoad();
+        });
+    }
+
+    function drawSamplesTable(samples) {
+        if (lang && lang === 'es') {
+            langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json';
+        } else {
+            langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/English.json';
+        }
+
+        //IF datatable is created, update data
+        if ($.fn.dataTable.isDataTable('#dataTable')) {
+            let datatable = new $.fn.dataTable.Api('#dataTable');
+            datatable.clear();
+            datatable.rows.add(samples);
+            datatable.draw();
+        }
+        //ELSE, create datatable
+        else {
+            $('#dataTable').DataTable({
+                drawCallback: () => {
+                    $('[data-toggle="tooltip"]').tooltip();
+                    endLoad();
+                    const table = $('#dataTable').DataTable();
+                    $("#dataTable button, #dataTable select").click(function(event){
+                        event.stopPropagation();
+                    });
+                    $('#dataTable tbody tr').on('click', 'td', function () {
+                        const data = table.row(this).data();
+                        //goToSample(data.id);
+                    });
+                },
+                data: samples,
+                columnDefs: [],
+                columns: [
+                    {title: "#Id", data: "id"},
+
+                ],
+                retrieve: true,
+                language: {
+                    url: langUrl
+                },
+                responsive: true,
             });
         }
     }

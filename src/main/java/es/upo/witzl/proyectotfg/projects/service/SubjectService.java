@@ -19,51 +19,45 @@ public class SubjectService implements ISubjectService {
     SubjectRepository subjectRepository;
 
     @Override
-    public Subject registerSubjectToProject(SubjectDto subjectDto, Project project) {
+    public Subject saveSubject(SubjectDto subjectDto, Project project) {
+        Subject subject;
         if(project.getSubject() != null) {
-            throw new SubjectAlreadyExistsException();
+            subject = project.getSubject();
+        } else {
+            subject = new Subject();
         }
-        Subject subject = new Subject();
         subject.setBirthDate(subjectDto.getBirthDate());
         subject.setGender(subjectDto.getGender());
         subject.setWeight(subjectDto.getWeight());
         subject.setHeight(subjectDto.getHeight());
         subject.setSmoker(subjectDto.isSmoker());
         subject.setProject(project);
-        subject.setBmi(calculateBmi(subject));
-        subject.setBfp(calculateBfp(subject));
+        if(subjectDto.getHeight() != null && subjectDto.getWeight() != null) {
+            subject.setBmi(calculateBmi(subject));
+            subject.setBfp(calculateBfp(subject));
+        }else {
+            subject.setBmi(null);
+            subject.setBfp(null);
+        }
 
         return subjectRepository.save(subject);
     }
 
-    @Override
-    public Subject updateSubject(SubjectDto subjectDto, Project project) {
-        Subject subject = project.getSubject();
-        subject.setGender(subjectDto.getGender());
-        subject.setBirthDate(subjectDto.getBirthDate());
-        subject.setWeight(subjectDto.getWeight());
-        subject.setHeight(subjectDto.getHeight());
-        subject.setSmoker(subjectDto.isSmoker());
-        subject.setBmi(calculateBmi(subject));
-        subject.setBfp(calculateBfp(subject));
-
-        return subjectRepository.save(subject);
-    }
-
-    private float calculateBmi(Subject subject) {
+    private Float calculateBmi(Subject subject) {
         float weight = subject.getWeight();
         float height = subject.getHeight()/100;
 
-        return weight/((float) Math.pow(height, 2));
+        return Float.valueOf(weight/((float) Math.pow(height, 2)));
     }
 
-    private float calculateBfp(Subject subject) {
+    private Float calculateBfp(Subject subject) {
         float bmi = subject.getBmi();
         float bmi2 = bmi * bmi;
         int age = getDiffYears(subject.getBirthDate(), new Date());
         int gender = subject.getGender() == "m" ? 1 : 0;
-        return (float) (-44.988 + (0.503 * age) + (10.689 * gender) + (3.172 * bmi) - (0.026 * bmi2) +
+        double result = (-44.988 + (0.503 * age) + (10.689 * gender) + (3.172 * bmi) - (0.026 * bmi2) +
                 (0.181 * bmi * gender) - (0.02 * bmi * age) - (0.005 * bmi2 * gender) + (0.00021 * bmi2 * age));
+        return Float.valueOf((float) result);
 
     }
 

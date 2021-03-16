@@ -27,9 +27,9 @@ public class DataSample {
     @Temporal(TemporalType.TIMESTAMP)
     private Date sampleDate;
 
-    private boolean simulated;
+    private Boolean simulated;
 
-    private float samplingRate;
+    private Float samplingRate;
 
     private String comments;
 
@@ -80,19 +80,19 @@ public class DataSample {
         this.sampleDate = sampleDate;
     }
 
-    public boolean isSimulated() {
+    public Boolean isSimulated() {
         return simulated;
     }
 
-    public void setSimulated(boolean simulated) {
+    public void setSimulated(Boolean simulated) {
         this.simulated = simulated;
     }
 
-    public float getSamplingRate() {
+    public Float getSamplingRate() {
         return samplingRate;
     }
 
-    public void setSamplingRate(float samplingRate) {
+    public void setSamplingRate(Float samplingRate) {
         this.samplingRate = samplingRate;
     }
 

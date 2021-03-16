@@ -43,12 +43,7 @@ public class SubjectController {
                 if (projectOptional.isPresent()) {
                     Project project = projectOptional.get();
                     if (project.getUser().equals(user)) {
-                        if(project.getSubject() == null) {
-                            subjectService.registerSubjectToProject(subjectDto, project);
-                        } else {
-                            subjectService.updateSubject(subjectDto, project);
-                        }
-
+                        subjectService.saveSubject(subjectDto, project);
                         return ResponseEntity.ok().build();
                     } else {
                         ResponseEntity.status(HttpStatus.FORBIDDEN);

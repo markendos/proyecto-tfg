@@ -91,6 +91,10 @@ i.notification {
     cursor: pointer;
 }
 
+.text-danger {
+    text-transform: capitalize;
+}
+
 /***** Language Selector *****/
 #langWrapper {
     position: absolute;

@@ -6,7 +6,5 @@ import es.upo.witzl.proyectotfg.projects.model.Subject;
 
 public interface ISubjectService {
 
-    Subject registerSubjectToProject(SubjectDto subjectDto, Project project);
-
-    Subject updateSubject(SubjectDto subjectDto, Project project);
+    Subject saveSubject(SubjectDto subjectDto, Project project);
 }

@@ -132,7 +132,7 @@ public class ProjectController {
 
                     return ResponseEntity.ok().build();
                 } else {
-                    ResponseEntity.status(HttpStatus.FORBIDDEN);
+                    return ResponseEntity.badRequest().build();
                 }
             } else {
                 return ResponseEntity.notFound().build();
@@ -140,8 +140,6 @@ public class ProjectController {
         } else {
             return ResponseEntity.notFound().build();
         }
-
-        return ResponseEntity.badRequest().build();
     }
 
     @GetMapping("/project/{projectId}")

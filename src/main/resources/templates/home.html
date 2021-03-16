@@ -155,20 +155,6 @@
         fetchProjects();
     });
 
-    function startLoad() {
-        loadingData = true;
-        if ($("#dataTable_wrapper")) {
-            $("#dataTable_wrapper").hide();
-        }
-        $("#tableSpinner").show();
-    }
-
-    function endLoad() {
-        $("#tableSpinner").hide();
-        $("#dataTable_wrapper").show();
-        loadingData = false;
-    }
-
     const renderProjectActions = (data, type, row) => {
         const registerSubjectOpt = `<option value="subject" ${row.subject ? 'disabled' : ''}>
                                     ${[[#{table.project.option.subject}]]}</option>`;
@@ -183,8 +169,12 @@
 
     const renderProjectLabels = (data, type, row) => {
         let labels = '';
-        for (let i = 0; i < data.length; i++) {
-            labels += `<span class="badge badge-pill badge-${getRandomColor()}">${data[i].name}</span>&nbsp;`;
+        if(data.length) {
+            for (let i = 0; i < data.length; i++) {
+                labels += `<span class="badge badge-pill badge-${getRandomColor()}">${data[i].name}</span>&nbsp;`;
+            }
+        } else {
+            labels = `<span class="text-center d-block">-</span>`;
         }
         return labels;
     };
@@ -197,10 +187,12 @@
     };
 
     const renderSubjectActions = (data, type, row) => {
-        return `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
+        return `<span ${row.subject ? ''
+                : `data-toggle="tooltip" data-placement="top" title="${[[#{table.project.column.subject.tooltip}]]}"`}>
+                <button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
                 onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? ''
-                : `disabled data-toggle="tooltip" data-placement="top" title="${[[#{table.project.column.subject.tooltip}]]}"`}>
-                ${[[#{table.column.action.view}]]}</button>`;
+                : `disabled`}>
+                ${[[#{table.column.action.view}]]}</button></span>`;
     };
 
     function drawProjectsTable(projects) {

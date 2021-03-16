@@ -1,5 +1,7 @@
 package es.upo.witzl.proyectotfg.samples.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -24,11 +26,11 @@ public class DataChannel {
     private String channelLabel;
 
     @Column(columnDefinition = "integer default 10")
-    private int resolution;
+    private Integer resolution;
 
-    private boolean digital;
+    private Boolean digital;
 
-    private boolean input;
+    private Boolean input;
 
     @ManyToOne
     @JoinColumn(name = "sensor_id", nullable = false)
@@ -42,6 +44,7 @@ public class DataChannel {
         this.sampleId = sampleId;
     }
 
+    @JsonIgnore
     public DataSample getDataSample() {
         return dataSample;
     }
@@ -67,27 +70,27 @@ public class DataChannel {
         this.channelLabel = channelLabel;
     }
 
-    public int getResolution() {
+    public Integer getResolution() {
         return resolution;
     }
 
-    public void setResolution(int resolution) {
+    public void setResolution(Integer resolution) {
         this.resolution = resolution;
     }
 
-    public boolean isDigital() {
+    public Boolean isDigital() {
         return digital;
     }
 
-    public void setDigital(boolean digital) {
+    public void setDigital(Boolean digital) {
         this.digital = digital;
     }
 
-    public boolean isInput() {
+    public Boolean isInput() {
         return input;
     }
 
-    public void setInput(boolean input) {
+    public void setInput(Boolean input) {
         this.input = input;
     }
 

@@ -12,7 +12,7 @@
                 <form action="#" method="POST" enctype="utf8" id="subjectForm">
                     <div class="modal-body">
                         <div class="form-group row">
-                            <div id="genderError" class="text-danger row col offset-3" style="display:none"></div>
+                            <div id="genderError" class="text-danger col-8 offset-4" style="display:none"></div>
                             <label class="col-sm-4" th:utext="#{label.form.subject.gender}"></label>
                             <div class="col-sm-3">
                                 <input type="radio" name="gender" id="genderMale" value="m"
@@ -28,7 +28,7 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div id="birthDateError" class="text-danger row col offset-3" style="display:none"></div>
+                            <div id="birthDateError" class="text-danger col-8 offset-4" style="display:none"></div>
                             <label for="birthDate" class="col-sm-4" th:utext="#{label.form.subject.birth}">date</label>
                             <div class="col-sm-8">
                                 <input id="birthDate" class="form-control" name="birthDate" type="date" value=""
@@ -36,23 +36,21 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div id="weightError" class="text-danger row col offset-3" style="display:none"></div>
+                            <div id="weightError" class="text-danger col-8 offset-4" style="display:none"></div>
                             <label for="weight" class="col-sm-4" th:utext="#{label.form.subject.weight}">weight</label>
                             <div class="col-sm-8">
-                                <input id="weight" class="form-control" name="weight" type="number" value=""
-                                       min="0" step="0.1"/>
+                                <input id="weight" class="form-control" name="weight" type="number" min="0" step="0.1"/>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div id="heightError" class="text-danger row col offset-3" style="display:none"></div>
+                            <div id="heightError" class="text-danger col-8 offset-4" style="display:none"></div>
                             <label for="height" class="col-sm-4" th:utext="#{label.form.subject.height}">height</label>
                             <div class="col-sm-8">
-                                <input id="height" class="form-control" name="height" type="number" value=""
-                                       min="0" step="1"/>
+                                <input id="height" class="form-control" name="height" type="number" min="0" step="1"/>
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div id="smokerError" class="text-danger row col offset-3" style="display:none"></div>
+                            <div id="smokerError" class="text-danger col-8 offset-4" style="display:none"></div>
                             <div class="col custom-control custom-switch ml-3">
                                 <input id="smoker" name="smoker" type="checkbox" class="custom-control-input"/>
                                 <label for="smoker" class="custom-control-label"
@@ -67,7 +65,7 @@
                                 <span id="age" class="col-sm-8"></span>
                             </div>
                             <div class="form-group row">
-                                <div id="bmiError" class="text-danger row col offset-3" style="display:none"></div>
+                                <div id="bmiError" class="text-danger col-8 offset-4" style="display:none"></div>
                                 <label for="bmi" class="col-sm-4" th:utext="#{label.form.subject.bmi}">bmi</label>
                                 <div class="col-sm-8">
                                     <div class="range-value" id="bmiVal"></div>
@@ -75,7 +73,7 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <div id="bfpError" class="text-danger row col offset-3" style="display:none"></div>
+                                <div id="bfpError" class="text-danger col-8 offset-4" style="display:none"></div>
                                 <label for="bfp" class="col-sm-4" th:utext="#{label.form.subject.bfp}">bfp</label>
                                 <div class="col-sm-8">
                                     <div class="range-value" id="bfpVal"></div>
@@ -118,18 +116,20 @@
             $(".error-list").html("");
             const formData = $('#subjectForm').serialize();
             $.post(serverContext + "subject/add", formData, function (data) {
+                $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
                 $('#subjectModal').modal('hide');
                 if(window.location.pathname.includes('/home')) {
                     fetchProjects();
+                } else if(window.location.pathname.includes('/project')) {
+                    location.reload();
                 }
-                $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
             }).fail(function (data) {
                 if (data.responseJSON) {
                     if (data.responseJSON.error.indexOf("InternalError") > -1) {
                         $("#errormsg").show().append(data.responseJSON.message);
                         $('#subjectModal').modal('hide');
                     } else {
-                        const errors = data.responseJSON.message;
+                        const errors = $.parseJSON(data.responseJSON.message);
                         $.each(errors, function (index, item) {
                             if (item.field) {
                                 $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
@@ -159,14 +159,19 @@
                 $("#weight").val(subject.weight);
                 $("#height").val(subject.height);
                 $("#smoker").attr("checked", subject.smoker);
-                $("#derivedFields").show();
                 $("#bmi").val(subject.bmi);
                 $("#bfp").val(subject.bfp);
                 $("#subjectProjectId").val(subject.id);
                 $("#subjectForm input, #subjectForm button[type='submit']").attr("disabled", true);
                 $("#age").text(calculateAge(new Date(subject.birthDate)));
-                representRangeValue($("#bmi"), $("#bmiVal"), subject.bmi);
-                representRangeValue($("#bfp"), $("#bfpVal"), subject.bfp);
+                if(subject.bmi) {
+                    representRangeValue($("#bmi"), $("#bmiVal"), subject.bmi);
+                    $("#derivedFields").show();
+                }
+                if(subject.bfp) {
+                    representRangeValue($("#bfp"), $("#bfpVal"), subject.bfp);
+                    $("#derivedFields").show();
+                }
                 const editBtnExists = $("#editSubjectBtn").length > 0;
 
                 if (role === 'owner' && !editBtnExists) {

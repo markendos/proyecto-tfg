@@ -62,6 +62,7 @@ public class MyUserPrincipal implements UserDetails {
         }
         return grantedAuthorities;
     }
+
     @Override
     public String getPassword() {
         return user.getPassword();

@@ -119,6 +119,10 @@ public class Project {
         this.dataSamples = dataSamples;
     }
 
+    public boolean isOwner(String user) {
+        return user.equals(this.getUser().getUsername());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

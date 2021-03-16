@@ -25,18 +25,19 @@ public class Subject {
     private String gender;
 
     @Column(length = 6)
-    private float weight;
+    private Float weight;
 
     @Column(length = 6)
-    private float height;
+    private Float height;
 
-    private boolean smoker;
-
-    @Column(length = 10)
-    private float bmi;
+    @Column(nullable = true)
+    private Boolean smoker;
 
     @Column(length = 10)
-    private float bfp;
+    private Float bmi;
+
+    @Column(length = 10)
+    private Float bfp;
 
     public Long getId() {
         return id;
@@ -71,43 +72,43 @@ public class Subject {
         this.gender = gender;
     }
 
-    public float getWeight() {
+    public Float getWeight() {
         return weight;
     }
 
-    public void setWeight(float weight) {
+    public void setWeight(Float weight) {
         this.weight = weight;
     }
 
-    public float getHeight() {
+    public Float getHeight() {
         return height;
     }
 
-    public void setHeight(float height) {
+    public void setHeight(Float height) {
         this.height = height;
     }
 
-    public boolean isSmoker() {
+    public Boolean isSmoker() {
         return smoker;
     }
 
-    public void setSmoker(boolean smoker) {
+    public void setSmoker(Boolean smoker) {
         this.smoker = smoker;
     }
 
-    public float getBmi() {
+    public Float getBmi() {
         return bmi;
     }
 
-    public void setBmi(float bmi) {
+    public void setBmi(Float bmi) {
         this.bmi = bmi;
     }
 
-    public float getBfp() {
+    public Float getBfp() {
         return bfp;
     }
 
-    public void setBfp(float bfp) {
+    public void setBfp(Float bfp) {
         this.bfp = bfp;
     }
 

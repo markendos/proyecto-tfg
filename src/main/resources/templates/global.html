@@ -135,20 +135,6 @@
         });
     });
 
-    function startLoad() {
-        loadingData = true;
-        if ($("#dataTable_wrapper")) {
-            $("#dataTable_wrapper").hide();
-        }
-        $("#tableSpinner").show();
-    }
-
-    function endLoad() {
-        $("#tableSpinner").hide();
-        $("#dataTable_wrapper").show();
-        loadingData = false;
-    }
-
     function fetchProjects() {
         if (!loadingData) {
             startLoad();
@@ -175,12 +161,13 @@
     };
 
     const renderProjectActions = (data, type, row) => {
-        return `<button id="project-${row.id}" type="button" class="btn btn-warning btn-sm" data-toggle="tooltip"
-                data-placement="top" title="${row.requested ? [[#{table.project.button.requested.tooltip}]]
-                : [[#{table.project.button.collaboration.tooltip}]]}" onclick="handleProjectAction(this)"
+        return `<span data-toggle="tooltip" data-placement="top"
+                title="${row.requested ? [[#{table.project.button.requested.tooltip}]]
+                : [[#{table.project.button.collaboration.tooltip}]]}">
+                <button id="project-${row.id}" type="button" class="btn btn-warning btn-sm" onclick="handleProjectAction(this)"
                 ${row.requested ? 'disabled' : ''}>
                 ${[[#{table.project.button.collaboration}]]}
-                <i class="fas fa-hands-helping"></i></button>`;
+                <i class="fas fa-hands-helping"></i></button></span>`;
     };
 
     function handleProjectAction(element) {

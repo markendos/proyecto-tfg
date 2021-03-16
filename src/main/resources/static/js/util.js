@@ -72,3 +72,16 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
 
+function startLoad() {
+    loadingData = true;
+    if ($("#dataTable_wrapper")) {
+        $("#dataTable_wrapper").hide();
+    }
+    $("#tableSpinner").show();
+}
+
+function endLoad() {
+    $("#tableSpinner").hide();
+    $("#dataTable_wrapper").show();
+    loadingData = false;
+}

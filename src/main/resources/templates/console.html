@@ -182,20 +182,6 @@
         $("#sensorModal").modal('show');
     }
 
-    function startLoad() {
-        loadingData = true;
-        if ($("#dataTable_wrapper")) {
-            $("#dataTable_wrapper").hide();
-        }
-        $("#tableSpinner").show();
-    }
-
-    function endLoad() {
-        $("#tableSpinner").hide();
-        $("#dataTable_wrapper").show();
-        loadingData = false;
-    }
-
     function handleRoleChange(element) {
         let data = {"user": element.id, "role": element.options[element.selectedIndex].value};
         $.ajax({

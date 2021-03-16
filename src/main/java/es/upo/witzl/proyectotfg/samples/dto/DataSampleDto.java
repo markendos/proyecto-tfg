@@ -23,7 +23,7 @@ public class DataSampleDto {
     private boolean simulated;
 
     @Column(length = 4)
-    private float samplingRate;
+    private Float samplingRate;
 
     private String comments;
 
