@@ -29,6 +29,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/i18n/es.min.js"
             integrity="sha512-xntXNPHoIOoLxuqmYhDB6MA67yimB0HxKb20FTgBcAO7RUk2jwctNYIkencPjG4hdxde8ee6FHqACJqGYYSiSg=="
             crossorigin="anonymous"></script>
+    <!-- Google Charts JS -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <!-- Custom JS -->
     <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
     <script th:src="@{/resources/js/util.js}"></script>
@@ -58,6 +60,52 @@
 <!-- Project Subject Modal Form -->
 <div th:replace="/fragments/subjectModal :: subjectModal"></div>
 
+<!-- Sample Subject Modal Table -->
+<div class="modal fade" id="sampleModal" tabindex="-1" aria-labelledby="sampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sampleModalLabel" th:utext="#{sample.modal.title}">Modal
+                    title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <ul class="nav nav-tabs">
+                <li class="nav-item" id="tableTab">
+                    <button class="nav-link active btn btn-link" onclick="toggleView('table')">Table</button>
+                </li>
+                <li class="nav-item" id="chartTab">
+                    <button class="nav-link btn btn-link" onclick="toggleView('chart')">Chart</button>
+                </li>
+            </ul>
+            <div class="modal-body">
+                <div class="table-responsive" id="tableView">
+                    <table id="sampleTable" class="table table-striped">
+                        <thead class="thead-dark"></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="container-fluid p-4">
+                    <div id="chartView"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <input type="text" id="sampleId" name="projectId" value="" hidden>
+                <button class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+                        th:attr="title=#{sample.button.statistics.generate}">
+                    <i class="fas fa-chart-bar"></i>
+                </button>
+                <button class="btn btn-info" data-toggle="tooltip" data-placement="top"
+                        th:attr="title=#{sample.button.export}">
+                    <i class="fas fa-file-download"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
     <div th:replace="/fragments/userSidebar :: userSidebar"></div>
@@ -75,7 +123,8 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
-                    <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a>
+                    </li>
                     <li class="breadcrumb-item active" aria-current="page"
                         th:utext="#{user.project.menu.project(${project.id})}"></li>
                 </ol>
@@ -129,9 +178,10 @@
                             th:onclick="addOrRemoveLabels([[${project.id}]])">[[#{table.project.column.labels}]]:
                     </button>
                     <span th:if="${project.labels == null or project.labels.empty}">&nbsp;-</span>
-                    <ul class="list-unstyled my-0">
+                    <ul class="my-0 list-inline">
+                        &nbsp;
                         <li th:each="label : ${project.labels}"
-                                  th:utext="${label.name}" class="mx-1 tag badge badge-pill">
+                            th:utext="${label.name}" class="tag badge badge-pill list-inline-item">
                         </li>
                     </ul>
                 </div>
@@ -165,11 +215,16 @@
     const encoded = utf8_to_b64(JSON.stringify(/*[[${project}]]*/));
     $("#userBtn").attr("id", encoded);
 
+    //Global variables to store retrieved sample data
+    let selectedSampleData = undefined;
+    let selectedSampleValues = undefined
+
     $(document).ready(function () {
         startLoad();
         fetchSamples();
+        google.charts.load('current', {'packages': ['line']});
 
-        $("#labelsBtn").attr("title",htmlDecode([[#{label.pages.title.project.labels}]]));
+        $("#labelsBtn").attr("title", htmlDecode([[#{label.pages.title.project.labels}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
         $("#collaboratorTitle").mouseenter(function () {
@@ -179,7 +234,7 @@
             $("#collaborators").hide();
         });
         const tags = $(".tag").toArray();
-        if(tags) {
+        if (tags) {
             tags?.forEach(tag => {
                 $(tag).addClass(`badge-${getRandomColor()}`);
             })
@@ -188,7 +243,7 @@
         }
 
         const collaborators = $("#collaborators ul li").toArray();
-        if(collaborators.length === 0) {
+        if (collaborators.length === 0) {
             $("#collaborators").empty().text(htmlDecode([[#{project.title.collaborators.none}]]));
         }
     });
@@ -222,6 +277,147 @@
         });
     }
 
+    const renderDeviceInfo = (data, type, row) => {
+        return `<i class="fas fa-info-circle" data-toggle="tooltip" data-placement="left" data-html="true"
+                title="<ul class='list-unstyled'>
+                <li><strong>${[[#{table.sample.tooltip.device.name}]]}</strong> ${row.deviceName ?? 'N/A'}</li>
+                <li><strong>${[[#{table.sample.tooltip.device.model}]]}</strong> ${row.deviceModel ?? 'N/A'}</li>
+                <li><strong>${[[#{table.sample.tooltip.device.firmware}]]}</strong> ${row.deviceFirmware ?? 'N/A'}</li>
+                </ul>"></i>`;
+    };
+
+    const renderSampleInfo = (data, type, row) => {
+        return `<i class="fas fa-info-circle" data-toggle="tooltip" data-placement="left" data-html="true"
+                title="<ul class='list-unstyled'>
+                <li><strong>${[[#{sample.label.samplingRate}]]}</strong> ${row.samplingRate ? row.samplingRate : 'N/A'}</li>
+                <li><strong>${[[#{table.sample.tooltip.simulated}]]}</strong> ${row.isSimulated ? '&#10004;' : '&#10006;'}</li>
+                <li><strong>${[[#{table.sample.tooltip.comments}]]}</strong> ${row.comments ?? 'N/A'}</li>
+                </ul>"></i>`;
+    };
+
+    const renderChannelInfo = (data, type, row) => {
+        let channelInfo = '';
+        row.dataChannels?.forEach((c) => {
+            channelInfo += "<ul class='list-unstyled'>";
+            channelInfo += `<li><strong>${[[#{sample.channel.name}]]}</strong> ${c.channelName ?? 'N/A'}</li>`;
+            channelInfo += `<li><strong>${[[#{sample.channel.label}]]}</strong> ${c.channelLabel ?? 'N/A'}</li>`;
+            channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
+                ? resolution : 'N/A'}</li>`;
+            channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
+                ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]]}</li>`;
+            channelInfo += `<li><strong>${[[#{sample.channel.type.io}]]}</strong> ${c.input
+                ? [[#{sample.channel.input}]] : [[#{sample.channel.output}]]}</li>`;
+            channelInfo += `<li><strong>Sensor:</strong> ${c.sensor.name ?? 'N/A'}</li>`;
+            channelInfo += `<li><strong>Sensor(alias):</strong> ${c.sensor.alias ?? 'RAW'}</li>`;
+            channelInfo += "</ul><hr/>";
+        });
+        return channelInfo === '' ? 'N/A'
+            : `<i class="fas fa-info-circle" data-toggle="tooltip" data-placement="left" data-html="true"
+                title="${channelInfo}"></i>`;
+    };
+
+    const renderSampleActions = (data, type, row) => {
+        const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.sample.option.delete}]]}</option>`;
+        return `<select id="project-${row.id}" class="form-control" onChange="handleSampleAction(this)">
+                    <option value="" disabled selected>${[[#{table.select.option.default}]]}</option>
+                    ${[[${role}]] === 'owner' ? deleteOpt : ''}
+                </select>`;
+    };
+
+    function handleSampleAction(element) {
+        const selectedOption = element.options[element.selectedIndex].value;
+        const id = element.id.substring(element.id.indexOf('-') + 1);
+        switch (selectedOption) {
+            case 'delete':
+                deleteSample(id);
+                break;
+        }
+        $(element).prop('selectedIndex', 0);
+    }
+
+    function deleteSample(sampleId) {
+        if (confirm(htmlDecode(/*[[#{message.confirm.sample.delete}]]*/))) {
+            $.ajax({
+                type: 'DELETE',
+                url: serverContext + 'sample/delete/' + sampleId,
+                success: (data) => {
+                    $("#successmsg").show().html(/*[[#{message.sample.success.delete}]]*/);
+                    fetchSamples();
+                },
+                error: (data) => {
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
+        }
+    }
+
+    function renderSampleData(sampleId) {
+        if(selectedSampleData && selectedSampleValues && selectedSampleData.id === sampleId) {
+            const role = /*[[${role}]]*/;
+            const deleteBtnExists = $("#deleteBtnExists").length > 0;
+            if (role === 'owner' && !deleteBtnExists) {
+                const deleteBtn = `<span id="deleteBtnExists" class='d-flex align-self-center ml-3'>
+                    <button class="btn btn-danger btn-sm" onclick='deleteSample(${sampleId})'>
+                        <i class="fas fa-trash"></i>
+                    </button></span>`;
+                $("#sampleModal modal-").after(deleteBtn);
+            }
+
+            const headerRow = $("<tr></tr>");
+            $(headerRow).append(`<th scope="col">#</th>`);
+            let channelInfo = '';
+            selectedSampleData?.dataChannels?.forEach((c) => {
+                channelInfo += "<ul class='list-unstyled'>";
+                channelInfo += `<li><strong>${[[#{sample.channel.name}]]}</strong> ${c.channelName ?? 'N/A'}</li>`;
+                channelInfo += `<li><strong>${[[#{sample.channel.label}]]}</strong> ${c.channelLabel ?? 'N/A'}</li>`;
+                channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
+                    ? resolution : 'N/A'}</li>`;
+                channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
+                    ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]]}</li>`;
+                channelInfo += `<li><strong>${[[#{sample.channel.type.io}]]}</strong> ${c.input
+                    ? [[#{sample.channel.input}]] : [[#{sample.channel.output}]]}</li>`;
+                channelInfo += `<li><strong>Sensor:</strong> ${c.sensor.name ?? 'N/A'}</li>`;
+                channelInfo += `<li><strong>Sensor(alias):</strong> ${c.sensor.alias ?? 'RAW'}</li>`;
+                channelInfo += "</ul>";
+
+                $(headerRow).append(`<th data-toggle="tooltip" data-placement="left" data-html="true"
+                title="${channelInfo}" scope="col">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
+            });
+
+            $("#sampleTable thead").append(headerRow);
+
+            selectedSampleValues[0].forEach((value, index1) => {
+                const newRow = $("<tr></tr>");
+                $(newRow).append(`<th scope="row">${(index1+1)}</th>`);
+                selectedSampleData.dataChannels.forEach((channel, index2) => {
+                    const newCell = $(`<td>${selectedSampleValues[index2][index1]}</td>`);
+                    $(newRow).append(newCell);
+                });
+                $("#sampleTable tbody").append(newRow);
+            });
+
+            $('[data-toggle="tooltip"]').tooltip();
+            $("#sampleModalLabel").append(`<span>&nbsp;#${sampleId}</span>`);
+            $("#sampleId").val(sampleId);
+            $("#sampleModal").modal('show');
+        }
+    }
+
+    function fetchSample(sampleData) {
+        $.ajax({
+            type: 'GET',
+            url: serverContext + 'sample/' + sampleData.id,
+            success: (data) => {
+                selectedSampleData = sampleData;
+                selectedSampleValues= data.all;
+                renderSampleData(sampleData.id);
+            },
+            error: (data) => {
+                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+            }
+        });
+    }
+
     function drawSamplesTable(samples) {
         if (lang && lang === 'es') {
             langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json';
@@ -243,18 +439,28 @@
                     $('[data-toggle="tooltip"]').tooltip();
                     endLoad();
                     const table = $('#dataTable').DataTable();
-                    $("#dataTable button, #dataTable select").click(function(event){
+                    $("#dataTable button, #dataTable select").click(function (event) {
                         event.stopPropagation();
                     });
                     $('#dataTable tbody tr').on('click', 'td', function () {
                         const data = table.row(this).data();
-                        //goToSample(data.id);
+                        if(selectedSampleData && selectedSampleValues && selectedSampleData.id === data.id) {
+                            $("#sampleModal").modal('show');
+                        } else {
+                            fetchSample(data)
+                        };
                     });
                 },
                 data: samples,
                 columnDefs: [],
                 columns: [
                     {title: "#Id", data: "id"},
+                    {title: [[#{table.sample.column.date}]], data: "sampleDate"},
+                    {title: [[#{table.sample.column.channels}]], render: renderChannelInfo},
+                    {title: [[#{table.sample.column.size}]], data: "size"},
+                    {title: [[#{table.sample.column.device}]], render: renderDeviceInfo},
+                    {title: [[#{table.sample.column.info}]], render: renderSampleInfo},
+                    {title: [[#{table.sample.column.actions}]], render: renderSampleActions},
 
                 ],
                 retrieve: true,
@@ -264,6 +470,56 @@
                 responsive: true,
             });
         }
+    }
+
+    function toggleView(view) {
+        switch (view) {
+            case 'chart':
+                $("#tableView").hide();
+                $("#tableTab button").removeClass("active");
+                if(!$("#chartView").children().length) {
+                    drawChart();
+                }
+                $("#chartTab button").addClass("active");
+                $("#chartView").show();
+                break;
+            case 'table':
+                $("#chartTab button").removeClass("active");
+                $("#chartView").hide();
+                $("#tableTab button").addClass("active");
+                $("#tableView").show();
+                break;
+        }
+    }
+
+    function drawChart() {
+        const data = new google.visualization.DataTable();
+        data.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
+
+        selectedSampleData.dataChannels.forEach((c) => {
+            data.addColumn('number', c.channelName);
+        })
+
+        selectedSampleValues[0].forEach((r, index1) => {
+            const row = [index1+1];
+            selectedSampleData.dataChannels.forEach((c, index2) => {
+                row.push(selectedSampleValues[index2][index1]);
+            })
+            data.addRow(row);
+        });
+
+        const options = {
+            chart: {
+                title: '',
+                subtitle: '',
+            },
+            height: 500,
+            hAxis: {gridlines: {count: -1}},
+        };
+
+        const chart = new google.charts.Line(document.getElementById("chartView"));
+
+        chart.draw(data, google.charts.Line.convertOptions(options));
     }
 </script>
 </body>

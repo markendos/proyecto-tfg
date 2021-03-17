@@ -160,7 +160,7 @@
                                     ${[[#{table.project.option.subject}]]}</option>`;
         const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.project.option.delete}]]}</option>`;
         return `<select id="project-${row.id}" class="form-control" onChange="handleProjectAction(this)">
-                    <option value="" disabled selected>${[[#{table.project.option.default}]]}</option>
+                    <option value="" disabled selected>${[[#{table.select.option.default}]]}</option>
                     <option value="labels">${[[#{table.project.option.labels}]]}</option>
                     ${row.role === 'owner' ? registerSubjectOpt : ''}
                     ${row.role === 'owner' ? deleteOpt : ''}
@@ -170,9 +170,11 @@
     const renderProjectLabels = (data, type, row) => {
         let labels = '';
         if(data.length) {
+            labels += '<ul class="list-inline">';
             for (let i = 0; i < data.length; i++) {
-                labels += `<span class="badge badge-pill badge-${getRandomColor()}">${data[i].name}</span>&nbsp;`;
+                labels += `<li class="my-2 list-inline-item badge badge-pill badge-${getRandomColor()}">${data[i].name}</li>`;
             }
+            labels += '</ul>';
         } else {
             labels = `<span class="text-center d-block">-</span>`;
         }
@@ -188,7 +190,7 @@
 
     const renderSubjectActions = (data, type, row) => {
         return `<span ${row.subject ? ''
-                : `data-toggle="tooltip" data-placement="top" title="${[[#{table.project.column.subject.tooltip}]]}"`}>
+                : `data-toggle="tooltip" data-placement="left" title="${[[#{table.project.column.subject.tooltip}]]}"`}>
                 <button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
                 onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? ''
                 : `disabled`}>

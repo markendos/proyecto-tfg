@@ -1,5 +1,6 @@
 package es.upo.witzl.proyectotfg.samples.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import es.upo.witzl.proyectotfg.projects.model.Project;
 
 import javax.persistence.*;
@@ -32,6 +33,8 @@ public class DataSample {
     private Float samplingRate;
 
     private String comments;
+
+    private Integer size;
 
     @OneToMany(mappedBy = "dataSample")
     private Collection<DataChannel> dataChannels;
@@ -112,12 +115,21 @@ public class DataSample {
         this.dataChannels = dataChannels;
     }
 
+    @JsonIgnore
     public Project getProject() {
         return project;
     }
 
     public void setProject(Project project) {
         this.project = project;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 
     @Override

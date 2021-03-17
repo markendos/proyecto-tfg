@@ -459,6 +459,20 @@ a.article:hover {
     }
 }
 
+/***** Sample Modal *****/
+#sampleModal .modal-content {
+    max-height: 90vh;
+}
+
+#sampleTable th,td {
+    text-align: center;
+}
+
+#sampleModal .modal-body {
+    overflow: auto;
+    padding: 0;
+}
+
 /***** Main Section *****/
 #collaborators {
     position: absolute;

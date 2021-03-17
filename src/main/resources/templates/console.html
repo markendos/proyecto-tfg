@@ -207,7 +207,7 @@
     };
 
     const renderTooltip = (data, type, row) => {
-        const ipTooltip = row.ip ? `<span data-toggle="tooltip" data-placement="top" title="IP Address: ${row.ip}">
+        const ipTooltip = row.ip ? `<span data-toggle="tooltip" data-placement="left" title="IP Address: ${row.ip}">
                 <i class="fas fa-info-circle ml-2"></i></span>` : '';
 
         return `<i class="fas fa-circle" style="font-size:0.5em;color:${row.ip ? 'green' : 'red'}"></i>

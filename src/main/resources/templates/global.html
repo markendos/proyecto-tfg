@@ -161,7 +161,7 @@
     };
 
     const renderProjectActions = (data, type, row) => {
-        return `<span data-toggle="tooltip" data-placement="top"
+        return `<span data-toggle="tooltip" data-placement="left"
                 title="${row.requested ? [[#{table.project.button.requested.tooltip}]]
                 : [[#{table.project.button.collaboration.tooltip}]]}">
                 <button id="project-${row.id}" type="button" class="btn btn-warning btn-sm" onclick="handleProjectAction(this)"

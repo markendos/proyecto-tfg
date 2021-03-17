@@ -13,10 +13,7 @@ import es.upo.witzl.proyectotfg.samples.repository.SensorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SampleService implements ISampleService {
@@ -37,6 +34,25 @@ public class SampleService implements ISampleService {
     SensorRepository sensorRepository;
 
     @Override
+    public Optional<DataSample> getSampleById(Long id) {
+        return dataSampleRepository.findById(id);
+    }
+
+    @Override
+    public Collection<Collection<Integer>> getSampleValues(DataSample sample) {
+        List allValues = new ArrayList();
+
+        for(DataChannel dc : sample.getDataChannels()) {
+            String id = sample.getId() + "@" + dc.getChannelName();
+            Optional<DataValue> dataValue = dataValueRepository.findById(id);
+            List<Integer> channelValues = (List) dataValue.get().getValues();
+           allValues.add(channelValues);
+        }
+
+        return allValues;
+    }
+
+    @Override
     public void test() {
         DataSample ds = new DataSample();
         ds.setSampleDate(new Date());
@@ -53,8 +69,10 @@ public class SampleService implements ISampleService {
         dv.setId(ds.getId().toString() + "@" + dc.getChannelName());
         dv.setValues(l);
         dc.setDataSample(ds);
+        ds.setSize(dv.getValues().size());
         Sensor sensor = sensorRepository.getOne(Long.parseLong("10"));
         dc.setSensor(sensor);
+        //dataSampleRepository.save(ds);
         dataChannelRepository.save(dc);
         dataValueRepository.save(dv);
     }

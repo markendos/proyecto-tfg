@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -87,13 +88,14 @@ public class SampleController {
                 Project project = projectOpt.get();
                 if(user.equals(project.getUser())) {
                     List<DataSample> samples = (List)project.getDataSamples();
+                    SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
                     ObjectMapper mapper = new ObjectMapper();
+                    mapper.setDateFormat(df);
                     HashMap aux = new HashMap();
 
                     if(samples != null) {
                         aux.put("all", samples);
                     }
-
                     return ResponseEntity.ok(mapper.writeValueAsString(aux));
                 } else {
                     return ResponseEntity.badRequest().build();
@@ -104,5 +106,37 @@ public class SampleController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping(value = "/sample/{sampleId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity viewSample(@PathVariable String sampleId, final Authentication authentication)
+            throws JsonProcessingException {
+
+        MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
+        Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            Optional<DataSample> sampleOpt = sampleService.getSampleById(Long.parseLong(sampleId));
+
+            if(sampleOpt.isPresent()) {
+                DataSample sample = sampleOpt.get();
+                if(sample.getProject().getUser().equals(user)) {
+                    List<List<Integer>> values = (List) sampleService.getSampleValues(sample);
+                    ObjectMapper mapper = new ObjectMapper();
+                    HashMap aux = new HashMap();
+
+                    if(values != null && !values.isEmpty()) {
+                        aux.put("all", values);
+                    }
+                    return ResponseEntity.ok(mapper.writeValueAsString(aux));
+                } else {
+                    return ResponseEntity.badRequest().build();
+                }
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 }
