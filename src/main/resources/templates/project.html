@@ -61,7 +61,7 @@
 <div th:replace="/fragments/subjectModal :: subjectModal"></div>
 
 <!-- Sample Subject Modal Table -->
-<div class="modal fade" id="sampleModal" tabindex="-1" aria-labelledby="sampleModalLabel"
+<div class="modal" id="sampleModal" tabindex="-1" aria-labelledby="sampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -88,6 +88,10 @@
                     </table>
                 </div>
                 <div class="container-fluid p-4">
+                    <div id="chartLoader" role="status" style="width: 3rem; height: 3rem;"
+                         class="spinner-grow text-primary">
+                        <span class="sr-only">Loading...</span>
+                    </div>
                     <div id="chartView"></div>
                 </div>
             </div>
@@ -220,6 +224,7 @@
     let selectedSampleValues = undefined
 
     $(document).ready(function () {
+        $("#chartLoader").hide();
         startLoad();
         fetchSamples();
         google.charts.load('current', {'packages': ['line']});
@@ -478,6 +483,7 @@
                 $("#tableView").hide();
                 $("#tableTab button").removeClass("active");
                 if(!$("#chartView").children().length) {
+                    $("#chartLoader").show();
                     drawChart();
                 }
                 $("#chartTab button").addClass("active");
@@ -492,7 +498,7 @@
         }
     }
 
-    function drawChart() {
+    function drawChart(listener) {
         const data = new google.visualization.DataTable();
         data.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
 
@@ -513,12 +519,18 @@
                 title: '',
                 subtitle: '',
             },
+            animation: {
+                duration: 1500,
+                easing: 'out',
+            },
             height: 500,
             hAxis: {gridlines: {count: -1}},
         };
 
         const chart = new google.charts.Line(document.getElementById("chartView"));
-
+        google.visualization.events.addListener(chart, 'ready', () => {
+            $("#chartLoader").hide();
+        });
         chart.draw(data, google.charts.Line.convertOptions(options));
     }
 </script>

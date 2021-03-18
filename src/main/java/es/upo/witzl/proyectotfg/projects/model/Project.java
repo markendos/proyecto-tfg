@@ -45,6 +45,9 @@ public class Project {
     @OneToMany(mappedBy = "project")
     private Collection<DataSample> dataSamples;
 
+    @Transient
+    private Integer numSamples;
+
     public Long getId() {
         return id;
     }
@@ -121,6 +124,10 @@ public class Project {
 
     public boolean isOwner(String user) {
         return user.equals(this.getUser().getUsername());
+    }
+
+    public Integer getNumSamples() {
+        return dataSamples == null ? 0 : dataSamples.size();
     }
 
     @Override

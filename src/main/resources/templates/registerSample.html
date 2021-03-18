@@ -2,7 +2,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Sample</title>
+    <title>Sample-Register</title>
 
     <!-- Bootstrap4 CSS -->
     <link rel="stylesheet" type="text/css" href="/resources/css/bootstrap.min.css"/>
@@ -129,7 +129,7 @@
             <div class="btn-toolbar mb-2 mb-md-0">
                 <button th:inline="text" class="btn btn-info mr-2" id="saveDataBtn" data-toggle="modal"
                         data-target="#modalFileSave" disabled>
-                    [[#{sample.button.save}]]
+                    [[#{label.form.save}]]
                     <i class="far fa-save"></i>
                 </button>
                 <input type="button" class="btn btn-secondary ml-2" id="resetBtn" th:value="#{sample.button.reset}" disabled/>
@@ -170,10 +170,11 @@
                     <button type="button" class="btn btn-success btn-sm mr-2" id="startSamplingBtn" disabled>START</button>
                     <button type="button" class="btn btn-warning btn-sm ml-2" id="stopSamplingBtn" disabled>STOP</button>
                 </div>
-                <div class="col progress">
+                <div class="col progress px-0">
                     <div class="progress-bar progress-bar-striped progress-bar-animated" id="sampling-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
+            <hr/>
             <div class="limiter d-flex m-0">
                 <div class="container-table100">
                     <div class="wrap-table100">
