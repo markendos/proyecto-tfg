@@ -62,7 +62,7 @@ public class SensorController {
         return new ModelAndView("/console", model);
     }
 
-    @GetMapping(value = "/admin/sensor/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/sensor/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllSensors() throws JsonProcessingException {
         List<Sensor> sensorList = sensorService.getSensors();
         ObjectMapper mapper = new ObjectMapper();

@@ -17,7 +17,7 @@ public class CollaborationRequest {
     }
 
     @EmbeddedId
-    CollaborationRequestKey id;
+    private CollaborationRequestKey id;
 
     @ManyToOne
     @MapsId("collaboratorId")

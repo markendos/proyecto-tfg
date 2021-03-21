@@ -36,6 +36,10 @@ public class DataChannel {
     @JoinColumn(name = "sensor_id", nullable = false)
     private Sensor sensor;
 
+    @OneToOne(mappedBy = "dataChannel")
+    @PrimaryKeyJoinColumn
+    private ChannelStatistics statistics;
+
     public Long getSampleId() {
         return sampleId;
     }
@@ -102,6 +106,14 @@ public class DataChannel {
         this.sensor = sensor;
     }
 
+    public ChannelStatistics getStatistics() {
+        return statistics;
+    }
+
+    public void setStatistics(ChannelStatistics statistics) {
+        this.statistics = statistics;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -118,7 +130,6 @@ public class DataChannel {
     @Override
     public String toString() {
         return "DataChannel{" +
-                ", dataSample=" + dataSample +
                 ", channelName='" + channelName + '\'' +
                 ", channelLabel='" + channelLabel + '\'' +
                 ", resolution=" + resolution +

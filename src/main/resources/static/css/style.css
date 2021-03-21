@@ -464,15 +464,11 @@ a.article:hover {
     max-height: 90vh;
 }
 
-#sampleTable th, #sampleTable td {
-    text-align: center;
-}
-
 th, td {
     vertical-align: middle !important;
 }
 
-#chartLoader {
+#chartLoader, #statsLoader {
     position: absolute;
     z-index: 9999;
     top: 40%;

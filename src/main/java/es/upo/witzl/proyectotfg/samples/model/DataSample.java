@@ -43,6 +43,8 @@ public class DataSample {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    private Boolean statsGenerated;
+
     public Long getId() {
         return id;
     }
@@ -132,6 +134,14 @@ public class DataSample {
         this.size = size;
     }
 
+    public Boolean isStatsGenerated() {
+        return this.statsGenerated;
+    }
+
+    public void setStatsGenerated(Boolean statsGenerated) {
+        this.statsGenerated = statsGenerated;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -157,6 +167,8 @@ public class DataSample {
                 ", samplingRate=" + samplingRate +
                 ", comments='" + comments + '\'' +
                 ", dataChannels=" + dataChannels +
+                ", size=" + size +
+                ", statsGenerated=" + statsGenerated +
                 '}';
     }
 }

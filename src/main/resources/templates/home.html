@@ -156,13 +156,10 @@
     });
 
     const renderProjectActions = (data, type, row) => {
-        const registerSubjectOpt = `<option value="subject" ${row.subject ? 'disabled' : ''}>
-                                    ${[[#{table.project.option.subject}]]}</option>`;
         const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.project.option.delete}]]}</option>`;
         return `<select id="project-${row.id}" class="form-control" onChange="handleProjectAction(this)">
                     <option value="" disabled selected>${[[#{table.select.option.default}]]}</option>
                     <option value="labels">${[[#{table.project.option.labels}]]}</option>
-                    ${row.role === 'owner' ? registerSubjectOpt : ''}
                     ${row.role === 'owner' ? deleteOpt : ''}
                 </select>`;
     };
@@ -189,12 +186,12 @@
     };
 
     const renderSubjectActions = (data, type, row) => {
-        return `<span ${row.subject ? ''
-                : `data-toggle="tooltip" data-placement="left" title="${[[#{table.project.column.subject.tooltip}]]}"`}>
-                <button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
+        const viewBtn = `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
                 onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? ''
-                : `disabled`}>
-                ${[[#{table.column.action.view}]]}</button></span>`;
+            : `disabled`}>${[[#{table.column.action.view}]]}</button>`;
+        const registerBtn = `<button class="btn btn-sm btn-primary" onclick="registerSubject(${row.id})"
+                            ${row.role !== 'owner' ? 'disabled' : ''}> ${[[#{table.project.option.subject}]]}</button>`
+        return row.subject ? viewBtn : registerBtn;
     };
 
     function drawProjectsTable(projects) {
@@ -286,9 +283,6 @@
         switch (selectedOption) {
             case 'labels':
                 addOrRemoveLabels(id);
-                break;
-            case 'subject':
-                registerSubject(id);
                 break;
             case 'delete':
                 deleteProject(id);

@@ -41,12 +41,12 @@
 <div id="successmsg" class="alert alert-success" style="display:none"></div>
 
 <!-- Save DataSample Modal Form -->
-<div class="modal fade" id="modalFileSave" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+<div class="modal fade" id="modalFileSave" tabindex="-1" role="dialog" aria-labelledby="saveModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Save data</h5>
+                <h5 class="modal-title" id="saveModalLabel">Save data</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -60,7 +60,7 @@
                         <div class="col-2"><strong>Save</strong></div>
                     </div>
                     <hr>
-                    <textarea id="saveComments" class="form-control" placeholder="Comments..."></textarea>
+                    <textarea id="comments" class="form-control" placeholder="Comments..."></textarea>
                     <div class="input-group mt-4">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Local:</span>
@@ -84,6 +84,7 @@
                             <label class="custom-control-label" for="dbSwitch" data-toggle="tooltip"
                                    data-placement="top" title="Save data to remote database">Database</label>
                         </div>
+                        <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
                     </div>
                 </form>
             </div>
@@ -578,7 +579,7 @@
         stopSampling();
     });
 </script>
-<script>
+<script th:inline="javascript">
     $(document).ready(function () {
         google.charts.load('current', {'packages': ['line']});
 
@@ -605,33 +606,29 @@
         });
 
         $("#modalFileSave").on('shown.bs.modal', function () {
-            let sensors = ["RAW", "S1", "S2", "S3"];
             let aChannels = sampledFrames[0][0];
-
+            const sensors = [[${sensors}]];
             for (let i = 0; i < aChannels.length; i++) {
                 if (aChannels[i]) {
-                    let row = $("<div class='row my-2 text-center'></div>");
+                    let row = $("<div class='row my-2 text-center align-items-center'></div>");
 
                     let col = $("<div class='col-2 align-middle py-2'></div>");
-                    $(col).text("[A" + (i + 1) + "]");
+                    $(col).append(`<input name="channelNames" value="A${i+1}" class="w-100 form-control" disabled/>`);
 
                     $(row).append(col);
 
                     col = $("<div class='col-3'></div>");
-                    let sensorSelector = $("<select class='form-control'></select>");
-
-                    for (let j = 0; j < sensors.length; j++) {
-                        let opt = $("<option>" + sensors[j] + "</option>");
-                        $(opt).val(sensors[j]);
+                    let sensorSelector = $("<select class='form-control' name='sensors'></select>");
+                    sensors.forEach((sensor) => {
+                        let opt = $(`<option value="${sensor.id}">${sensor.alias}</option>`);
                         $(sensorSelector).append(opt);
-                    }
+                    });
                     $(col).append(sensorSelector);
                     $(row).append(col);
 
                     col = $("<div class='col-5'></div>");
-                    let label = $("<input class='form-control chLabel' type='text'/>");
+                    let label = $(`<input class='form-control chLabel' type='text' value=""/>`);
                     $(label).css("width", "100%");
-                    $(label).val("A" + (i + 1));
 
                     $(col).append(label);
                     $(row).append(col);
@@ -660,6 +657,9 @@
             if ($("#txtSwitch").is(":checked")) {
                 saveOpenSignalsData();
             }
+            if($("#dbSwitch").is(":checked")) {
+                saveSample();
+            }
             $(function () {
                 $('#modalFileSave').modal('toggle');
             });
@@ -672,6 +672,33 @@
         });
 
     });
+    function saveSample() {
+        console.log(sampledData);
+        console.log(sampledFrames);
+        console.log(aChannels);
+        event.preventDefault();
+        $(".alert").html("").hide();
+        $(".error-list").html("");
+        const formData = $('#fileSaveForm').serialize();
+        $.post(serverContext + "sample/add/" + [[${project.id}]], formData, function (data) {
+            $('#modalFileSave').modal('hide');
+            $("#successmsg").show().html(/!*[[#{message.sample.success.register}]]*!/);
+        }).fail(function (data) {
+            if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                $("#errormsg").show().append(data.responseJSON.message);
+                $('#modalFileSave').modal('hide');
+            } else {
+                const errors = $.parseJSON(data.responseJSON.message);
+                $.each(errors, function (index, item) {
+                    if (item.field) {
+                        $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                    } else {
+                        $("#globalError").show().append(item.defaultMessage + "<br/>");
+                    }
+                });
+            }
+        });
+    }
 </script>
 <script th:inline="javascript">
     function isWebBluetoothEnabled() {

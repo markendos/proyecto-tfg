@@ -72,34 +72,50 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <ul class="nav nav-tabs">
+            <ul id="sampleNav" class="nav nav-tabs">
                 <li class="nav-item" id="tableTab">
-                    <button class="nav-link active btn btn-link" onclick="toggleView('table')">Table</button>
+                    <button class="nav-link active btn btn-link" onclick="toggleView('table')"
+                            th:utext="#{sample.tab.table}">Table</button>
                 </li>
                 <li class="nav-item" id="chartTab">
-                    <button class="nav-link btn btn-link" onclick="toggleView('chart')">Chart</button>
+                    <button class="nav-link btn btn-link" onclick="toggleView('chart')"
+                            th:utext="#{sample.tab.chart}">Chart</button>
+                </li>
+                <li class="nav-item" id="statsTab">
+                    <button class="nav-link btn btn-link" onclick="toggleView('stats')"
+                            th:utext="#{sample.tab.stats}">Statistics</button>
                 </li>
             </ul>
             <div class="modal-body">
-                <div class="table-responsive" id="tableView">
-                    <table id="sampleTable" class="table table-striped">
+                <div class="table-responsive sampleTabContent" id="tableView">
+                    <table id="sampleTable" class="table table-striped text-center">
                         <thead class="thead-dark"></thead>
                         <tbody></tbody>
                     </table>
                 </div>
-                <div class="container-fluid p-4">
+                <div class="container-fluid p-4 sampleTabContent" id="chartView" style="display: none;">
                     <div id="chartLoader" role="status" style="width: 3rem; height: 3rem;"
                          class="spinner-grow text-primary">
                         <span class="sr-only">Loading...</span>
                     </div>
-                    <div id="chartView"></div>
+                    <div id="chartContent"></div>
+                </div>
+                <div class="table-responsive sampleTabContent" id="statsView" style="display: none;">
+                    <div id="statsLoader" role="status" style="width: 3rem; height: 3rem;"
+                         class="spinner-grow text-primary">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <table id="statsTable" class="table table-striped text-center">
+                        <thead class="thead-dark"></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
             <div class="modal-footer">
                 <input type="text" id="sampleId" name="projectId" value="" hidden>
                 <button class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                        th:attr="title=#{sample.button.statistics.generate}">
-                    <i class="fas fa-chart-bar"></i>
+                        th:attr="title=#{sample.button.report.generate}">
+                    <i class="fas fa-file-pdf"></i>
                 </button>
                 <button class="btn btn-info" data-toggle="tooltip" data-placement="top"
                         th:attr="title=#{sample.button.export}">
@@ -224,7 +240,6 @@
     let selectedSampleValues = undefined
 
     $(document).ready(function () {
-        $("#chartLoader").hide();
         startLoad();
         fetchSamples();
         google.charts.load('current', {'packages': ['line']});
@@ -405,6 +420,8 @@
             $("#sampleModalLabel").append(`<span>&nbsp;#${sampleId}</span>`);
             $("#sampleId").val(sampleId);
             $("#sampleModal").modal('show');
+        } else {
+            $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
         }
     }
 
@@ -452,7 +469,11 @@
                         if(selectedSampleData && selectedSampleValues && selectedSampleData.id === data.id) {
                             $("#sampleModal").modal('show');
                         } else {
-                            fetchSample(data)
+                            $("#sampleTable").children().empty();
+                            $("#statsTable").children().empty();
+                            $("#sampleModalLabel span").remove();
+                            toggleView('table');
+                            fetchSample(data);
                         };
                     });
                 },
@@ -480,22 +501,82 @@
     function toggleView(view) {
         switch (view) {
             case 'chart':
-                $("#tableView").hide();
-                $("#tableTab button").removeClass("active");
-                if(!$("#chartView").children().length) {
-                    $("#chartLoader").show();
+                $(".sampleTabContent").hide();
+                $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                $("#chartTab button.nav-link").addClass("active");
+                $("#chartView").show();
+                if(!$("#chartContent").children().length) {
                     drawChart();
                 }
-                $("#chartTab button").addClass("active");
-                $("#chartView").show();
                 break;
             case 'table':
-                $("#chartTab button").removeClass("active");
-                $("#chartView").hide();
-                $("#tableTab button").addClass("active");
+                $(".sampleTabContent").hide();
+                $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                $("#tableTab button.nav-link").addClass("active");
                 $("#tableView").show();
                 break;
+            case 'stats':
+                $(".sampleTabContent").hide();
+                $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                $("#statsTab button.nav-link").addClass("active");
+                $("#statsView").show();
+                loadSampleStatistics();
+                break;
         }
+    }
+
+    function loadSampleStatistics() {
+        if(selectedSampleData) {
+            if(!selectedSampleData.statsGenerated) {
+                if(confirm(htmlDecode([[#{message.confirm.sample.generateStatistics}]]))) {
+                    generateStatistics(selectedSampleData.id);
+                }
+            } else if($("#statsTable tbody").children().length === 0) {
+                $("#statsLoader").hide();
+                selectedSampleData.dataChannels.forEach((c, i) => {
+                    if(i === 0) {
+                        console.log(selectedSampleData);
+                        const statNames = Object.keys(c.statistics);
+                        const headerRow = $("<tr></tr>");
+                        const chName = $(`<th scope="col">${[[#{sample.table.channel}]]}</th>`);
+                        $(headerRow).append(chName);
+                        statNames.forEach((k) => {
+                            const cell = $(`<th scope="col">${k}</th>`);
+                           $(headerRow).append(cell);
+                        });
+                        $("#statsTable thead").append(headerRow);
+                    }
+                    const row = $("<tr></tr>");
+                    const ch = $(`<th scope="row">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
+                    $(row).append(ch);
+                    const stats = Object.values(c.statistics);
+                    stats.forEach((v) => {
+                        const stat = $(`<td>${v.toPrecision(5)}</td>`);
+                        $(row).append(stat);
+                    });
+                    $("#statsTable tbody").append(row);
+                });
+            }
+            $("#statsLoader").hide();
+        } else {
+            $("#statsLoader").hide();
+            $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+        }
+    }
+
+    function generateStatistics(sampleId) {
+        $.ajax({
+            type: 'GET',
+            url: serverContext + 'sample/statistics/' + sampleId,
+            success: (data) => {
+                selectedSampleData = data.sample;
+                loadSampleStatistics();
+                fetchSamples();
+            },
+            error: (data) => {
+                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+            }
+        });
     }
 
     function drawChart(listener) {
@@ -527,7 +608,7 @@
             hAxis: {gridlines: {count: -1}},
         };
 
-        const chart = new google.charts.Line(document.getElementById("chartView"));
+        const chart = new google.charts.Line(document.getElementById("chartContent"));
         google.visualization.events.addListener(chart, 'ready', () => {
             $("#chartLoader").hide();
         });

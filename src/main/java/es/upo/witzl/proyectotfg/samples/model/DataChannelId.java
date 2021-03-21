@@ -1,12 +1,16 @@
 package es.upo.witzl.proyectotfg.samples.model;
 
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Embeddable
 public class DataChannelId implements Serializable {
-
+    @Column(name = "sample_id", nullable = false)
     private Long sampleId;
 
+    @Column(length = 2, nullable = false)
     private String channelName;
 
     public DataChannelId() {

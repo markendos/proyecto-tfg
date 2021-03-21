@@ -238,7 +238,7 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "admin/sensor/all", function (data) {
+        $.get(serverContext + "sensor/all", function (data) {
             const sensors = data.all;
             drawSensorsTable(sensors);
         }).fail(function (data) {
