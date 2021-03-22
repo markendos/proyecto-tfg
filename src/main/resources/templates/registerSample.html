@@ -60,7 +60,7 @@
                         <div class="col-2"><strong>Save</strong></div>
                     </div>
                     <hr>
-                    <textarea id="comments" class="form-control" placeholder="Comments..."></textarea>
+                    <textarea id="comments" name="comments" class="form-control" placeholder="Comments..."></textarea>
                     <div class="input-group mt-4">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Local:</span>
@@ -86,6 +86,13 @@
                         </div>
                         <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
                     </div>
+                    <input id="sRate" name="samplingRate" hidden/>
+                    <input id="deviceName" name="deviceName" hidden/>
+                    <input id="deviceModel" name="deviceModel" value="bitalino-rev" hidden/>
+                    <input id="deviceFirmware" name="deviceFirmware" hidden/>
+                    <input type="checkbox" id="simulated" name="simulated" hidden/>
+                    <input id="size" name="size" hidden/>
+                    <input id="projectId" name="projectId" th:attr="value=${project.id}" hidden/>
                 </form>
             </div>
             <div class="modal-footer">
@@ -162,7 +169,7 @@
                     <label class="my-auto" for="samplingRate" th:utext="#{sample.label.samplingRate}"></label>
                     <select id="samplingRate" class="form-control form-control-sm d-inline ml-1" style="width: auto" disabled>
                         <option value=1>1</option>
-                        <option value=10>10</option>
+                        <option value=10 selected>10</option>
                         <option value=100 disabled>100</option>
                         <option value=1000 disabled>1000</option>
                     </select>
@@ -218,7 +225,7 @@
     let device = null;
     let commands = null;
     let frames = null;
-    let version = "";
+    let firmware = "";
     const lastSeq = -1;
     let count = 0;
     let limit = -1;
@@ -252,7 +259,7 @@
             $("#status").text(connecting).removeClass().addClass("connecting my-auto mx-2");
             console.log('Requesting Bluetooth Device...');
             device = await navigator.bluetooth.requestDevice(options);
-
+            console.log(device);
             console.log('Connecting to GATT Server...');
             const server = await device.gatt.connect();
 
@@ -271,7 +278,7 @@
             //Get the Bitalino Commands characteristic to send commands to the device
             commands = await service.getCharacteristic('4051eb11-bf0a-4c74-8730-a48f4193fcea');
 
-            version = getVersion();
+            firmware = getVersion();
 
             $("#status").text(ready);
             $("#status").addClass("ready my-auto mx-2");
@@ -408,7 +415,7 @@
             }
         }
         console.log('> ' + str);
-        version = str.slice(str.indexOf("v") + 1);
+        firmware = str.slice(str.indexOf("v") + 1);
 
         //Remove event handler function for the 'firmware version' command
         await frames.removeEventListener('characteristicvaluechanged', handleFirmwareVersionNotification);
@@ -608,12 +615,24 @@
         $("#modalFileSave").on('shown.bs.modal', function () {
             let aChannels = sampledFrames[0][0];
             const sensors = [[${sensors}]];
+            let active = aChannels.filter(function (x) {
+                return x == true
+            });
+            let resolutions = [];
+            active.forEach((c, i) => {
+                if (active.length == 6 && i >= 4) {
+                    resolutions.push(6);
+                } else {
+                    resolutions.push(10);
+                }
+            });
+
             for (let i = 0; i < aChannels.length; i++) {
                 if (aChannels[i]) {
                     let row = $("<div class='row my-2 text-center align-items-center'></div>");
 
                     let col = $("<div class='col-2 align-middle py-2'></div>");
-                    $(col).append(`<input name="channelNames" value="A${i+1}" class="w-100 form-control" disabled/>`);
+                    $(col).append(`<input name="channelNames" value="A${i+1}" class="w-100 form-control" readonly/>`);
 
                     $(row).append(col);
 
@@ -627,7 +646,7 @@
                     $(row).append(col);
 
                     col = $("<div class='col-5'></div>");
-                    let label = $(`<input class='form-control chLabel' type='text' value=""/>`);
+                    let label = $(`<input name="channelLabels" class="form-control chLabel" value=""/>`);
                     $(label).css("width", "100%");
 
                     $(col).append(label);
@@ -640,10 +659,16 @@
 
                     $(col).append(check);
                     $(row).append(col);
+                    $(row).append(`<input name="channelResolutions" value="${resolutions[i]}" hidden/>`);
 
                     $("#fileSaveForm>hr").before(row);
                 }
             }
+            $("#deviceName").val(device.name);
+            $("#deviceFirmware").val(firmware);
+            $("#sRate").val(sampledFrames[0][1]);
+            $("#size").val(sampledData.length);
+            $("#simulated").attr("checked", $("#isSimulated").is(":checked"));
         });
 
         $('#modalFileSave').on('hidden.bs.modal', function () {
@@ -680,14 +705,15 @@
         $(".alert").html("").hide();
         $(".error-list").html("");
         const formData = $('#fileSaveForm').serialize();
-        $.post(serverContext + "sample/add/" + [[${project.id}]], formData, function (data) {
-            $('#modalFileSave').modal('hide');
-            $("#successmsg").show().html(/!*[[#{message.sample.success.register}]]*!/);
+        $('#modalFileSave').modal('hide');
+        $.post(serverContext + "sample/add", formData, function (data) {
+            const sample = data.new;
+            saveValues(sample);
         }).fail(function (data) {
-            if (data.responseJSON.error.indexOf("InternalError") > -1) {
+            if (data.responseJSON?.error?.indexOf("InternalError") > -1) {
                 $("#errormsg").show().append(data.responseJSON.message);
-                $('#modalFileSave').modal('hide');
             } else {
+                $('#modalFileSave').modal('show');
                 const errors = $.parseJSON(data.responseJSON.message);
                 $.each(errors, function (index, item) {
                     if (item.field) {
@@ -698,6 +724,60 @@
                 });
             }
         });
+    }
+
+    function saveValues(sample) {
+        if(sample?.size === sampledData.length) {
+            const offset = 2;
+            let promises = [];
+            let channelValues = [];
+
+            for(let i = offset; i < sampledData[0].length; i++) {
+                channelValues.push([]);
+            }
+            sampledData.forEach((v, i) => {
+                for(let j = offset; j < v.length; j++) {
+                    channelValues[j-offset].push(v[j]);
+                }
+            });
+
+            promises.push(channelValues.map((v, i) => {
+                return new Promise(function(resolve, reject) {
+                    const req = new XMLHttpRequest();
+                    req.open('POST', serverContext + `sample/saveValues`);
+                    req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                    req.onload = function() {
+                        if (req.status == 200) {
+                            resolve(JSON.parse(req.response));
+                        }
+                        else {
+                            reject();
+                        }
+                    };
+
+                    req.send(JSON.stringify({
+                        sampleId: sample.id,
+                        channelName: sample.dataChannels[i].channelName ?? `A${i + 1}`,
+                        values: v,
+                    }));
+                })
+            }));
+
+            Promise.all(promises).then(results => {
+                $("#successmsg").show().html([[#{message.sample.success.register}]]);
+            }, reason => {
+                $.ajax({
+                    type: 'DELETE',
+                    url: serverContext + 'sample/delete/' + sample.id,
+                    success: (data) => {
+                        $("#errormsg").show().html(/*[[#{message.sample.error.register}]]*/);
+                    },
+                    error: (data) => {
+                        $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                    }
+                });
+            });
+        }
     }
 </script>
 <script th:inline="javascript">
@@ -771,52 +851,41 @@
 
         let aux = 0;
 
-        for (let i = 0; i < aChannels.length; i++) {
-            if (aChannels[i]) {
-                if (!$(checks[aux++]).is(":checked")) {
-                    aChannels[i] = false;
-                }
-            }
-        }
+        aChannels.filter((c, i) => aChannels[i] && !$(checks[aux++]).is(":checked")).forEach((c, i) => {
+            aChannels[i] = false;
+        });
 
         let txt = '# OpenSignals Text File Format\n';
         txt += '# {"' + device.name + '": {"sensor": [';
 
-        for (let i = 0; i < sensors.length; i++) {
-            if ($(checks[i]).is(":checked")) {
-                txt += '"' + $(sensors[i]).val() + '", ';
-            }
-        }
+        aChannels.filter((c, i) => $(checks[i]).is(":checked")).forEach((c, i) => {
+            txt += '"' + $(sensors[i]).val() + '", ';
+        });
 
         txt = txt.slice(0, -2);
         txt += '], "device name": "' + device.name + '", "column": ["nSeq", "I1", "I2", "O1", "O2", ';
 
-        for (let i = 0; i < aChannels.length; i++) {
-            if (aChannels[i]) {
-                txt += '"A' + (i + 1) + '", ';
-            }
-        }
+        aChannels.filter((c, i) => aChannels[i]).forEach((c, i) => {
+            txt += '"A' + (i + 1) + '", ';
+        });
 
         txt = txt.slice(0, -2);
         txt += '], "sync interval": 2, "time": "' + hours + ":" + minutes + ":" + seconds + "." + d.getMilliseconds();
         txt += '", "comments": "' + comments + '", "device connection": "' + device.name + '", "channels": [';
 
-        for (let i = 0; i < aChannels.length; i++) {
-            if (aChannels[i]) {
-                txt += (i + 1) + ', ';
-            }
-        }
+        aChannels.filter((c, i) => aChannels[i]).forEach((c, i) => {
+            txt += (i + 1) + ', ';
+        });
 
         txt = txt.slice(0, -2);
         txt += '], "date": "' + d.getFullYear() + "-" + month + "-" + day + '"';
-        txt += ', "mode": 0, "digital IO": [0, 0, 1, 1], "firmware version": "' + version + '", "device": "bitalino_rev", "position": 0, ';
+        txt += ', "mode": 0, "digital IO": [0, 0, 1, 1], "firmware version": "' + firmware
+            + '", "device": "bitalino_rev", "position": 0, ';
         txt += '"sampling rate": ' + sRate + ', "label": [';
 
-        for (let i = 0; i < labels.length; i++) {
-            if ($(checks[i]).is(":checked")) {
-                txt += '"' + $(labels[i]).val() + '", ';
-            }
-        }
+        labels.filter((l, i) => $(checks[i]).is(":checked")).labels.forEach((l, i) => {
+            txt += '"' + $(labels[i]).val() + '", ';
+        });
 
         txt = txt.slice(0, -2);
         txt += '], "resolution": [4, 1, 1, 1, 1, ';
@@ -825,7 +894,7 @@
             return x == true
         });
 
-        for (let i = 0; i < active.length; i++) {
+        active.forEach((c, i) => {
             if (active.length == 6 && i >= 4) {
                 txt += 6;
             } else {
@@ -833,7 +902,7 @@
             }
 
             txt += ", ";
-        }
+        });
 
         txt = txt.slice(0, -2);
         txt += '], "special": [';
@@ -848,7 +917,8 @@
         txt += ']}}\n' + "# EndOfHeader\n";
 
         for (let i = 1; i < sampledFrames.length; i++) {
-            txt += sampledFrames[i].seq + "\t" + sampledFrames[i].digital[0] + "\t" + sampledFrames[i].digital[1] + "\t" + sampledFrames[i].digital[2] + "\t" + sampledFrames[i].digital[3];
+            txt += sampledFrames[i].seq + "\t" + sampledFrames[i].digital[0] + "\t" + sampledFrames[i].digital[1]
+                + "\t" + sampledFrames[i].digital[2] + "\t" + sampledFrames[i].digital[3];
             for (let j = 0; j < sampledFrames[i].analog.length; j++) {
                 if ($(checks[j]).is(":checked")) {
                     txt += "\t" + sampledFrames[i].analog[j];

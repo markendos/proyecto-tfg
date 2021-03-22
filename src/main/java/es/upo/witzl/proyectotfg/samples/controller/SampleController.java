@@ -7,7 +7,9 @@ import es.upo.witzl.proyectotfg.projects.model.Project;
 import es.upo.witzl.proyectotfg.projects.service.ICollaborationRequestService;
 import es.upo.witzl.proyectotfg.projects.service.IProjectService;
 import es.upo.witzl.proyectotfg.samples.dto.DataSampleDto;
+import es.upo.witzl.proyectotfg.samples.dto.SampleValuesDto;
 import es.upo.witzl.proyectotfg.samples.model.DataSample;
+import es.upo.witzl.proyectotfg.samples.model.DataValue;
 import es.upo.witzl.proyectotfg.samples.model.Sensor;
 import es.upo.witzl.proyectotfg.samples.service.ISampleService;
 import es.upo.witzl.proyectotfg.samples.service.ISensorService;
@@ -51,10 +53,9 @@ public class SampleController {
     @PostMapping(value = "/sample/add", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity addSample(@Valid DataSampleDto sampleDto, final Authentication authentication)
             throws JsonProcessingException {
-        if(sampleDto.getProjectId() == null) {
+        if(sampleDto.getProjectId() != null) {
             MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
             Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
-
             if(userOptional.isPresent()) {
                 User user = userOptional.get();
                 Optional<Project> projectOpt = projectService.getProjectById(sampleDto.getProjectId());
@@ -70,6 +71,37 @@ public class SampleController {
                             aux.put("new", newSample);
                         }
                         return ResponseEntity.ok(mapper.writeValueAsString(aux));
+                    } else {
+                        return ResponseEntity.badRequest().build();
+                    }
+                } else {
+                    return ResponseEntity.notFound().build();
+                }
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
+    @PostMapping(value = "/sample/saveValues", produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity saveValues(@Valid @RequestBody SampleValuesDto sampleValuesDto, final Authentication authentication)
+            throws JsonProcessingException {
+        Long sampleId = sampleValuesDto.getSampleId();
+        if(sampleId != null) {
+            MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
+            Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
+            if(userOptional.isPresent()) {
+                User user = userOptional.get();
+                Optional<DataSample> dataSampleOpt = sampleService.getSampleById(sampleId);
+                if(dataSampleOpt.isPresent()) {
+                    DataSample dataSample = dataSampleOpt.get();
+                    boolean isCollaborator = collaborationRequestService.isCollaborator(dataSample.getProject(), user);
+                    if(dataSample.getProject().getUser().equals(user) || isCollaborator) {
+                        sampleService.addValueToSample(sampleValuesDto, dataSample);
+                        return ResponseEntity.ok().build();
                     } else {
                         return ResponseEntity.badRequest().build();
                     }

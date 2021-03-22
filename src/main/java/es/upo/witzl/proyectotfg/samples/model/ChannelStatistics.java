@@ -25,6 +25,9 @@ public class ChannelStatistics {
 
     private Double skewness;
 
+    @Column(length = 60)
+    private String distribution;
+
     @JsonIgnore
     public DataChannelId getId() {
         return id;
@@ -74,6 +77,14 @@ public class ChannelStatistics {
 
     public void setSkewness(Double skewness) {
         this.skewness = skewness;
+    }
+
+    public String getDistribution() {
+        return distribution;
+    }
+
+    public void setDistribution(String distribution) {
+        this.distribution = distribution;
     }
 
     @Override

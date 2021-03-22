@@ -322,7 +322,7 @@
             channelInfo += `<li><strong>${[[#{sample.channel.name}]]}</strong> ${c.channelName ?? 'N/A'}</li>`;
             channelInfo += `<li><strong>${[[#{sample.channel.label}]]}</strong> ${c.channelLabel ?? 'N/A'}</li>`;
             channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
-                ? resolution : 'N/A'}</li>`;
+                ? c.resolution : 'N/A'}</li>`;
             channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
                 ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]]}</li>`;
             channelInfo += `<li><strong>${[[#{sample.channel.type.io}]]}</strong> ${c.input
@@ -391,7 +391,7 @@
                 channelInfo += `<li><strong>${[[#{sample.channel.name}]]}</strong> ${c.channelName ?? 'N/A'}</li>`;
                 channelInfo += `<li><strong>${[[#{sample.channel.label}]]}</strong> ${c.channelLabel ?? 'N/A'}</li>`;
                 channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
-                    ? resolution : 'N/A'}</li>`;
+                    ? c.resolution : 'N/A'}</li>`;
                 channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
                     ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]]}</li>`;
                 channelInfo += `<li><strong>${[[#{sample.channel.type.io}]]}</strong> ${c.input
@@ -535,7 +535,6 @@
                 $("#statsLoader").hide();
                 selectedSampleData.dataChannels.forEach((c, i) => {
                     if(i === 0) {
-                        console.log(selectedSampleData);
                         const statNames = Object.keys(c.statistics);
                         const headerRow = $("<tr></tr>");
                         const chName = $(`<th scope="col">${[[#{sample.table.channel}]]}</th>`);
@@ -551,7 +550,7 @@
                     $(row).append(ch);
                     const stats = Object.values(c.statistics);
                     stats.forEach((v) => {
-                        const stat = $(`<td>${v.toPrecision(5)}</td>`);
+                        const stat = $(`<td>${isNaN(v) ? v : v.toPrecision(5)}</td>`);
                         $(row).append(stat);
                     });
                     $("#statsTable tbody").append(row);

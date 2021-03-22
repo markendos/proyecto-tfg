@@ -1,13 +1,9 @@
 package es.upo.witzl.proyectotfg.samples.dto;
 
-import javax.persistence.Column;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
-import java.util.Date;
 import java.util.List;
 
 public class DataSampleDto {
@@ -24,11 +20,7 @@ public class DataSampleDto {
     @Size(max = 60)
     private String deviceFirmware;
 
-    @Column(nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date sampleDate;
-
-    private boolean simulated;
+    private Boolean simulated;
 
     @Min(1)
     @Max(10)
@@ -41,7 +33,11 @@ public class DataSampleDto {
 
     private List<String> channelLabels;
 
-    private List<Integer> sensors;
+    private List<Integer> channelResolutions;
+
+    private List<Long> sensors;
+
+    private Integer size;
 
     public Long getProjectId() {
         return projectId;
@@ -75,19 +71,11 @@ public class DataSampleDto {
         this.deviceFirmware = deviceFirmware;
     }
 
-    public Date getSampleDate() {
-        return sampleDate;
-    }
-
-    public void setSampleDate(Date sampleDate) {
-        this.sampleDate = sampleDate;
-    }
-
-    public boolean isSimulated() {
+    public Boolean isSimulated() {
         return simulated;
     }
 
-    public void setSimulated(boolean simulated) {
+    public void setSimulated(Boolean simulated) {
         this.simulated = simulated;
     }
 
@@ -123,11 +111,27 @@ public class DataSampleDto {
         this.channelLabels = channelLabels;
     }
 
-    public List<Integer> getSensors() {
+    public List<Integer> getChannelResolutions() {
+        return channelResolutions;
+    }
+
+    public void setChannelResolutions(List<Integer> channelResolutions) {
+        this.channelResolutions = channelResolutions;
+    }
+
+    public List<Long> getSensors() {
         return sensors;
     }
 
-    public void setSensors(List<Integer> sensors) {
+    public void setSensors(List<Long> sensors) {
         this.sensors = sensors;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
     }
 }

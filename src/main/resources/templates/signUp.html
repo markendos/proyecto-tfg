@@ -150,7 +150,7 @@
         $(".alert").html("").hide();
         $(".error-list").html("");
         if ($("#password").val() != $("#matchPassword").val()) {
-            $("#globalError").show().html(/!*[[#{PasswordMatches.user}]]*!/);
+            $("#globalError").show().html([[#{PasswordMatches.user}]]);
             return;
         }
         const formData = $('#userForm').serialize();
