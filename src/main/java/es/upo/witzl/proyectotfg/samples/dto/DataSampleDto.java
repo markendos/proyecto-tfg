@@ -20,8 +20,6 @@ public class DataSampleDto {
     @Size(max = 60)
     private String deviceFirmware;
 
-    private Boolean simulated;
-
     @Min(1)
     @Max(10)
     private Float samplingRate;
@@ -69,14 +67,6 @@ public class DataSampleDto {
 
     public void setDeviceFirmware(String deviceFirmware) {
         this.deviceFirmware = deviceFirmware;
-    }
-
-    public Boolean isSimulated() {
-        return simulated;
-    }
-
-    public void setSimulated(Boolean simulated) {
-        this.simulated = simulated;
     }
 
     public Float getSamplingRate() {

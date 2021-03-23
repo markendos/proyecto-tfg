@@ -187,10 +187,12 @@
 
     const renderSubjectActions = (data, type, row) => {
         const viewBtn = `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
-                onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? ''
-            : `disabled`}>${[[#{table.column.action.view}]]}</button>`;
+                         onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? '' : 'disabled'}
+                         data-toggle="tooltip" data-placement="top" title="${[[#{table.column.action.view}]]}">
+                         <i class="fas fa-eye"></i></button>`;
         const registerBtn = `<button class="btn btn-sm btn-primary" onclick="registerSubject(${row.id})"
-                            ${row.role !== 'owner' ? 'disabled' : ''}> ${[[#{table.project.option.subject}]]}</button>`
+                            data-toggle="tooltip" data-placement="top" title="${[[#{table.project.option.subject}]]}"
+                            ${row.role !== 'owner' ? 'disabled' : ''}><i class="fas fa-user-plus"></i></button>`
         return row.subject ? viewBtn : registerBtn;
     };
 

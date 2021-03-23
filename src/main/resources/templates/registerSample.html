@@ -46,7 +46,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="saveModalLabel">Save data</h5>
+                <h5 class="modal-title" id="saveModalLabel" th:utext="#{sample.save.modal.title}"></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -54,35 +54,47 @@
             <div class="modal-body">
                 <form id="fileSaveForm">
                     <div class="row text-center">
-                        <div class="col-2"><strong>Channel</strong></div>
+                        <div class="col-2"><strong th:utext="#{sample.table.channel}">Channel</strong></div>
                         <div class="col-3"><strong>Sensor</strong></div>
-                        <div class="col-5"><strong>Label</strong></div>
-                        <div class="col-2"><strong>Save</strong></div>
+                        <div class="col-5"><strong th:utext="#{sample.modal.save.label}">Label</strong></div>
+                        <div class="col-2"><strong th:utext="#{label.form.save}">Save</strong></div>
                     </div>
                     <hr>
-                    <textarea id="comments" name="comments" class="form-control" placeholder="Comments..."></textarea>
-                    <div class="input-group mt-4">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Local:</span>
+                    <textarea id="comments" name="comments" class="form-control"
+                              th:attr="placeholder=#{sample.modal.save.comments}"></textarea>
+                    <div class="mt-4 d-flex justify-content-between">
+                        <div class="d-flex">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text mr-2">Local:</span>
+                                </div>
+                                <div class="custom-control custom-switch ml-2 my-auto">
+                                    <input type="checkbox" class="custom-control-input" id="txtSwitch">
+                                    <label class="custom-control-label" for="txtSwitch" data-toggle="tooltip"
+                                           data-placement="top" th:attr="title=#{sample.modal.save.tooltip.txt}">
+                                        <i class="fas fa-file-alt fa-2x"></i></label>
+                                </div>
+                                <div class="custom-control custom-switch mx-4 my-auto">
+                                    <input type="checkbox" class="custom-control-input" id="csvSwitch">
+                                    <label class="custom-control-label" for="csvSwitch" data-toggle="tooltip"
+                                           data-placement="top" th:attr="title=#{sample.modal.save.tooltip.csv}">
+                                        <i class="fas fa-file-csv fa-2x"></i></label>
+                                </div>
+                            </div>
                         </div>
-                        <div class="custom-control custom-switch ml-2 my-auto">
-                            <input type="checkbox" class="custom-control-input" id="txtSwitch">
-                            <label class="custom-control-label" for="txtSwitch" data-toggle="tooltip"
-                                   data-placement="top" title="OpenSignals formatted data text file">.txt</label>
-                        </div>
-                        <div class="custom-control custom-switch mx-4 my-auto">
-                            <input type="checkbox" class="custom-control-input" id="csvSwitch">
-                            <label class="custom-control-label" for="csvSwitch" data-toggle="tooltip"
-                                   data-placement="top" title="CSV data file">.csv</label>
-                        </div>
-
-                        <div class="input-group-prepend">
-                            <span class="input-group-text rounded-left">Remote:</span>
-                        </div>
-                        <div class="custom-control custom-switch ml-2 my-auto">
-                            <input type="checkbox" class="custom-control-input" id="dbSwitch" disabled>
-                            <label class="custom-control-label" for="dbSwitch" data-toggle="tooltip"
-                                   data-placement="top" title="Save data to remote database">Database</label>
+                        <div class="d-flex">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text rounded-left mr-2"
+                                          th:utext="#{sample.modal.save.remote}"></span>
+                                </div>
+                                <div class="custom-control custom-switch ml-2 my-auto">
+                                    <input type="checkbox" class="custom-control-input" id="dbSwitch">
+                                    <label class="custom-control-label" for="dbSwitch" data-toggle="tooltip"
+                                           data-placement="top" th:attr="title=#{sample.modal.save.tooltip.remote}">
+                                        <i class="fas fa-database fa-2x"></i></label>
+                                </div>
+                            </div>
                         </div>
                         <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
                     </div>
@@ -90,14 +102,15 @@
                     <input id="deviceName" name="deviceName" hidden/>
                     <input id="deviceModel" name="deviceModel" value="bitalino-rev" hidden/>
                     <input id="deviceFirmware" name="deviceFirmware" hidden/>
-                    <input type="checkbox" id="simulated" name="simulated" hidden/>
                     <input id="size" name="size" hidden/>
                     <input id="projectId" name="projectId" th:attr="value=${project.id}" hidden/>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmSaveBtn">Confirm</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                        th:utext="#{label.form.cancel}">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmSaveBtn"
+                        th:utext="#{label.form.confirm}">Confirm</button>
             </div>
         </div>
     </div>
@@ -140,20 +153,23 @@
                     [[#{label.form.save}]]
                     <i class="far fa-save"></i>
                 </button>
-                <input type="button" class="btn btn-secondary ml-2" id="resetBtn" th:value="#{sample.button.reset}" disabled/>
+                <input type="button" class="btn btn-secondary ml-2" id="resetBtn"
+                       th:value="#{sample.button.reset}" disabled/>
             </div>
         </div>
         <div class="pb-2 mb-3 border-bottom">
             <div class="d-flex my-0">
                 <button type="button" class="btn btn-primary btn-sm" id="connectBtn" th:inline="text">
-                    [[#{sample.device.button}]]
-                    <i class="fab fa-bluetooth-b"></i>
+                    [[#{sample.device.button}]] &nbsp;
+                    <i class="fab fa-bluetooth"></i>
                 </button>
-                <span th:utext="#{sample.device.status.disconnected}" id="status" class="disconnected my-auto mx-2"></span>
+                <span id="status" class="disconnected my-auto mx-2"
+                      th:utext="#{sample.device.status.disconnected}">
+                </span>
             </div>
             <div id="controlBtns" class="d-flex my-4 align-items-center">
                 <div class="pl-0 col">
-                    <label class="my-auto mr-1" for="numSamples">Nº Samples:</label>
+                    <label class="my-auto mr-1" for="numSamples" th:utext="#{sample.label.number}"></label>
                     <input class="form-control form-control-sm d-inline" id="numSamples" type="number" value=0 min="0"
                            step="5" style="width:100px" data-toggle="tooltip" data-placement="top"
                            th:attr="title=#{sample.label.number.tooltip}" disabled/>
@@ -230,7 +246,7 @@
     let count = 0;
     let limit = -1;
     const numChannels = 6
-    const aChannels = new Array(numChannels);
+    let aChannels = new Array(numChannels);
     aChannels.fill(false)
     let sampling = false;
     let sampledData = null;
@@ -462,8 +478,8 @@
         }
         //If the message was correctly received, it starts decoding
         if (CRC == ((x3 << 3) | (x2 << 2) | (x1 << 1) | x0)) {
-            const digital = new Array();
-            const analog = new Array();
+            const digital = [];
+            const analog = [];
 
             /*parse frames*/
             const seq = ((value.getUint8(j - 0) & 0xF0) >> 4) & 0xF;
@@ -558,7 +574,7 @@
         }
     }
 </script>
-<script>
+<script th:inline="javascript">
     $("#connectBtn").click(function () {
         if (isWebBluetoothEnabled()) {
             discoverDevices();
@@ -579,7 +595,7 @@
                 startSampling();
             }
         } else {
-            alert("At least one analog channel (A1-A6) must be enabled to start data acquisition.");
+            alert(htmlDecode([[#{message.alert.sample.activeChannel}]]));
         }
     });
     $("#stopSamplingBtn").click(function () {
@@ -653,7 +669,7 @@
                     $(row).append(col);
 
                     col = $("<div class='col-2'></div>");
-                    let check = $("<input class='form-control mx-auto channelCheck' type='checkbox'/>");
+                    let check = $(`<input class='form-control mx-auto channelCheck' type='checkbox'/>`);
                     $(check).attr("checked", true);
                     $(check).css("width", "30%");
 
@@ -668,7 +684,6 @@
             $("#deviceFirmware").val(firmware);
             $("#sRate").val(sampledFrames[0][1]);
             $("#size").val(sampledData.length);
-            $("#simulated").attr("checked", $("#isSimulated").is(":checked"));
         });
 
         $('#modalFileSave').on('hidden.bs.modal', function () {
@@ -679,8 +694,12 @@
         });
 
         $("#confirmSaveBtn").click(function () {
+            const date = new Date();
             if ($("#txtSwitch").is(":checked")) {
-                saveOpenSignalsData();
+                saveOpenSignalsData(date);
+            }
+            if($("#csvSwitch").is(":checked")) {
+                saveCSV(date);
             }
             if($("#dbSwitch").is(":checked")) {
                 saveSample();
@@ -698,14 +717,13 @@
 
     });
     function saveSample() {
-        console.log(sampledData);
-        console.log(sampledFrames);
-        console.log(aChannels);
         event.preventDefault();
         $(".alert").html("").hide();
         $(".error-list").html("");
-        const formData = $('#fileSaveForm').serialize();
+        $("input.channelCheck:not(:checked)").closest(".row").find("input,select").attr("disabled", true);
+        const formData = $('#fileSaveForm').serializeArray();
         $('#modalFileSave').modal('hide');
+
         $.post(serverContext + "sample/add", formData, function (data) {
             const sample = data.new;
             saveValues(sample);
@@ -727,40 +745,55 @@
     }
 
     function saveValues(sample) {
+        console.log(sampledFrames[0][0]);
         if(sample?.size === sampledData.length) {
             const offset = 2;
-            let promises = [];
-            let channelValues = [];
+            const promises = [];
+            const channelValues = [];
 
-            for(let i = offset; i < sampledData[0].length; i++) {
-                channelValues.push([]);
+            const checks = $("#fileSaveForm").find("input.channelCheck");
+            let aux = 0;
+            let aChannels = [...sampledFrames[0][0]];
+
+            for(let i = 0; i < aChannels.length; i++) {
+                if(aChannels[i]) {
+                    if(!$(checks[aux++]).is(":checked")) {
+                        aChannels[i] = false;
+                    }
+                }
+            }
+            for(let i = 0; i < aChannels.length; i++) {
+                    channelValues.push([]);
             }
             sampledData.forEach((v, i) => {
                 for(let j = offset; j < v.length; j++) {
-                    channelValues[j-offset].push(v[j]);
+                    if(aChannels[j-offset]) {
+                        channelValues[j-offset].push(v[j]);
+                    }
                 }
             });
-
+            aux = 0;
             promises.push(channelValues.map((v, i) => {
-                return new Promise(function(resolve, reject) {
-                    const req = new XMLHttpRequest();
-                    req.open('POST', serverContext + `sample/saveValues`);
-                    req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                    req.onload = function() {
-                        if (req.status == 200) {
-                            resolve(JSON.parse(req.response));
-                        }
-                        else {
-                            reject();
-                        }
-                    };
+                if (v.length) {
+                    return new Promise(function (resolve, reject) {
+                        const req = new XMLHttpRequest();
+                        req.open('POST', serverContext + `sample/saveValues`);
+                        req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                        req.onload = function () {
+                            if (req.status == 200) {
+                                resolve(JSON.parse(req.response));
+                            } else {
+                                reject();
+                            }
+                        };
 
-                    req.send(JSON.stringify({
-                        sampleId: sample.id,
-                        channelName: sample.dataChannels[i].channelName ?? `A${i + 1}`,
-                        values: v,
-                    }));
-                })
+                        req.send(JSON.stringify({
+                            sampleId: sample.id,
+                            channelName: sample.dataChannels[aux++].channelName ?? `A${i + 1}`,
+                            values: v,
+                        }));
+                    })
+                }
             }));
 
             Promise.all(promises).then(results => {
@@ -790,8 +823,8 @@
             stopSampling();
         }
         $("#samples tbody").empty();
-        sampledData = new Array();
-        sampledFrames = new Array();
+        sampledData = [];
+        sampledFrames = [];
         $("#linechart").empty();
         $("#saveDataBtn").attr("disabled", true);
         $("#sampling-progress").attr("aria-valuenow", 0);
@@ -832,95 +865,175 @@
         chart.draw(data, google.charts.Line.convertOptions(options));
     }
 
-    function saveOpenSignalsData() {
+    function saveCSV(date) {
+        let sRate = sampledFrames[0][1];
+        let timeIncrement = (1/sRate)*1000;
+
+        let labels = $("#fileSaveForm").find("input.chLabel");
+        let checks = $("#fileSaveForm").find("input.channelCheck");
+        let aChannels = [...sampledFrames[0][0]];
+
+        let aux = 0;
+
+        for(let i = 0; i < aChannels.length; i++) {
+            if(aChannels[i]) {
+                if(!$(checks[aux++]).is(":checked")) {
+                    aChannels[i] = false;
+                }
+            }
+        }
+
+        let csv = `"seq","timestamp",`;
+
+        for(let i = 0; i < aChannels.length; i++) {
+            if(aChannels[i]) {
+                const label = $(labels[aux++]).val();
+                csv += `"A${i+1}${label ? '[' + label + ']' : '' }",`;
+                csv += `"A${i+1}${label ? '[' + label + ']' : '' }_norm",`;
+            }
+        }
+        csv = csv.slice(0,-1);
+        csv += "\n";
+
+        const active = aChannels.filter((x) => x);
+        const resolutions = [];
+        for(let i = 0; i < active.length; i++) {
+            if(active.length == 6 && i >= 4) {
+                resolutions.push(6);
+            }
+            else {
+                resolutions.push(10);
+            }
+        }
+
+        for(let i = 1; i < sampledFrames.length; i++) {
+            date = new Date(date.getTime() + timeIncrement);
+            let month = (date.getMonth()+1).toString().padStart(2,0);
+            let day = date.getDate().toString().padStart(2,0);
+            let hours = date.getHours().toString().padStart(2,0);
+            let minutes = date.getMinutes().toString().padStart(2,0);
+            let seconds = date.getSeconds().toString().padStart(2,0);
+            csv += `${i},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}"`;
+            for(let j = 0; j < sampledFrames[i].analog.length; j++) {
+                if($(checks[j]).is(":checked")) {
+                    csv += "," + sampledFrames[i].analog[j];
+                    csv += "," + normalizeValue(sampledFrames[i].analog[j], resolutions[j]);
+                }
+            }
+            csv += "\n";
+        }
+
+        const blob = new Blob([csv],
+            {type: "text/plain;charset=ascii"});
+
+        let filename = "data_" + device.name + "_" + date.getTime() + ".csv";
+
+        saveAs(blob, filename);
+    }
+
+    function normalizeValue(value, bits) {
+        const min = 0;
+        const max = Math.pow(2, Number.parseInt(bits));
+        return ((value - min) / (max - min)).toPrecision(6);
+    }
+
+    function saveOpenSignalsData(date) {
         const comments = $("#saveComments").val();
         let sensors = $("#fileSaveForm").find("select");
         let labels = $("#fileSaveForm").find("input.chLabel");
         let checks = $("#fileSaveForm").find("input.channelCheck");
 
-        let d = new Date();
-        let month = (d.getMonth() + 1).toString().padStart(2, 0);
-        let day = d.getDate().toString().padStart(2, 0);
+        let month = (date.getMonth()+1).toString().padStart(2,0);
+        let day = date.getDate().toString().padStart(2,0);
+        let hours = date.getHours().toString().padStart(2,0);
+        let minutes = date.getMinutes().toString().padStart(2,0);
+        let seconds = date.getSeconds().toString().padStart(2,0);
 
-        let hours = d.getHours().toString().padStart(2, 0);
-        let minutes = d.getMinutes().toString().padStart(2, 0);
-        let seconds = d.getSeconds().toString().padStart(2, 0);
-
-        let aChannels = sampledFrames[0][0];
+        let aChannels = [...sampledFrames[0][0]];
         let sRate = sampledFrames[0][1];
 
         let aux = 0;
 
-        aChannels.filter((c, i) => aChannels[i] && !$(checks[aux++]).is(":checked")).forEach((c, i) => {
-            aChannels[i] = false;
-        });
+        for(let i = 0; i < aChannels.length; i++) {
+            if(aChannels[i]) {
+                if(!$(checks[aux++]).is(":checked")) {
+                    aChannels[i] = false;
+                }
+            }
+        }
 
         let txt = '# OpenSignals Text File Format\n';
         txt += '# {"' + device.name + '": {"sensor": [';
 
-        aChannels.filter((c, i) => $(checks[i]).is(":checked")).forEach((c, i) => {
-            txt += '"' + $(sensors[i]).val() + '", ';
-        });
+        for(let i = 0; i < sensors.length; i++) {
+            if($(checks[i]).is(":checked")) {
+                txt += '"' + $(sensors[i]).val() + '", ';
+            }
+        }
 
-        txt = txt.slice(0, -2);
+        txt = txt.slice(0,-2);
         txt += '], "device name": "' + device.name + '", "column": ["nSeq", "I1", "I2", "O1", "O2", ';
 
-        aChannels.filter((c, i) => aChannels[i]).forEach((c, i) => {
-            txt += '"A' + (i + 1) + '", ';
-        });
+        for(let i = 0; i < aChannels.length; i++) {
+            if(aChannels[i]) {
+                txt += '"A' + (i+1) + '", ';
+            }
+        }
 
-        txt = txt.slice(0, -2);
-        txt += '], "sync interval": 2, "time": "' + hours + ":" + minutes + ":" + seconds + "." + d.getMilliseconds();
+        txt = txt.slice(0,-2);
+        txt += '], "sync interval": 2, "time": "' + hours + ":" + minutes + ":" + seconds + "." + date.getMilliseconds();
         txt += '", "comments": "' + comments + '", "device connection": "' + device.name + '", "channels": [';
 
-        aChannels.filter((c, i) => aChannels[i]).forEach((c, i) => {
-            txt += (i + 1) + ', ';
-        });
+        for(let i = 0; i < aChannels.length; i++) {
+            if(aChannels[i]) {
+                txt += (i+1) + ', ';
+            }
+        }
 
-        txt = txt.slice(0, -2);
-        txt += '], "date": "' + d.getFullYear() + "-" + month + "-" + day + '"';
-        txt += ', "mode": 0, "digital IO": [0, 0, 1, 1], "firmware version": "' + firmware
-            + '", "device": "bitalino_rev", "position": 0, ';
+        txt = txt.slice(0,-2);
+        txt += '], "date": "' + date.getFullYear() + "-" + month + "-" + day + '"';
+        txt += ', "mode": 0, "digital IO": [0, 0, 1, 1], "firmware version": "' + firmware +
+            '", "device": "bitalino_rev", "position": 0, ';
         txt += '"sampling rate": ' + sRate + ', "label": [';
 
-        labels.filter((l, i) => $(checks[i]).is(":checked")).labels.forEach((l, i) => {
-            txt += '"' + $(labels[i]).val() + '", ';
-        });
+        for(let i = 0; i < labels.length; i++) {
+            if($(checks[i]).is(":checked")) {
+                txt += '"' + $(labels[i]).val() + '", ';
+            }
+        }
 
-        txt = txt.slice(0, -2);
+        txt = txt.slice(0,-2);
         txt += '], "resolution": [4, 1, 1, 1, 1, ';
 
-        let active = aChannels.filter(function (x) {
-            return x == true
-        });
+        const active = aChannels.filter((x) => x);
 
-        active.forEach((c, i) => {
-            if (active.length == 6 && i >= 4) {
+        for(let i = 0; i < active.length; i++) {
+            if(active.length == 6 && i >= 4) {
                 txt += 6;
-            } else {
+            }
+            else {
                 txt += 10;
             }
 
             txt += ", ";
-        });
+        }
 
-        txt = txt.slice(0, -2);
+        txt = txt.slice(0,-2);
         txt += '], "special": [';
 
-        for (let i = 0; i < aChannels.length; i++) {
-            if (aChannels[i]) {
+        for(let i = 0; i < aChannels.length; i++) {
+            if(aChannels[i]) {
                 txt += '{}, ';
             }
         }
 
-        txt = txt.slice(0, -2);
+        txt = txt.slice(0,-2);
         txt += ']}}\n' + "# EndOfHeader\n";
 
-        for (let i = 1; i < sampledFrames.length; i++) {
-            txt += sampledFrames[i].seq + "\t" + sampledFrames[i].digital[0] + "\t" + sampledFrames[i].digital[1]
-                + "\t" + sampledFrames[i].digital[2] + "\t" + sampledFrames[i].digital[3];
-            for (let j = 0; j < sampledFrames[i].analog.length; j++) {
-                if ($(checks[j]).is(":checked")) {
+        for(let i = 1; i < sampledFrames.length; i++) {
+            txt += sampledFrames[i].seq + "\t" + sampledFrames[i].digital[0] + "\t" + sampledFrames[i].digital[1] + "\t" + sampledFrames[i].digital[2] + "\t" + sampledFrames[i].digital[3];
+            for(let j = 0; j < sampledFrames[i].analog.length; j++) {
+                if($(checks[j]).is(":checked")) {
                     txt += "\t" + sampledFrames[i].analog[j];
                 }
             }
@@ -930,7 +1043,7 @@
         const blob = new Blob([txt],
             {type: "text/plain;charset=ascii"});
 
-        let filename = "opensignals_" + device.name + "_" + d.getFullYear() + month + day;
+        let filename = "opensignals_" + device.name + "_" + date.getFullYear() + month + day;
         filename += "_" + hours + "_" + minutes + "_" + seconds + ".txt";
 
         saveAs(blob, filename);

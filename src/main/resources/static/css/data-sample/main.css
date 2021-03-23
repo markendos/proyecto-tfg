@@ -184,3 +184,8 @@ th, td {
 .table100.ver3 .ps__rail-y .ps__thumb-y::before {
   background-color: #00ad5f;
 }
+
+/***** Modal *****/
+#fileSaveForm i {
+  color: #343a40;
+}

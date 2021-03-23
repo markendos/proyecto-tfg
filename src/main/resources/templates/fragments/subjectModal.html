@@ -105,6 +105,7 @@
 
         function registerSubject(projectId) {
             $('#subjectForm')[0].reset();
+            $("#editSubjectBtn").remove();
             makeSubjectEditable(true);
             $("#derivedFields").hide();
             $('#subjectProjectId').val(projectId);

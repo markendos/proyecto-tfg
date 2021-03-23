@@ -28,8 +28,6 @@ public class DataSample {
     @Temporal(TemporalType.TIMESTAMP)
     private Date sampleDate;
 
-    private Boolean simulated;
-
     private Float samplingRate;
 
     private String comments;
@@ -83,14 +81,6 @@ public class DataSample {
 
     public void setSampleDate(Date sampleDate) {
         this.sampleDate = sampleDate;
-    }
-
-    public Boolean isSimulated() {
-        return simulated;
-    }
-
-    public void setSimulated(Boolean simulated) {
-        this.simulated = simulated;
     }
 
     public Float getSamplingRate() {
@@ -163,7 +153,6 @@ public class DataSample {
                 ", deviceModel='" + deviceModel + '\'' +
                 ", deviceFirmware='" + deviceFirmware + '\'' +
                 ", sampleDate=" + sampleDate +
-                ", simulated=" + simulated +
                 ", samplingRate=" + samplingRate +
                 ", comments='" + comments + '\'' +
                 ", dataChannels=" + dataChannels +

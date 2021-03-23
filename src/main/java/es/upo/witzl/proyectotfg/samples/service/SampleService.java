@@ -51,7 +51,6 @@ public class SampleService implements ISampleService {
         ds.setDeviceName(sampleDto.getDeviceName());
         ds.setDeviceModel(sampleDto.getDeviceModel());
         ds.setDeviceFirmware(sampleDto.getDeviceFirmware());
-        sampleDto.setSimulated(sampleDto.isSimulated());
         ds.setStatsGenerated(false);
         ds = dataSampleRepository.save(ds);
 
