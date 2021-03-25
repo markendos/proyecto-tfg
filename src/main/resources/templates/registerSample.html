@@ -109,7 +109,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         th:utext="#{label.form.cancel}">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmSaveBtn"
+                <button type="button" class="btn btn-primary" id="confirmSaveBtn" onclick="handleSampleExport()"
                         th:utext="#{label.form.confirm}">Confirm</button>
             </div>
         </div>
@@ -246,8 +246,7 @@
     let count = 0;
     let limit = -1;
     const numChannels = 6
-    let aChannels = new Array(numChannels);
-    aChannels.fill(false)
+    let aChannels = (new Array(numChannels)).fill(false);
     let sampling = false;
     let sampledData = null;
     let sampledFrames = null;
@@ -258,9 +257,14 @@
     const acquiring = /*[[#{sample.device.status.acquiring}]]*/;
 
     Frame.prototype.toString = function frameToString() {
-        const str = "Frame{" + "CRC=" + this.crc + ", seq=" + this.seq + ", analog=" + this.analog + ", digital=" + this.digital + "}";
+        const str = "Frame{" + "CRC=" + this.crc + ", seq=" + this.seq + ", analog=" + this.analog
+            + ", digital=" + this.digital + "}";
 
         return str;
+    }
+
+    function isWebBluetoothEnabled() {
+        return (navigator.bluetooth);
     }
 
     async function discoverDevices() {
@@ -629,6 +633,11 @@
         });
 
         $("#modalFileSave").on('shown.bs.modal', function () {
+            let chInfo = $("#fileSaveForm").find($("div.channelInfo"));
+            for (let i = 1; i < chInfo.length; i++) {
+                $(chInfo[i]).remove();
+            }
+
             let aChannels = sampledFrames[0][0];
             const sensors = [[${sensors}]];
             let active = aChannels.filter(function (x) {
@@ -645,7 +654,7 @@
 
             for (let i = 0; i < aChannels.length; i++) {
                 if (aChannels[i]) {
-                    let row = $("<div class='row my-2 text-center align-items-center'></div>");
+                    let row = $("<div class='row my-2 text-center align-items-center channelInfo'></div>");
 
                     let col = $("<div class='col-2 align-middle py-2'></div>");
                     $(col).append(`<input name="channelNames" value="A${i+1}" class="w-100 form-control" readonly/>`);
@@ -686,29 +695,6 @@
             $("#size").val(sampledData.length);
         });
 
-        $('#modalFileSave').on('hidden.bs.modal', function () {
-            let ch = $("#fileSaveForm").find($("div.row"));
-            for (let i = 1; i < ch.length; i++) {
-                $(ch[i]).remove();
-            }
-        });
-
-        $("#confirmSaveBtn").click(function () {
-            const date = new Date();
-            if ($("#txtSwitch").is(":checked")) {
-                saveOpenSignalsData(date);
-            }
-            if($("#csvSwitch").is(":checked")) {
-                saveCSV(date);
-            }
-            if($("#dbSwitch").is(":checked")) {
-                saveSample();
-            }
-            $(function () {
-                $('#modalFileSave').modal('toggle');
-            });
-        });
-
         $("#resetBtn").click(function () {
             $("th.clickeable").addClass("channel");
             aChannels.fill(false);
@@ -716,18 +702,33 @@
         });
 
     });
+
+    function handleSampleExport() {
+        $('#modalFileSave').modal('hide');
+        if($("#dbSwitch").is(":checked")) {
+            showSpinner();
+            saveSample();
+        }
+        const date = new Date();
+        if ($("#txtSwitch").is(":checked")) {
+            saveOpenSignalsData(date);
+        }
+        if($("#csvSwitch").is(":checked")) {
+            saveCSV(date);
+        }
+    }
+
     function saveSample() {
-        event.preventDefault();
         $(".alert").html("").hide();
         $(".error-list").html("");
         $("input.channelCheck:not(:checked)").closest(".row").find("input,select").attr("disabled", true);
         const formData = $('#fileSaveForm').serializeArray();
-        $('#modalFileSave').modal('hide');
 
         $.post(serverContext + "sample/add", formData, function (data) {
             const sample = data.new;
             saveValues(sample);
         }).fail(function (data) {
+            hideSpinner();
             if (data.responseJSON?.error?.indexOf("InternalError") > -1) {
                 $("#errormsg").show().append(data.responseJSON.message);
             } else {
@@ -744,8 +745,7 @@
         });
     }
 
-    function saveValues(sample) {
-        console.log(sampledFrames[0][0]);
+    async function saveValues(sample) {
         if(sample?.size === sampledData.length) {
             const offset = 2;
             const promises = [];
@@ -797,15 +797,20 @@
             }));
 
             Promise.all(promises).then(results => {
+                hideSpinner();
                 $("#successmsg").show().html([[#{message.sample.success.register}]]);
+                $(".alert").children("i.fa-window-close").remove();
+                $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
             }, reason => {
                 $.ajax({
                     type: 'DELETE',
                     url: serverContext + 'sample/delete/' + sample.id,
                     success: (data) => {
+                        hideSpinner();
                         $("#errormsg").show().html(/*[[#{message.sample.error.register}]]*/);
                     },
                     error: (data) => {
+                        hideSpinner();
                         $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
                     }
                 });
@@ -814,10 +819,6 @@
     }
 </script>
 <script th:inline="javascript">
-    function isWebBluetoothEnabled() {
-        return (navigator.bluetooth);
-    }
-
     function clearData() {
         if (sampling) {
             stopSampling();
@@ -874,7 +875,6 @@
         let aChannels = [...sampledFrames[0][0]];
 
         let aux = 0;
-
         for(let i = 0; i < aChannels.length; i++) {
             if(aChannels[i]) {
                 if(!$(checks[aux++]).is(":checked")) {
@@ -885,6 +885,7 @@
 
         let csv = `"seq","timestamp",`;
 
+        aux = 0;
         for(let i = 0; i < aChannels.length; i++) {
             if(aChannels[i]) {
                 const label = $(labels[aux++]).val();

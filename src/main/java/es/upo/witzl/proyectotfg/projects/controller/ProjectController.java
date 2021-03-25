@@ -6,6 +6,8 @@ import es.upo.witzl.proyectotfg.projects.dto.ProjectDto;
 import es.upo.witzl.proyectotfg.projects.model.Project;
 import es.upo.witzl.proyectotfg.projects.service.ICollaborationRequestService;
 import es.upo.witzl.proyectotfg.projects.service.IProjectService;
+import es.upo.witzl.proyectotfg.projects.service.ISubjectService;
+import es.upo.witzl.proyectotfg.samples.service.ISampleService;
 import es.upo.witzl.proyectotfg.users.model.User;
 import es.upo.witzl.proyectotfg.users.security.MyUserPrincipal;
 import es.upo.witzl.proyectotfg.users.service.IUserService;
@@ -38,6 +40,12 @@ public class ProjectController {
 
     @Autowired
     ICollaborationRequestService collaborationRequestService;
+
+    @Autowired
+    ISampleService sampleService;
+
+    @Autowired
+    ISubjectService subjectService;
 
     @PostMapping(value = "/project/add", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity createProject(@Valid ProjectDto projectDto, final Authentication authentication)
@@ -130,6 +138,15 @@ public class ProjectController {
             if (projectOptional.isPresent()) {
                 Project project = projectOptional.get();
                 if(project.getUser().equals(user)) {
+                    if(project.hasCollaborationRequests()) {
+                        collaborationRequestService.deleteProjectCollaborations(project);
+                    }
+                    if(project.hasDataSamples()) {
+                        sampleService.deleteSamples(project.getDataSamples());
+                    }
+                    if(project.getSubject() != null) {
+                        subjectService.deleteSubject(project.getSubject());
+                    }
                     projectService.deleteProject(project);
 
                     return ResponseEntity.ok().build();

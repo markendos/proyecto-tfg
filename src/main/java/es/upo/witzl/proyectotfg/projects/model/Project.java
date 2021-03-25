@@ -130,6 +130,15 @@ public class Project {
         return dataSamples == null ? 0 : dataSamples.size();
     }
 
+    public boolean hasCollaborationRequests() {
+        return this.getCollaborationRequests() != null && !this.getCollaborationRequests().isEmpty();
+    }
+
+    public boolean hasDataSamples() {
+        return this.getDataSamples() != null && !this.getDataSamples().isEmpty();
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

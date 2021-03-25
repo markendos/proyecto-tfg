@@ -1,0 +1,274 @@
+<div th:fragment="sampleViewModal">
+    <div class="modal" id="sampleModal" tabindex="-1" aria-labelledby="sampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sampleModalLabel" th:utext="#{sample.modal.title}">Modal
+                        title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <ul id="sampleNav" class="nav nav-tabs">
+                    <li class="nav-item" id="tableTab">
+                        <button class="nav-link active btn btn-link" onclick="toggleView('table')"
+                                th:utext="#{sample.tab.table}">Table</button>
+                    </li>
+                    <li class="nav-item" id="chartTab">
+                        <button class="nav-link btn btn-link" onclick="toggleView('chart')"
+                                th:utext="#{sample.tab.chart}">Chart</button>
+                    </li>
+                    <li class="nav-item dropdown" id="statsTab">
+                        <button class="nav-link dropdown-toggle btn btn-link" data-toggle="dropdown" role="button"
+                                th:utext="#{sample.tab.stats}" aria-haspopup="true" aria-expanded="false">Statistics
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item btn btn-link" onclick="toggleView('statsUni')"
+                                    th:utext="#{sample.tab.stats.univariate}">Univariate</button>
+                            <button class="dropdown-item btn btn-link" onclick="toggleView('statsMulti')"
+                                    th:utext="#{sample.tab.stats.multivariate }">Multivariate</button>
+                        </div>
+                    </li>
+                </ul>
+                <div class="modal-body">
+                    <div class="table-responsive sampleTabContent" id="tableView">
+                        <table id="sampleTable" class="table table-striped text-center">
+                            <thead class="thead-dark"></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="container-fluid p-4 sampleTabContent" id="chartView" style="display: none;">
+                        <div id="chartLoader" role="status" style="width: 3rem; height: 3rem;"
+                             class="spinner-grow text-primary">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div id="chartContent"></div>
+                    </div>
+                    <div class="table-responsive sampleTabContent" id="statsUniView" style="display: none;">
+                        <div id="statsUniLoader" role="status" style="width: 3rem; height: 3rem; display: flex"
+                             class="spinner-grow text-primary mx-auto">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <table id="statsUniTable" class="table table-striped text-center">
+                            <thead class="thead-dark"></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive sampleTabContent" id="statsMultiView" style="display: none;">
+                        <div id="statsMultiLoader" role="status" style="width: 3rem; height: 3rem; display: flex"
+                             class="spinner-grow text-primary mx-auto">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <table id="statsMultiTable" class="table table-striped text-center">
+                            <thead class="thead-dark"></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="custom-control custom-switch mr-4 my-auto">
+                        <input type="checkbox" class="custom-control-input" id="normalizeSwitch">
+                        <label class="custom-control-label" for="normalizeSwitch"
+                               th:utext="#{sample.modal.normalize}"></label>
+                    </div>
+                    <input type="text" id="sampleId" name="projectId" value="" hidden>
+                    <button class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
+                            th:attr="title=#{sample.button.report.generate}">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button class="btn btn-info" data-toggle="tooltip" data-placement="top"
+                            th:attr="title=#{sample.button.export}">
+                        <i class="fas fa-file-download"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Sample Modal JS Functionalities-->
+    <script th:inline="javascript">
+        //Global variables to store retrieved sample data
+        let selectedSampleData = undefined;
+        let selectedSampleValues = undefined
+        let selectedSampleValuesNorm = undefined
+        let normalized = false;
+        let correlationMatrix = undefined;
+
+        $(document).ready(function () {
+            google.charts.load('current', {'packages': ['line']});
+            $("#normalizeSwitch").change(() => toggleDataNormalization());
+        });
+
+        function toggleDataNormalization() {
+            normalized = !normalized;
+            if(normalized && !selectedSampleValuesNorm) {
+                selectedSampleValuesNorm = [];
+                selectedSampleValues.forEach((channel) => {
+                    selectedSampleValuesNorm.push(normalizeZeroToOne(channel));
+                })
+            }
+            $("#sampleTable thead").empty();
+            $("#sampleTable tbody").empty();
+            $("#chartContent").empty();
+            renderSampleData(selectedSampleData.id);
+            const currentViewId = $("#sampleNav .nav-link.active").closest("li.nav-item").attr("id");
+            switch (currentViewId) {
+                case 'tableTab': toggleView('table'); break;
+                case 'chartTab': toggleView('chart'); break;
+                case 'statsTab': toggleView('statsUni'); break;
+            }
+        }
+
+        function toggleView(view) {
+            switch (view) {
+                case 'chart':
+                    $(".sampleTabContent").hide();
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#chartTab button.nav-link").addClass("active");
+                    $("#chartView").show();
+                    if(!$("#chartContent").children().length) {
+                        $("#chartLoader").show();
+                        drawChart();
+                    }
+                    break;
+                case 'table':
+                    $(".sampleTabContent").hide();
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#tableTab button.nav-link").addClass("active");
+                    $("#tableView").show();
+                    break;
+                case 'statsUni':
+                    $(".sampleTabContent").hide();
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#statsTab button.nav-link").addClass("active");
+                    $("#statsUniView").show();
+                    $("#statsUniLoader").show();
+                    loadUnivariateStatistics();
+                    $("#statsUniLoader").hide();
+                    break;
+                case 'statsMulti':
+                    $(".sampleTabContent").hide();
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#statsTab button.nav-link").addClass("active");
+                    $("#statsMultiView").show();
+                    $("#statsMultiLoader").show();
+                    loadMultivariateStatistics();
+                    $("#statsMultiLoader").hide();
+                    break;
+            }
+        }
+
+        function loadUnivariateStatistics() {
+            if(selectedSampleData) {
+                if(!selectedSampleData.statsGenerated) {
+                    if(confirm(htmlDecode([[#{message.confirm.sample.generateStatistics}]]))) {
+                        generateStatistics(selectedSampleData.id);
+                    }
+                } else if($("#statsUniTable tbody").children().length === 0) {
+                    selectedSampleData.dataChannels.forEach((c, i) => {
+                        if(i === 0) {
+                            const statNames = Object.keys(c.statistics);
+                            const headerRow = $("<tr></tr>");
+                            const chName = $(`<th scope="col">${[[#{sample.table.channel}]]}</th>`);
+                            $(headerRow).append(chName);
+                            statNames.forEach((k) => {
+                                const cell = $(`<th scope="col">${k}</th>`);
+                                $(headerRow).append(cell);
+                            });
+                            $("#statsUniTable thead").append(headerRow);
+                        }
+                        const row = $("<tr></tr>");
+                        const ch = $(`<th scope="row">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
+                        $(row).append(ch);
+                        const stats = Object.values(c.statistics);
+                        stats.forEach((v) => {
+                            const stat = $(`<td>${isNaN(v) ? v : v.toPrecision(6)}</td>`);
+                            $(row).append(stat);
+                        });
+                        $("#statsUniTable tbody").append(row);
+                    });
+                }
+            } else {
+                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+            }
+        }
+
+        function loadMultivariateStatistics() {
+            if (selectedSampleData) {
+                if(!correlationMatrix) {
+                    correlationMatrix = calculateCorrelations(selectedSampleValues);
+                }
+                selectedSampleData.dataChannels.forEach((c, i) => {
+                    if(i === 0) {
+                        const headerRow = $("<tr></tr>");
+                        $(headerRow).append($(`<th scope="col">${[[#{sample.table.channel}]]}</th>`));
+                        selectedSampleData.dataChannels.forEach((ch, j) => {
+                            const cell = $(`<th scope="col">${ch.channelName}</th>`);
+                            $(headerRow).append(cell);
+                        });
+                        $("#statsMultiTable thead").append(headerRow);
+                    }
+                    const row = $("<tr></tr>");
+                    const ch = $(`<th scope="row">${c.channelName}</th>`);
+                    $(row).append(ch);
+                    correlationMatrix[i].forEach((v) => {
+                        const correlation = $(`<td>${v ?? '-'}</td>`);
+                        $(row).append(correlation);
+                    });
+                    $("#statsMultiTable tbody").append(row);
+                });
+            }
+        }
+
+        function generateStatistics(sampleId) {
+            $.ajax({
+                type: 'GET',
+                url: serverContext + 'sample/statistics/' + sampleId,
+                success: (data) => {
+                    selectedSampleData = data.sample;
+                    loadUnivariateStatistics();
+                    fetchSamples();
+                },
+                error: (data) => {
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
+        }
+
+        function drawChart(listener) {
+            if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))) {
+                const dataTable = new google.visualization.DataTable();
+                dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
+
+                selectedSampleData.dataChannels.forEach((c) => {
+                    dataTable.addColumn('number', c.channelName);
+                });
+
+                const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
+
+                data[0].forEach((r, index1) => {
+                    const row = [index1 + 1];
+                    selectedSampleData.dataChannels.forEach((c, index2) => {
+                        row.push(Number.parseFloat(data[index2][index1]));
+                    })
+                    dataTable.addRow(row);
+                });
+
+                const options = {
+                    chart: {
+                        title: '',
+                        subtitle: '',
+                    },
+                    height: 500,
+                    hAxis: { gridlines: {count: -1} },
+                    explorer: { axis: 'horizontal' },
+                };
+
+                const chart = new google.charts.Line(document.getElementById("chartContent"));
+                google.visualization.events.addListener(chart, 'ready', () => {
+                    $("#chartLoader").hide();
+                });
+                chart.draw(dataTable, google.charts.Line.convertOptions(options));
+            }
+        }
+    </script>
+</div>

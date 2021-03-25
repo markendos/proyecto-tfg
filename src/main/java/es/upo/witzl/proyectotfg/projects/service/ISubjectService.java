@@ -7,4 +7,6 @@ import es.upo.witzl.proyectotfg.projects.model.Subject;
 public interface ISubjectService {
 
     Subject saveSubject(SubjectDto subjectDto, Project project);
+
+    void deleteSubject(Subject subject);
 }

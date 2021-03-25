@@ -74,12 +74,17 @@ i.notification {
 }
 
 /***** Notification Banners *****/
-.alert {
+div.alert {
     margin: 0;
     display: flex;
     opacity: 0.9;
     align-items: center;
     overflow-wrap: anywhere;
+    position: absolute;
+    opacity: 0.9;
+    z-index: 10;
+    top: 56px;
+    width: 100%;
 }
 
 .alert > i.fa-window-close {
@@ -352,14 +357,6 @@ span {
 
 a[data-toggle="collapse"] {
     position: relative;
-}
-
-.dropdown-toggle::after {
-    display: block;
-    position: absolute;
-    top: 50%;
-    right: 20px;
-    transform: translateY(-50%);
 }
 
 ul ul a {

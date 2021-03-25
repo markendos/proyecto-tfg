@@ -63,76 +63,8 @@
 <!-- Project Subject Modal Form -->
 <div th:replace="/fragments/subjectModal :: subjectModal"></div>
 
-<!-- Sample Modal -->
-<div class="modal" id="sampleModal" tabindex="-1" aria-labelledby="sampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="sampleModalLabel" th:utext="#{sample.modal.title}">Modal
-                    title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <ul id="sampleNav" class="nav nav-tabs">
-                <li class="nav-item" id="tableTab">
-                    <button class="nav-link active btn btn-link" onclick="toggleView('table')"
-                            th:utext="#{sample.tab.table}">Table</button>
-                </li>
-                <li class="nav-item" id="chartTab">
-                    <button class="nav-link btn btn-link" onclick="toggleView('chart')"
-                            th:utext="#{sample.tab.chart}">Chart</button>
-                </li>
-                <li class="nav-item" id="statsTab">
-                    <button class="nav-link btn btn-link" onclick="toggleView('stats')"
-                            th:utext="#{sample.tab.stats}">Statistics</button>
-                </li>
-            </ul>
-            <div class="modal-body">
-                <div class="table-responsive sampleTabContent" id="tableView">
-                    <table id="sampleTable" class="table table-striped text-center">
-                        <thead class="thead-dark"></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-                <div class="container-fluid p-4 sampleTabContent" id="chartView" style="display: none;">
-                    <div id="chartLoader" role="status" style="width: 3rem; height: 3rem;"
-                         class="spinner-grow text-primary">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <div id="chartContent"></div>
-                </div>
-                <div class="table-responsive sampleTabContent" id="statsView" style="display: none;">
-                    <div id="statsLoader" role="status" style="width: 3rem; height: 3rem;"
-                         class="spinner-grow text-primary">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <table id="statsTable" class="table table-striped text-center">
-                        <thead class="thead-dark"></thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <div class="custom-control custom-switch mr-4 my-auto">
-                    <input type="checkbox" class="custom-control-input" id="normalizeSwitch">
-                    <label class="custom-control-label" for="normalizeSwitch"
-                           th:utext="#{sample.modal.normalize}"></label>
-                </div>
-                <input type="text" id="sampleId" name="projectId" value="" hidden>
-                <button class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                        th:attr="title=#{sample.button.report.generate}">
-                    <i class="fas fa-file-pdf"></i>
-                </button>
-                <button class="btn btn-info" data-toggle="tooltip" data-placement="top"
-                        th:attr="title=#{sample.button.export}">
-                    <i class="fas fa-file-download"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
+<!-- Sample View Modal -->
+<div th:replace="/fragments/sampleViewModal :: sampleViewModal"></div>
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
@@ -245,20 +177,14 @@
 <!--Page Footer-->
 <footer th:replace="/fragments/footer :: pageFooter"></footer>
 
+<!--Project JS Functionalities-->
 <script th:inline="javascript">
     const encoded = utf8_to_b64(JSON.stringify(/*[[${project}]]*/));
     $("#userBtn").attr("id", encoded);
 
-    //Global variables to store retrieved sample data
-    let selectedSampleData = undefined;
-    let selectedSampleValues = undefined
-    let selectedSampleValuesNorm = undefined
-    let normalized = false;
-
     $(document).ready(function () {
         startLoad();
         fetchSamples();
-        google.charts.load('current', {'packages': ['line']});
 
         $("#labelsBtn").attr("title", htmlDecode([[#{label.pages.title.project.labels}]]));
         $('[data-toggle="tooltip"]').tooltip();
@@ -281,22 +207,7 @@
         if (collaborators.length === 0) {
             $("#collaborators").empty().text(htmlDecode([[#{project.title.collaborators.none}]]));
         }
-        $("#normalizeSwitch").change(() => {
-            normalized = !normalized;
-            if(normalized && !selectedSampleValuesNorm) {
-                selectedSampleValuesNorm = [];
-                selectedSampleValues.forEach((channel) => {
-                    selectedSampleValuesNorm.push(normalizeZeroToOne(channel));
-                })
-            }
-            $("#sampleTable thead").empty();
-            $("#sampleTable tbody").empty();
-            $("#chartContent").empty();
-            renderSampleData(selectedSampleData.id);
-            toggleView('table');
-        });
     });
-
     function deleteProject(projectId) {
         if (confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
             $.ajax({
@@ -312,7 +223,10 @@
             });
         }
     }
+</script>
 
+<!--Sample JS Functionalities-->
+<script th:inline="javascript">
     function fetchSamples() {
         if (!loadingData) {
             startLoad();
@@ -326,6 +240,52 @@
         });
     }
 
+    function fetchSample(sampleData) {
+        $.ajax({
+            type: 'GET',
+            url: serverContext + 'sample/' + sampleData.id,
+            success: (data) => {
+                selectedSampleData = sampleData;
+                selectedSampleValues= data.all;
+                renderSampleData(sampleData.id);
+            },
+            error: (data) => {
+                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+            }
+        });
+    }
+
+    function handleSampleAction(element) {
+        const selectedOption = element.options[element.selectedIndex].value;
+        const id = element.id.substring(element.id.indexOf('-') + 1);
+        switch (selectedOption) {
+            case 'delete':
+                deleteSample(id);
+                break;
+        }
+        $(element).prop('selectedIndex', 0);
+    }
+
+    function deleteSample(sampleId) {
+        if (confirm(htmlDecode(/*[[#{message.confirm.sample.delete}]]*/))) {
+            $("#sampleModal").modal('hide');
+            $.ajax({
+                type: 'DELETE',
+                url: serverContext + 'sample/delete/' + sampleId,
+                success: (data) => {
+                    $("#successmsg").show().html(/*[[#{message.sample.success.delete}]]*/);
+                    fetchSamples();
+                },
+                error: (data) => {
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
+        }
+    }
+</script>
+
+<!--DataTables JS Functionalities-->
+<script th:inline="javascript">
     const renderDeviceInfo = (data, type, row) => {
         return `<i class="fas fa-info-circle" data-toggle="tooltip" data-placement="left" data-html="true"
                 title="<ul class='list-unstyled'>
@@ -365,34 +325,6 @@
                     ${[[${role}]] === 'owner' ? deleteOpt : ''}
                 </select>`;
     };
-
-    function handleSampleAction(element) {
-        const selectedOption = element.options[element.selectedIndex].value;
-        const id = element.id.substring(element.id.indexOf('-') + 1);
-        switch (selectedOption) {
-            case 'delete':
-                deleteSample(id);
-                break;
-        }
-        $(element).prop('selectedIndex', 0);
-    }
-
-    function deleteSample(sampleId) {
-        if (confirm(htmlDecode(/*[[#{message.confirm.sample.delete}]]*/))) {
-            $("#sampleModal").modal('hide');
-            $.ajax({
-                type: 'DELETE',
-                url: serverContext + 'sample/delete/' + sampleId,
-                success: (data) => {
-                    $("#successmsg").show().html(/*[[#{message.sample.success.delete}]]*/);
-                    fetchSamples();
-                },
-                error: (data) => {
-                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
-                }
-            });
-        }
-    }
 
     function renderSampleData(sampleId) {
         if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))
@@ -453,21 +385,6 @@
         }
     }
 
-    function fetchSample(sampleData) {
-        $.ajax({
-            type: 'GET',
-            url: serverContext + 'sample/' + sampleData.id,
-            success: (data) => {
-                selectedSampleData = sampleData;
-                selectedSampleValues= data.all;
-                renderSampleData(sampleData.id);
-            },
-            error: (data) => {
-                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
-            }
-        });
-    }
-
     function drawSamplesTable(samples) {
         if (lang && lang === 'es') {
             langUrl = 'https://cdn.datatables.net/plug-ins/1.10.22/i18n/Spanish.json';
@@ -498,7 +415,7 @@
                             $("#sampleModal").modal('show');
                         } else {
                             $("#sampleTable").children().empty();
-                            $("#statsTable").children().empty();
+                            $("#statsUniTable").children().empty();
                             $("#sampleModalLabel span").remove();
                             $("#chartContent").empty();
                             toggleView('table');
@@ -524,124 +441,6 @@
                 },
                 responsive: true,
             });
-        }
-    }
-
-    function toggleView(view) {
-        switch (view) {
-            case 'chart':
-                $(".sampleTabContent").hide();
-                $("#sampleNav li.nav-item button.nav-link").removeClass("active");
-                $("#chartTab button.nav-link").addClass("active");
-                $("#chartView").show();
-                if(!$("#chartContent").children().length) {
-                    $("#chartLoader").show();
-                    drawChart();
-                }
-                break;
-            case 'table':
-                $(".sampleTabContent").hide();
-                $("#sampleNav li.nav-item button.nav-link").removeClass("active");
-                $("#tableTab button.nav-link").addClass("active");
-                $("#tableView").show();
-                break;
-            case 'stats':
-                $(".sampleTabContent").hide();
-                $("#sampleNav li.nav-item button.nav-link").removeClass("active");
-                $("#statsTab button.nav-link").addClass("active");
-                $("#statsView").show();
-                loadSampleStatistics();
-                break;
-        }
-    }
-
-    function loadSampleStatistics() {
-        if(selectedSampleData) {
-            if(!selectedSampleData.statsGenerated) {
-                if(confirm(htmlDecode([[#{message.confirm.sample.generateStatistics}]]))) {
-                    generateStatistics(selectedSampleData.id);
-                }
-            } else if($("#statsTable tbody").children().length === 0) {
-                $("#statsLoader").hide();
-                selectedSampleData.dataChannels.forEach((c, i) => {
-                    if(i === 0) {
-                        const statNames = Object.keys(c.statistics);
-                        const headerRow = $("<tr></tr>");
-                        const chName = $(`<th scope="col">${[[#{sample.table.channel}]]}</th>`);
-                        $(headerRow).append(chName);
-                        statNames.forEach((k) => {
-                            const cell = $(`<th scope="col">${k}</th>`);
-                           $(headerRow).append(cell);
-                        });
-                        $("#statsTable thead").append(headerRow);
-                    }
-                    const row = $("<tr></tr>");
-                    const ch = $(`<th scope="row">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
-                    $(row).append(ch);
-                    const stats = Object.values(c.statistics);
-                    stats.forEach((v) => {
-                        const stat = $(`<td>${isNaN(v) ? v : v.toPrecision(6)}</td>`);
-                        $(row).append(stat);
-                    });
-                    $("#statsTable tbody").append(row);
-                });
-            }
-            $("#statsLoader").hide();
-        } else {
-            $("#statsLoader").hide();
-            $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
-        }
-    }
-
-    function generateStatistics(sampleId) {
-        $.ajax({
-            type: 'GET',
-            url: serverContext + 'sample/statistics/' + sampleId,
-            success: (data) => {
-                selectedSampleData = data.sample;
-                loadSampleStatistics();
-                fetchSamples();
-            },
-            error: (data) => {
-                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
-            }
-        });
-    }
-
-    function drawChart(listener) {
-        if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))) {
-            const dataTable = new google.visualization.DataTable();
-            dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
-
-            selectedSampleData.dataChannels.forEach((c) => {
-                dataTable.addColumn('number', c.channelName);
-            });
-
-            const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
-
-            data[0].forEach((r, index1) => {
-                const row = [index1 + 1];
-                selectedSampleData.dataChannels.forEach((c, index2) => {
-                    row.push(Number.parseFloat(data[index2][index1]));
-                })
-                dataTable.addRow(row);
-            });
-
-            const options = {
-                chart: {
-                    title: '',
-                    subtitle: '',
-                },
-                height: 500,
-                hAxis: { gridlines: {count: -1} },
-                explorer: { axis: 'horizontal' },
-            };
-
-            const chart = new google.charts.Line(document.getElementById("chartContent"));
-            google.visualization.events.addListener(chart, 'ready', () => {
-                $("#chartLoader").hide();
-            });
-            chart.draw(dataTable, google.charts.Line.convertOptions(options));
         }
     }
 </script>

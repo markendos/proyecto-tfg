@@ -25,7 +25,7 @@ public class DataChannel {
     @Column(length = 60)
     private String channelLabel;
 
-    @Column(columnDefinition = "integer default 10")
+    @Column(columnDefinition = "integer default 10", nullable = false)
     private Integer resolution;
 
     private Boolean digital;

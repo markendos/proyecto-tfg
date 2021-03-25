@@ -26,7 +26,7 @@ public class SensorService implements ISensorService {
         final Sensor sensor = new Sensor();
 
         sensor.setName(sensorDto.getName());
-        sensor.setAlias(sensorDto.getAlias());
+        sensor.setAlias(sensorDto.getAlias().toUpperCase());
         sensor.setDescription(sensorDto.getDescription());
 
         return sensorRepository.save(sensor);

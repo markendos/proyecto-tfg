@@ -51,4 +51,11 @@ public class CollaborationRequestService implements ICollaborationRequestService
         CollaborationRequest cr = new CollaborationRequest(user, project);
         return collaborationRequestRepository.existsByIdAndRequestStatusLike(cr.getId(), "approved");
     }
+
+    @Override
+    public void deleteProjectCollaborations(Project project) {
+        for(CollaborationRequest cr : project.getCollaborationRequests()) {
+            collaborationRequestRepository.delete(cr);
+        }
+    }
 }

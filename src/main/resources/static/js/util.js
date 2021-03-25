@@ -3,6 +3,7 @@ let loadingData = false;
 $(document).ready(function () {
     markRequiredFields();
 
+    $(".alert").children("i.fa-window-close").remove();
     $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
 });
 $(document).ajaxStart(function () {
@@ -13,12 +14,8 @@ $(document).ajaxStart(function () {
 });
 $(document).ajaxStop(function () {
     hideSpinner();
-    const alerts = $(".alert");
-    for (let i = 0; i < alerts.length; i++) {
-        if ($(alerts[i]).find($('.fa-window-close')).length === 0) {
-            $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
-        }
-    }
+    $(".alert").children("i.fa-window-close").remove();
+    $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
 });
 
 function markRequiredFields() {
@@ -53,7 +50,7 @@ function showSpinner() {
 
 // Function to close alert banners
 function closeAlert(element) {
-    $(element).closest('.alert').fadeOut('fast');
+    $(element).closest('.alert').fadeOut('slow');
 }
 
 // Function to decode and unescape html symbols in JS

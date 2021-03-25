@@ -22,6 +22,8 @@ public interface ISampleService {
 
     void deleteSample(DataSample sample);
 
+    void deleteSamples(Collection<DataSample> samples);
+
     void addValueToSample(SampleValuesDto sdto, DataSample sample);
 
 }

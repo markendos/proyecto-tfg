@@ -13,8 +13,8 @@ public class ChannelStatistics {
 
     @OneToOne
     @MapsId
-    @JoinColumn(name = "sample_id")
     @JoinColumn(name = "channel_name")
+    @JoinColumn(name = "sample_id")
     private DataChannel dataChannel;
 
     private Double mean;

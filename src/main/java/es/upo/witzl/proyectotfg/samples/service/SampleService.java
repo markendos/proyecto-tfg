@@ -139,7 +139,7 @@ public class SampleService implements ISampleService {
             ChannelStatistics cs = new ChannelStatistics();
             cs.setDataChannel(dc);
             double[] values = channelValues.stream().mapToDouble(i -> i).toArray();
-            double[] normalized = normalizeZeroOne(values);
+            double[] normalized = normalize(values, 0, Math.pow(2, dc.getResolution()));
             cs.setMean(StatUtils.mean(normalized));
             cs.setStdDev(Math.sqrt(StatUtils.variance(normalized)));
             Kurtosis k = new Kurtosis();
@@ -193,6 +193,13 @@ public class SampleService implements ISampleService {
     }
 
     @Override
+    public void deleteSamples(Collection<DataSample> samples) {
+        for(DataSample ds : samples) {
+            deleteSample(ds);
+        }
+    }
+
+    @Override
     public void addValueToSample(SampleValuesDto sdto, DataSample sample) {
         DataValue dv = new DataValue();
         dv.setId(sdto.getSampleId() + "@" + sdto.getChannelName());
@@ -200,10 +207,16 @@ public class SampleService implements ISampleService {
         dataValueRepository.save(dv);
     }
 
-    private double[] normalizeZeroOne(double[] values) {
+    /**
+     * Normalizes values from array to range
+     *
+     * @param values Array of values
+     * @param min Min value of new range
+     * @param max Max value of new range
+     * @return An array of normalized values
+     */
+    private double[] normalize(double[] values, double min, double max) {
         double[] normalized = new double[values.length];
-        double min = StatUtils.min(values);
-        double max = StatUtils.max(values);
         for(int i = 0; i < values.length; i++) {
             normalized[i] = (values[i] - min)/(max - min);
         }

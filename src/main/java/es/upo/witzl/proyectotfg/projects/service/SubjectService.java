@@ -43,6 +43,11 @@ public class SubjectService implements ISubjectService {
         return subjectRepository.save(subject);
     }
 
+    @Override
+    public void deleteSubject(Subject subject) {
+        subjectRepository.delete(subject);
+    }
+
     private Float calculateBmi(Subject subject) {
         float weight = subject.getWeight();
         float height = subject.getHeight()/100;

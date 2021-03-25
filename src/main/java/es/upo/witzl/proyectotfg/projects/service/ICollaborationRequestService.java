@@ -19,4 +19,6 @@ public interface ICollaborationRequestService {
     CollaborationRequest updateCollaborationRequest(CollaborationRequest cr);
 
     boolean isCollaborator(Project project, User user);
+
+    void deleteProjectCollaborations(Project project);
 }
