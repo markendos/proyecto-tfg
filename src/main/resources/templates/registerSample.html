@@ -34,7 +34,7 @@
 <!--Notificaction Banners-->
 <div th:with="msg=${param.message}">
     <div class="alert alert-info" th:utext="#{${msg}}"
-         th:unless="${msg == null}">message
+         th:unless="${msg == undefined}">message
     </div>
 </div>
 <div id="errormsg" class="alert alert-danger" style="display:none"></div>
@@ -157,7 +157,7 @@
                        th:value="#{sample.button.reset}" disabled/>
             </div>
         </div>
-        <div class="pb-2 mb-3 border-bottom">
+        <div class="pb-2 mb-3">
             <div class="d-flex my-0">
                 <button type="button" class="btn btn-primary btn-sm" id="connectBtn" th:inline="text">
                     [[#{sample.device.button}]] &nbsp;
@@ -198,7 +198,7 @@
                     <div class="progress-bar progress-bar-striped progress-bar-animated" id="sampling-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
-            <hr/>
+            <hr class="my-4"/>
             <div class="limiter d-flex m-0">
                 <div class="container-table100">
                     <div class="wrap-table100">
@@ -229,7 +229,8 @@
                     </div>
                 </div>
             </div>
-            <div class="d-flex mt-4" id="linechart"></div>
+            <hr class="my-4"/>
+            <div class="d-flex shadow p-3 bg-white rounded" id="linechart" th:utext="#{sample.plot.tip}"></div>
         </div>
     </main>
 </div>
@@ -238,9 +239,9 @@
 <footer th:replace="/fragments/footer :: pageFooter"></footer>
 
 <script th:inline="javascript">
-    let device = null;
-    let commands = null;
-    let frames = null;
+    let device = undefined;
+    let commands = undefined;
+    let frames = undefined;
     let firmware = "";
     const lastSeq = -1;
     let count = 0;
@@ -248,9 +249,9 @@
     const numChannels = 6
     let aChannels = (new Array(numChannels)).fill(false);
     let sampling = false;
-    let sampledData = null;
-    let sampledFrames = null;
-    let chart = null;
+    let sampledData = undefined;
+    let sampledFrames = undefined;
+    let chart = undefined;
     const disconnected = /*[[#{sample.device.status.disconnected}]]*/;
     const connecting = /*[[#{sample.device.status.connecting}]]*/;
     const ready = htmlDecode(/*[[#{sample.device.status.ready}]]*/);
@@ -446,8 +447,8 @@
             return x == true
         }).length;
         let value = event.target.value;
-        let frame = null;
-        let number_bytes = null;
+        let frame = undefined;
+        let number_bytes = undefined;
 
         if (analogChannels <= 4) {
             number_bytes = Math.ceil((12. + 10. * analogChannels) / 8.);
@@ -531,7 +532,7 @@
 
     function sleep(milliseconds) {
         const date = Date.now();
-        let currentDate = null;
+        let currentDate = undefined;
         do {
             currentDate = Date.now();
         } while (currentDate - date < milliseconds);
@@ -591,7 +592,7 @@
     $("#startSamplingBtn").click(function () {
         if (aChannels.indexOf(true) >= 0) {
             let clear = true;
-            if ((sampledData !== null && sampledData.length > 0) || (sampledFrames !== null && sampledFrames.length > 1)) {
+            if ((sampledData !== undefined && sampledData.length > 0) || (sampledFrames !== undefined && sampledFrames.length > 1)) {
                 clear = confirm("All unsaved data will be lost, continue?");
             }
             if (clear) {
@@ -608,7 +609,6 @@
 </script>
 <script th:inline="javascript">
     $(document).ready(function () {
-        google.charts.load('current', {'packages': ['line']});
 
         $(function () {
             $('[data-toggle="tooltip"]').tooltip()
@@ -627,14 +627,15 @@
         });
 
         $("#isPlot").change(function () {
-            if (this.checked && sampledData != null && sampledData.length > 0) {
+            if (this.checked && sampledData != undefined && sampledData.length > 0) {
                 drawChart();
             }
         });
 
         $("#modalFileSave").on('shown.bs.modal', function () {
             let chInfo = $("#fileSaveForm").find($("div.channelInfo"));
-            for (let i = 1; i < chInfo.length; i++) {
+
+            for (let i = 0; i < chInfo.length; i++) {
                 $(chInfo[i]).remove();
             }
 
@@ -664,7 +665,7 @@
                     col = $("<div class='col-3'></div>");
                     let sensorSelector = $("<select class='form-control' name='sensors'></select>");
                     sensors.forEach((sensor) => {
-                        let opt = $(`<option value="${sensor.id}">${sensor.alias}</option>`);
+                        let opt = $(`<option value="${sensor.id}" ${sensor.alias === 'RAW' ? 'selected' : ''}>${sensor.alias}</option>`);
                         $(sensorSelector).append(opt);
                     });
                     $(col).append(sensorSelector);
@@ -823,6 +824,7 @@
         if (sampling) {
             stopSampling();
         }
+        chart = undefined;
         $("#samples tbody").empty();
         sampledData = [];
         sampledFrames = [];
@@ -833,37 +835,58 @@
         $("#sampling-progress").text("");
         count = 0;
     }
-
+    google.charts.load('current', {'packages': ['line']});
     function drawChart() {
-        const data = new google.visualization.DataTable();
-        data.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
-        data.addColumn('number', 'Seq');
-
-        for (let i = 0; i < aChannels.length; i++) {
-            if (aChannels[i]) {
-                data.addColumn('number', 'A' + (i + 1));
+        if(chart) {
+            let dataTable = chart.getDataTable();
+            if(dataTable.getNumberOfRows() < sampledData.length) {
+                const current = dataTable.getNumberOfRows();
+                const offset = sampledData.length - current;
+                const newRows = sampledData.slice(offset);
+                newRows.forEach((row) => {
+                    row.splice(1,1);
+                    dataTable.addRow(row);
+                })
+                chart.draw();
             }
+        } else {
+            let dataTable = new google.visualization.DataTable();
+            dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
+            dataTable.addColumn('number', 'Seq');
+
+            for (let i = 0; i < aChannels.length; i++) {
+                if (aChannels[i]) {
+                    dataTable.addColumn('number', 'A' + (i + 1));
+                }
+            }
+
+            dataTable.addRows(sampledData);
+
+            const options = {
+                chart: {
+                    title: htmlDecode(/*[[#{sample.title.plot}]]*/),
+                    subtitle: ''
+                },
+                height: 500,
+                hAxis: {gridlines: {count: -1}},
+                explorer: {actions: ['dragToZoom', 'rightClickToReset']},
+            };
+
+            chart = new google.visualization.ChartWrapper({
+                chartType: 'Line',
+                dataTable: dataTable,
+                options: options,
+                containerId: 'linechart'
+            });
+
+
+            //chart = new google.charts.Line(document.getElementById("linechart"));
+
+            //Hide the 'nSeq' column from the chart
+            dataTable.removeColumn(1);
+
+            chart.draw();
         }
-
-        data.addRows(sampledData);
-
-        const options = {
-            chart: {
-                title: htmlDecode(/*[[#{sample.title.plot}]]*/),
-                subtitle: ''
-            },
-            height: 500,
-            hAxis: {gridlines: {count: -1}},
-        };
-
-        if (chart == null) {
-            chart = new google.charts.Line(document.getElementById("linechart"));
-        }
-
-        //Hide the 'nSeq' column from the chart
-        data.removeColumn(1);
-
-        chart.draw(data, google.charts.Line.convertOptions(options));
     }
 
     function saveCSV(date) {
@@ -968,7 +991,8 @@
 
         for(let i = 0; i < sensors.length; i++) {
             if($(checks[i]).is(":checked")) {
-                txt += '"' + $(sensors[i]).val() + '", ';
+                let sensorName = getSensorById($(sensors[i]).val()).alias;
+                txt += `"${sensorName ?? 'RAW'}", `;
             }
         }
 
@@ -1048,6 +1072,11 @@
         filename += "_" + hours + "_" + minutes + "_" + seconds + ".txt";
 
         saveAs(blob, filename);
+    }
+
+    function getSensorById(sensorId) {
+        const sensors = [[${sensors}]];
+        return sensors.find((s) => s.id === parseInt(sensorId));
     }
 </script>
 </body>

@@ -37,7 +37,7 @@
                             <tbody></tbody>
                         </table>
                     </div>
-                    <div class="container-fluid p-4 sampleTabContent" id="chartView" style="display: none;">
+                    <div class="container-fluid sampleTabContent" id="chartView" style="display: none;">
                         <div id="chartLoader" role="status" style="width: 3rem; height: 3rem;"
                              class="spinner-grow text-primary">
                             <span class="sr-only">Loading...</span>
@@ -94,7 +94,6 @@
         let correlationMatrix = undefined;
 
         $(document).ready(function () {
-            google.charts.load('current', {'packages': ['line']});
             $("#normalizeSwitch").change(() => toggleDataNormalization());
         });
 
@@ -234,7 +233,8 @@
             });
         }
 
-        function drawChart(listener) {
+        google.charts.load('current', {'packages': ['corechart']});
+        function drawChart() {
             if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))) {
                 const dataTable = new google.visualization.DataTable();
                 dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
@@ -258,16 +258,21 @@
                         title: '',
                         subtitle: '',
                     },
+                    chartArea: {
+                        width: '83%',
+                        height: '80%',
+                    },
                     height: 500,
+                    width: '100%',
                     hAxis: { gridlines: {count: -1} },
                     explorer: { axis: 'horizontal' },
                 };
 
-                const chart = new google.charts.Line(document.getElementById("chartContent"));
+                const chart = new google.visualization.LineChart(document.getElementById("chartContent"));
                 google.visualization.events.addListener(chart, 'ready', () => {
                     $("#chartLoader").hide();
                 });
-                chart.draw(dataTable, google.charts.Line.convertOptions(options));
+                chart.draw(dataTable, options);
             }
         }
     </script>
