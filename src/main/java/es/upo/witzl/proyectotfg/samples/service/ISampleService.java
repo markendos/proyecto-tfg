@@ -16,8 +16,6 @@ public interface ISampleService {
 
     Collection<Collection<Integer>> getSampleValues(DataSample sample);
 
-    void test();
-
     DataSample getStatistics(DataSample sample);
 
     void deleteSample(DataSample sample);

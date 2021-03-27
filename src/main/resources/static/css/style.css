@@ -239,11 +239,6 @@ a:focus {
     margin: 40px 0;
 }
 
-/*i,
-span {
-    display: inline-block;
-}*/
-
 /* ---------------------------------------------------
     SIDEBAR STYLE
 ----------------------------------------------------- */
@@ -512,6 +507,12 @@ caption {
 #dataTable tbody > tr:hover {
     cursor: pointer;
     box-shadow: 5px 0px 0px 0px #00ad5f inset;
+}
+
+/***** Sample Modal *****/
+
+#sampleModal .sampleTabContent {
+    min-height: 60vh;
 }
 
 /***** Footer *****/

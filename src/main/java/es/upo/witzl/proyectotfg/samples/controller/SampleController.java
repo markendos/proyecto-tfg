@@ -143,14 +143,6 @@ public class SampleController {
         return new ModelAndView(redirect, model);
     }
 
-    @GetMapping("/test/mongo")
-    public ResponseEntity testMongo() {
-        System.out.println("HOLAAAAA");
-        sampleService.test();
-
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping(value = "/samples/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getProjectSamples(@RequestParam String projectId, final Authentication authentication)
             throws JsonProcessingException {

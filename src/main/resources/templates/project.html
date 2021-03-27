@@ -89,6 +89,10 @@
                         th:utext="#{user.project.menu.project(${project.id})}"></li>
                 </ol>
             </nav>
+            <h3 id="projectTitle" class="my-0" data-toggle="tooltip" data-placement="top"
+                th:utext="${project.name}">
+
+            </h3>
             <div class="btn-toolbar mb-2 mb-md-0">
                 <a th:href="@{/registerSample/{id}(id=${project.id})}" class="btn btn-outline-primary">
                     <span th:utext="#{label.pages.button.sample.add}"></span>
@@ -187,6 +191,7 @@
         fetchSamples();
 
         $("#labelsBtn").attr("title", htmlDecode([[#{label.pages.title.project.labels}]]));
+        $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
         $("#collaboratorTitle").mouseenter(function () {
@@ -333,11 +338,13 @@
             const deleteBtnExists = $("#deleteSampleBtn").length > 0;
             if (role === 'owner' && !deleteBtnExists) {
                 const deleteBtn = `<span id="deleteSampleBtn" class='d-flex align-self-center ml-3'>
-                    <button class="btn btn-danger btn-sm" onclick='deleteSample(${sampleId})'>
+                    <button class="btn btn-danger btn-sm my-auto" onclick='deleteSample(${sampleId})'>
                         <i class="fas fa-trash"></i>
                     </button></span>`;
                 $("#sampleModal .modal-title").after(deleteBtn);
             }
+            $("#sampleDate").empty();
+            $("#sampleDate").append(`<i class="fas fa-calendar-day"></i> ${selectedSampleData.sampleDate}`)
 
             const headerRow = $("<tr></tr>");
             $(headerRow).append(`<th scope="col">#</th>`);

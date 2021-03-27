@@ -644,7 +644,7 @@
             let active = aChannels.filter(function (x) {
                 return x == true
             });
-            let resolutions = [];
+            const resolutions = [];
             active.forEach((c, i) => {
                 if (active.length == 6 && i >= 4) {
                     resolutions.push(6);
@@ -652,7 +652,7 @@
                     resolutions.push(10);
                 }
             });
-
+            let aux = 0;
             for (let i = 0; i < aChannels.length; i++) {
                 if (aChannels[i]) {
                     let row = $("<div class='row my-2 text-center align-items-center channelInfo'></div>");
@@ -685,7 +685,7 @@
 
                     $(col).append(check);
                     $(row).append(col);
-                    $(row).append(`<input name="channelResolutions" value="${resolutions[i]}" hidden/>`);
+                    $(row).append(`<input name="channelResolutions" value="${resolutions[aux++]}" hidden/>`);
 
                     $("#fileSaveForm>hr").before(row);
                 }
@@ -766,10 +766,11 @@
             for(let i = 0; i < aChannels.length; i++) {
                     channelValues.push([]);
             }
-            sampledData.forEach((v, i) => {
-                for(let j = offset; j < v.length; j++) {
-                    if(aChannels[j-offset]) {
-                        channelValues[j-offset].push(v[j]);
+            sampledData.forEach((v) => {
+                let aux = 0;
+                for(let j = offset; j < channelValues.length + offset; j++) {
+                    if(aChannels[j - offset]) {
+                        channelValues[j - offset].push(v[offset + aux++]);
                     }
                 }
             });
@@ -841,6 +842,9 @@
             let dataTable = chart.getDataTable();
             if(dataTable.getNumberOfRows() < sampledData.length) {
                 const current = dataTable.getNumberOfRows();
+                if(current > 200) {
+                    dataTable.removeRows(0, 200);
+                }
                 const offset = sampledData.length - current;
                 const newRows = sampledData.slice(offset);
                 newRows.forEach((row) => {

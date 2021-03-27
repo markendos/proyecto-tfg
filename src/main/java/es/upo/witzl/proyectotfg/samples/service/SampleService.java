@@ -71,7 +71,7 @@ public class SampleService implements ISampleService {
             }
             dc.setResolution(resolutions.get(i));
             dc.setDigital(false);
-            dc.setInput(false);
+            dc.setInput(true);
             Sensor sensor = getSensor(sensorIds.get(i));
             dc.setSensor(sensor);
             dataChannelRepository.save(dc);
@@ -102,32 +102,6 @@ public class SampleService implements ISampleService {
         }
 
         return allValues;
-    }
-
-    @Override
-    public void test() {
-        DataSample ds = new DataSample();
-        ds.setSampleDate(new Date());
-        Project project = projectRepository.getOne(Long.parseLong("7"));
-        ds.setProject(project);
-        ds = dataSampleRepository.save(ds);
-        DataChannel dc = new DataChannel();
-        dc.setChannelName("A0");
-        List<Integer> l = new ArrayList<>();
-        Random r  = new Random();
-        for(int i = 0; i < 1000; i++) {
-            l.add(r.nextInt());
-        }
-        DataValue dv = new DataValue();
-        dv.setId(ds.getId().toString() + "@" + dc.getChannelName());
-        dv.setValues(l);
-        dc.setDataSample(ds);
-        ds.setSize(dv.getValues().size());
-        Sensor sensor = sensorRepository.getOne(Long.parseLong("10"));
-        dc.setSensor(sensor);
-        //dataSampleRepository.save(ds);
-        dataChannelRepository.save(dc);
-        dataValueRepository.save(dv);
     }
 
     @Override
