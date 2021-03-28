@@ -7,7 +7,7 @@ import java.util.Objects;
 
 @Entity
 @IdClass(DataChannelId.class)
-public class DataChannel {
+public class DataChannel implements Comparable<DataChannel>{
 
     @Id
     @Column(name = "sample_id")
@@ -137,5 +137,10 @@ public class DataChannel {
                 ", input=" + input +
                 ", sensor=" + sensor +
                 '}';
+    }
+
+    @Override
+    public int compareTo(DataChannel dc) {
+        return this.channelName.compareTo(dc.channelName);
     }
 }

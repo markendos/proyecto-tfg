@@ -35,6 +35,7 @@ public class DataSample {
     private Integer size;
 
     @OneToMany(mappedBy = "dataSample")
+    @OrderBy("channelName ASC")
     private Collection<DataChannel> dataChannels;
 
     @ManyToOne

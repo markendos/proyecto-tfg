@@ -21,6 +21,8 @@ public class ChannelStatistics {
 
     private Double stdDev;
 
+    private Double median;
+
     private Double kurtosis;
 
     private Double skewness;
@@ -61,6 +63,14 @@ public class ChannelStatistics {
 
     public void setStdDev(Double stdDev) {
         this.stdDev = stdDev;
+    }
+
+    public Double getMedian() {
+        return median;
+    }
+
+    public void setMedian(Double median) {
+        this.median = median;
     }
 
     public Double getKurtosis() {

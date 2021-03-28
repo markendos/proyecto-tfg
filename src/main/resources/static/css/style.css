@@ -389,7 +389,7 @@ a.article:hover {
 
 #content {
     width: 0;
-    min-height: 100vh;
+    min-height: calc(100vh - 120px); /* The full height of the view port - (header + footer) heights */
     transition: all 0.3s;
 }
 

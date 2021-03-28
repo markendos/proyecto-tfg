@@ -6,6 +6,7 @@ import es.upo.witzl.proyectotfg.samples.dto.DataSampleDto;
 import es.upo.witzl.proyectotfg.samples.dto.SampleValuesDto;
 import es.upo.witzl.proyectotfg.samples.model.*;
 import es.upo.witzl.proyectotfg.samples.repository.*;
+import org.apache.commons.math3.distribution.CauchyDistribution;
 import org.apache.commons.math3.distribution.ConstantRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformRealDistribution;
@@ -113,9 +114,12 @@ public class SampleService implements ISampleService {
             ChannelStatistics cs = new ChannelStatistics();
             cs.setDataChannel(dc);
             double[] values = channelValues.stream().mapToDouble(i -> i).toArray();
-            double[] normalized = normalize(values, 0, Math.pow(2, dc.getResolution()));
+            double min = StatUtils.min(values);
+            double max = StatUtils.max(values);
+            double[] normalized = normalizeZeroOne(values, min, max);
             cs.setMean(StatUtils.mean(normalized));
             cs.setStdDev(Math.sqrt(StatUtils.variance(normalized)));
+            cs.setMedian(StatUtils.percentile(normalized, 50));
             Kurtosis k = new Kurtosis();
             cs.setKurtosis(k.evaluate(normalized));
             Skewness s = new Skewness();
@@ -123,7 +127,7 @@ public class SampleService implements ISampleService {
 
             /* ----------------------  Distribution tests ---------------------- */
             double alpha = 0.05;
-            NormalDistribution normal = new NormalDistribution();
+            NormalDistribution normal = new NormalDistribution(cs.getMean(), cs.getStdDev());
             KolmogorovSmirnovTest KSTest = new KolmogorovSmirnovTest();
             double result = KSTest.kolmogorovSmirnovTest(normal, normalized);
             if(result > alpha) {
@@ -139,7 +143,13 @@ public class SampleService implements ISampleService {
                     if(result > alpha) {
                         cs.setDistribution("constant");
                     } else {
-                        cs.setDistribution("undefined");
+                        CauchyDistribution cd = new CauchyDistribution(cs.getMedian(), 1);
+                        result = KSTest.kolmogorovSmirnovTest(cd, normalized);
+                        if(result > alpha) {
+                            cs.setDistribution("cauchy");
+                        } else {
+                            cs.setDistribution("undefined");
+                        }
                     }
                 }
             }
@@ -182,14 +192,14 @@ public class SampleService implements ISampleService {
     }
 
     /**
-     * Normalizes values from array to range
+     * Normalizes values from array in [min, max] range to [0, 1] range
      *
      * @param values Array of values
-     * @param min Min value of new range
-     * @param max Max value of new range
+     * @param min Min value of old range
+     * @param max Max value of old range
      * @return An array of normalized values
      */
-    private double[] normalize(double[] values, double min, double max) {
+    private double[] normalizeZeroOne(double[] values, double min, double max) {
         double[] normalized = new double[values.length];
         for(int i = 0; i < values.length; i++) {
             normalized[i] = (values[i] - min)/(max - min);
