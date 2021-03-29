@@ -68,9 +68,9 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text mr-2">Local:</span>
                                 </div>
-                                <div class="custom-control custom-switch ml-2 my-auto">
+                                <div class="custom-control custom-switch mx-4 my-auto">
                                     <input type="checkbox" class="custom-control-input" id="txtSwitch">
-                                    <label class="custom-controlt-label" for="txtSwitch" data-toggle="tooltip"
+                                    <label class="custom-control-label" for="txtSwitch" data-toggle="tooltip"
                                            data-placement="top" th:attr="title=#{sample.modal.save.tooltip.txt}">
                                         <i class="fas fa-file-alt fa-2x"></i></label>
                                 </div>
@@ -97,7 +97,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
                     </div>
                     <input id="sRate" name="samplingRate" hidden/>
                     <input id="deviceName" name="deviceName" hidden/>
@@ -107,6 +106,7 @@
                     <input id="projectId" name="projectId" th:attr="value=${project.id}" hidden/>
                 </form>
             </div>
+            <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal"
                         th:utext="#{label.form.cancel}">Cancel</button>
@@ -169,7 +169,9 @@
                 </span>
                 <div class="custom-file w-25 ml-auto">
                     <input type="file" class="custom-file-input" id="sampleFile" accept=".txt">
-                    <label class="custom-file-label" for="sampleFile">Choose file</label>
+                    <label class="custom-file-label" for="sampleFile" th:utext="#{sample.file.upload}"
+                    th:attr="data-browse=#{sample.file.browse}">
+                    </label>
                 </div>
             </div>
             <div id="controlBtns" class="row mx-0 my-4 align-items-center">
@@ -244,15 +246,15 @@
 <footer th:replace="/fragments/footer :: pageFooter"></footer>
 
 <script th:inline="javascript">
-    let device = undefined;
+    let device = {};
     let commands = undefined;
     let frames = undefined;
-    let firmware = "";
     const lastSeq = -1;
     let count = 0;
     let limit = -1;
     const numChannels = 6
     let aChannels = (new Array(numChannels)).fill(false);
+    let imported = { sensors: undefined, labels: undefined, resolutions: undefined, comments: undefined };
     let sampling = false;
     let sampledData = undefined;
     let sampledFrames = undefined;
@@ -304,7 +306,7 @@
             //Get the Bitalino Commands characteristic to send commands to the device
             commands = await service.getCharacteristic('4051eb11-bf0a-4c74-8730-a48f4193fcea');
 
-            firmware = getVersion();
+            getVersion();
 
             $("#status").text(ready);
             $("#status").addClass("ready my-auto mx-2");
@@ -312,9 +314,7 @@
             // Set up event listener for when device gets disconnected.
             device.addEventListener('gattserverdisconnected', onDisconnected);
 
-            $("#startSamplingBtn").attr("disabled", false);
-            $("input").attr("disabled", false);
-            $("select").attr("disabled", false);
+            $("#controlBtns input, #controlBtns select, #startSamplingBtn, #resetBtn").attr("disabled", false);
 
         } catch (error) {
             $("#status").text(disconnected).removeClass().addClass("disconnected my-auto mx-2");
@@ -325,6 +325,7 @@
     function onDisconnected(event) {
         const device = event.target;
         console.log(`Device ${device.name} is disconnected.`);
+        $("#controlBtns input, #controlBtns select, #controlBtns button").attr("disabled", true);
         $("#status").text(disconnected).removeClass().addClass("disconnected my-auto mx-2");
     }
 
@@ -441,7 +442,7 @@
             }
         }
         console.log('> ' + str);
-        firmware = str.slice(str.indexOf("v") + 1);
+        device = Object.assign(device, { firmware: str.slice(str.indexOf("v") + 1) });
 
         //Remove event handler function for the 'firmware version' command
         await frames.removeEventListener('characteristicvaluechanged', handleFirmwareVersionNotification);
@@ -453,7 +454,7 @@
         }).length;
         let value = event.target.value;
         let frame = undefined;
-        let number_bytes = undefined;
+        let number_bytes;
 
         if (analogChannels <= 4) {
             number_bytes = Math.ceil((12. + 10. * analogChannels) / 8.);
@@ -462,7 +463,7 @@
         }
 
         const j = number_bytes - 1;
-        let CRC = 0;
+        let CRC;
         let x0 = 0;
         let x1 = 0;
         let x2 = 0;
@@ -572,7 +573,7 @@
         const div = document.getElementById("sampleContainer");
         div.scrollTop = div.scrollHeight - div.clientHeight;
 
-        aux = [count, frame.seq];
+        aux = [count];
         for (let i = 0; i < frame.analog.length; i++) {
             aux.push(frame.analog[i]);
         }
@@ -596,8 +597,9 @@
     $("#startSamplingBtn").click(function () {
         if (aChannels.indexOf(true) >= 0) {
             let clear = true;
-            if ((sampledData !== undefined && sampledData.length > 0) || (sampledFrames !== undefined && sampledFrames.length > 1)) {
-                clear = confirm("All unsaved data will be lost, continue?");
+            if ((sampledData !== undefined && sampledData.length > 0)
+                || (sampledFrames !== undefined && sampledFrames.length > 1)) {
+                clear = confirm(htmlDecode([[#{message.confirm.sample.reset}]]));
             }
             if (clear) {
                 clearData();
@@ -615,8 +617,15 @@
     $(document).ready(function () {
 
         $("#sampleFile").change((event) => {
+            $(".alert").hide();
             const file = event.target.files[0];
-            readFile(file);
+            if(file?.type === 'text/plain') {
+                readFile(file);
+            } else if(file){
+                $("#errormsg").show().html([[#{message.sample.file.error.type}]]);
+                $(".alert").children("i.fa-window-close").remove();
+                $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
+            }
         });
 
         $(function () {
@@ -653,15 +662,23 @@
             let active = aChannels.filter(function (x) {
                 return x == true
             });
-            const resolutions = [];
-            active.forEach((c, i) => {
-                if (active.length == 6 && i >= 4) {
-                    resolutions.push(6);
-                } else {
-                    resolutions.push(10);
-                }
-            });
+            let resolutions;
+
+            if(imported?.resolutions) {
+                resolutions = imported.resolutions.slice();
+            }
+            else {
+                resolutions = [];
+                active.forEach((c, i) => {
+                    if (active.length == 6 && i >= 4) {
+                        resolutions.push(6);
+                    } else {
+                        resolutions.push(10);
+                    }
+                });
+            }
             let aux = 0;
+
             for (let i = 0; i < aChannels.length; i++) {
                 if (aChannels[i]) {
                     let row = $("<div class='row my-2 text-center align-items-center channelInfo'></div>");
@@ -674,7 +691,11 @@
                     col = $("<div class='col-3'></div>");
                     let sensorSelector = $("<select class='form-control' name='sensors'></select>");
                     sensors.forEach((sensor) => {
-                        let opt = $(`<option value="${sensor.id}" ${sensor.alias === 'RAW' ? 'selected' : ''}>${sensor.alias}</option>`);
+                        let selected =  false;
+                        if((sensor.alias === 'RAW' && !imported?.sensors) || imported?.sensors[i] === sensor.alias) {
+                            selected = true;
+                        }
+                        let opt = $(`<option value="${sensor.id}" ${selected ? 'selected' : ''}>${sensor.alias}</option>`);
                         $(sensorSelector).append(opt);
                     });
                     $(col).append(sensorSelector);
@@ -683,6 +704,9 @@
                     col = $("<div class='col-5'></div>");
                     let label = $(`<input name="channelLabels" class="form-control chLabel" value=""/>`);
                     $(label).css("width", "100%");
+                    if(imported?.labels[i]) {
+                        $(label).val(imported.labels[i])
+                    }
 
                     $(col).append(label);
                     $(row).append(col);
@@ -699,8 +723,11 @@
                     $("#fileSaveForm>hr").before(row);
                 }
             }
+            if(imported?.comments) {
+                $("#comments").val(imported.comments);
+            }
             $("#deviceName").val(device.name);
-            $("#deviceFirmware").val(firmware);
+            $("#deviceFirmware").val(device.firmware);
             $("#sRate").val(sampledFrames[0][1]);
             $("#size").val(sampledData.length);
         });
@@ -742,14 +769,9 @@
             if (data.responseJSON?.error?.indexOf("InternalError") > -1) {
                 $("#errormsg").show().append(data.responseJSON.message);
             } else {
-                $('#modalFileSave').modal('show');
                 const errors = $.parseJSON(data.responseJSON.message);
                 $.each(errors, function (index, item) {
-                    if (item.field) {
-                        $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                    } else {
-                        $("#globalError").show().append(item.defaultMessage + "<br/>");
-                    }
+                    $("#errormsg").show().append(`${item.field} ${item.defaultMessage}<br/>`);
                 });
             }
         });
@@ -757,7 +779,7 @@
 
     async function saveValues(sample) {
         if(sample?.size === sampledData.length) {
-            const offset = 2;
+            const offset = 1;
             const promises = [];
             const channelValues = [];
 
@@ -838,6 +860,7 @@
         $("#samples tbody").empty();
         sampledData = [];
         sampledFrames = [];
+        let imported = { sensors: undefined, labels: undefined, resolutions: undefined, comments: undefined };
         $("#linechart").empty();
         $("#saveDataBtn").attr("disabled", true);
         $("#sampling-progress").attr("aria-valuenow", 0);
@@ -850,7 +873,6 @@
     function drawChart() {
         let dataTable = new google.visualization.DataTable();
         dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
-        dataTable.addColumn('number', 'Seq');
 
         for(let i = 0; i < aChannels.length; i++) {
             if(aChannels[i]) {
@@ -873,9 +895,6 @@
         if(chart == null) {
             chart = new google.charts.Line(document.getElementById("linechart"));
         }
-
-        //Hide the 'nSeq' column from the chart
-        dataTable.removeColumn(1);
 
         chart.draw(dataTable, google.charts.Line.convertOptions(options));
     }
@@ -1025,14 +1044,13 @@
                 date: `${date.getFullYear()}-${month}-${day}`,
                 mode: 0,
                 "digital IO": [0, 0, 1, 1],
-                'firmware version': firmware ?? '',
+                'firmware version': device.firmware ?? '',
                 device: 'bitalino_rev',
                 position: 0,
                 'sampling rate': sRate,
                 label: labelsArr,
                 resolution: resolutions,
             }};
-        console.log(JSON.stringify(header));
         txt += '# ' + JSON.stringify(header);
         txt += '\n' + "# EndOfHeader";
 
@@ -1063,27 +1081,119 @@
 
     function readFile(file) {
         const reader = new FileReader();
+        const maxLines = 3000;
+        showSpinner();
+        clearData();
         reader.onload = ((reader) => {
-            return () => {
+            return async () => {
                 const contents = reader.result;
                 const lines = contents.split('\n');
-                parseSampleFromFile(lines);
+                await parseSampleFromFile(lines, maxLines);
+                hideSpinner();
+                $("#saveDataBtn").attr("disabled", false);
             }
         })(reader);
         reader.readAsText(file);
     }
 
-    function parseSampleFromFile(lines) {
-        if(lines.length > 0) {
-            for(let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                if(line.startsWith('# OpenSignals Text File Format')) {
+    function parseSampleFromFile(lines, maxLines) {
+        if(lines.length > 1 && lines.length < maxLines) {
+            if(device?.id) {
+                device.gatt.disconnect();
+            }
+            clearData();
+            let frame;
+            let seq;
+            let digital;
+            let analog;
+            let resolutions;
+            let info;
+            let i = 0;
+            let errors = false;
+            let endHeader = false;
+
+            while(i < lines.length && !errors) {
+                const line = lines[i].trim();
+
+                if(i === 0 && line.startsWith('# OpenSignals Text File Format')) {
                     const header = JSON.parse(lines[i+1].substr(2));
-                    console.log(header);
+                    info = Object.values(header)[0];
+                    device = { name: info[ 'device name' ], firmware: info['firmware version'] };
+                    aChannels = (new Array(numChannels)).fill(false);
+
+                    for(let j = 0; j < numChannels; j++) {
+                        for(let k = 0; k < info?.channels?.length; k++) {
+                            if((j + 1) === info?.channels[k]) {
+                                aChannels[j] = true;
+                            }
+                        }
+                    }
+                    //Add acquisition info to the sampled frames array
+                    let status = [aChannels.slice(), info[ 'sampling rate' ] ?? 10];
+                    sampledFrames.push(status);
+
+                    if(info?.sensor) {
+                        imported.sensors = [...info.sensor];
+                    }
+                    if(info?.label) {
+                        imported.labels = [...info.label];
+                    }
+                    if(info?.comments) {
+                        imported.comments = info.comments;
+                    }
                 }
+                else if (line.startsWith('# EndOfHeader')) {
+                    endHeader = true;
+                }
+
+                else if(!line.startsWith('#') && info) {
+                    const values = line.split('\t');
+                    if(info?.column.length === values.length) {
+                        digital = [];
+                        analog = [];
+                        resolutions = [];
+                        info?.column?.forEach((col, i) => {
+                            if (col === 'nSeq') {
+                                seq = values[i];
+                            } else if (col.startsWith('I') || col.startsWith('O')) {
+                                digital.push(values[i]);
+                            } else if (col.startsWith('A')) {
+                                analog.push(values[i]);
+                                if(info.resolution[i]) {
+                                    resolutions.push(info.resolution[i]);
+                                }
+                            }
+                        });
+
+                        if(resolutions?.length) {
+                            imported.resolutions = resolutions.slice();
+                        }
+                        frame = new Frame(0, seq, analog, digital);
+                        sampledFrames.push(frame);
+                        ++count;
+                        addSampleRow(frame);
+                    }
+
+                } else if(endHeader){
+                    errors = true;
+                }
+                i++;
+            }
+            if(errors) {
+                $("#errormsg").show().html(/*[[#{message.sample.file.error.format}]]*/);
+                $(".alert").children("i.fa-window-close").remove();
+                $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
+            } else {
+                $("#saveDataBtn").attr("disabled", false);
             }
         } else {
-            alert("Empty file!")
+            if(lines.length <= 1) {
+                $("#errormsg").show().html(/*[[#{message.sample.file.error.empty}]]*/);
+            } else if(lines.length > maxLines) {
+                $("#errormsg").show().html(/*[[#{message.sample.file.error.size}]]*/);
+            }
+            $(".alert").children("i.fa-window-close").remove();
+            $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
         }
     }
 </script>

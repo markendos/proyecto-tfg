@@ -21,7 +21,7 @@ public class DataSampleDto {
     private String deviceFirmware;
 
     @Min(1)
-    @Max(10)
+    @Max(1000)
     private Float samplingRate;
 
     @Size(max = 255)

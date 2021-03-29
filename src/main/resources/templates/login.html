@@ -1,16 +1,19 @@
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
 
+    <!-- Bootstrap4 CSS -->
     <link rel="stylesheet" th:href="@{/resources/css/bootstrap.min.css}"/>
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="/resources/css/style.css"/>
     <link rel="stylesheet" href="/resources/css/login.css"/>
 
+    <!-- JQuery -->
     <script src="/resources/js/jquery-3.5.1.min.js"></script>
-    <script th:inline="javascript">var requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <!-- Custom JS -->
+    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
     <script th:src="@{/resources/js/util.js}"></script>
 </head>
 <body onload="display_username()">
@@ -90,10 +93,10 @@
                 client_id: /*[[${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}]]*/
             });
             gapi.signin2.render('my-signin2', {
-                'longtitle': true,
-                'theme': 'light',
-                'onsuccess': onSuccess,
-                'onfailure': onFailure
+                longtitle: true,
+                theme: 'light',
+                onsuccess: onSuccess,
+                onfailure: onFailure
             });
                 function onSuccess(googleUser) {
                     var idToken = googleUser.getAuthResponse().id_token;
