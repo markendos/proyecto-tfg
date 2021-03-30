@@ -13,7 +13,7 @@
     <!-- JQuery -->
     <script src="/resources/js/jquery-3.5.1.min.js"></script>
     <!-- Custom JS -->
-    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:inline="javascript">const requiredMessage = [[#{label.form.requiredFields}]];</script>
     <script th:src="@{/resources/js/util.js}"></script>
 </head>
 <body onload="display_username()">

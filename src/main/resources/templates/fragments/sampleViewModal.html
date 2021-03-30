@@ -262,7 +262,7 @@
         function renderSampleData(sampleId) {
             if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))
                 && selectedSampleData.id === sampleId) {
-                const role = /*[[${role}]]*/;
+                const role = [[${role}]];
                 const deleteBtnExists = $("#deleteSampleBtn").length > 0;
                 if (role === 'owner' && !deleteBtnExists) {
                     const deleteBtn = `<span id="deleteSampleBtn" class='d-flex align-self-center ml-3'>

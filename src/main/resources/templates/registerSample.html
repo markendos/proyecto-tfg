@@ -18,7 +18,7 @@
             integrity="sha512-k8F8QynmFNURwbUJC8drKA+fo3YfNvjqKzStdydD6au+MzvxBoRnxH8E31RJXwDY9DrnEiPhh9wBoDSIxhkyHQ=="
             crossorigin="anonymous"></script>
     <!-- Custom JS -->
-    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:inline="javascript">const requiredMessage = [[#{label.form.requiredFields}]];</script>
     <script th:src="@{/resources/js/util.js}"></script>
     <script th:src="@{/resources/js/sideBar.js}"></script>
 </head>

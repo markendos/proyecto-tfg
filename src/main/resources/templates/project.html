@@ -38,7 +38,7 @@
     <!-- Simple Statistics JS -->
     <script src="https://unpkg.com/simple-statistics@7.6.0/dist/simple-statistics.min.js"></script>
     <!-- Custom JS -->
-    <script th:inline="javascript">let requiredMessage = /*[[#{label.form.requiredFields}]]*/;</script>
+    <script th:inline="javascript">const requiredMessage = [[#{label.form.requiredFields}]];</script>
     <script th:src="@{/resources/js/util.js}"></script>
     <script th:src="@{/resources/js/sideBar.js}"></script>
     <script th:src="@{/resources/js/statistics.js}"></script>
