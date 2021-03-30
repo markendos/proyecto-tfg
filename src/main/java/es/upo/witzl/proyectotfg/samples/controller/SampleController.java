@@ -195,9 +195,10 @@ public class SampleController {
                     List<List<Integer>> values = (List) sampleService.getSampleValues(sample);
                     ObjectMapper mapper = new ObjectMapper();
                     HashMap aux = new HashMap();
+                    aux.put("sample", sample);
 
                     if(values != null && !values.isEmpty()) {
-                        aux.put("all", values);
+                        aux.put("values", values);
                     }
                     return ResponseEntity.ok(mapper.writeValueAsString(aux));
                 } else {

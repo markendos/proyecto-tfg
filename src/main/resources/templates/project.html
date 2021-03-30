@@ -95,7 +95,6 @@
             </nav>
             <h3 id="projectTitle" class="my-0" data-toggle="tooltip" data-placement="top"
                 th:utext="${project.name}">
-
             </h3>
             <div class="btn-toolbar mb-2 mb-md-0">
                 <a th:href="@{/registerSample/{id}(id=${project.id})}" class="btn btn-outline-primary">
@@ -217,6 +216,7 @@
             $("#collaborators").empty().text(htmlDecode([[#{project.title.collaborators.none}]]));
         }
     });
+
     function deleteProject(projectId) {
         if (confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
             $.ajax({
@@ -249,15 +249,29 @@
         });
     }
 
-    function fetchSample(sampleData) {
+    function fetchSample(sampleId, exportOpt) {
         $.ajax({
             type: 'GET',
-            url: serverContext + 'sample/' + sampleData.id,
+            url: serverContext + 'sample/' + sampleId,
             success: (data) => {
-                selectedSampleData = sampleData;
-                selectedSampleValues= data.all;
-                renderSampleData(sampleData.id);
-                toggleView('table');
+                selectedSampleData = data.sample;
+                selectedSampleValues= data.values;
+                if(selectedSampleData.dataChannels.length > 1) {
+                    $('#statsMultiBtn').attr('disabled', false);
+                }
+                if(exportOpt) {
+                    console.log(exportOpt);
+                    console.log("AAAA");
+                   switch (exportOpt) {
+                       case 'csv':
+                           exportCSV(); break;
+                       case 'txt':
+                           exportTXT(); break;
+                   }
+                }else {
+                    renderSampleData(sampleId);
+                    toggleView('table');
+                }
             },
             error: (data) => {
                 $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
@@ -269,6 +283,12 @@
         const selectedOption = element.options[element.selectedIndex].value;
         const id = element.id.substring(element.id.indexOf('-') + 1);
         switch (selectedOption) {
+            case 'csv':
+                fetchSample(id, selectedOption);
+                break;
+            case 'txt':
+                fetchSample(id, selectedOption);
+                break;
             case 'delete':
                 deleteSample(id);
                 break;
@@ -328,73 +348,17 @@
     };
 
     const renderSampleActions = (data, type, row) => {
+        const exportOpts = `<optgroup label="${[[#{sample.button.export}]]}">`
+                            + `<option value="csv">${[[#{sample.modal.save.tooltip.csv}]]}</option>`
+                            + `<option value="txt">${[[#{sample.modal.save.tooltip.txt}]]}</option>`
+                            + `</optgroup>`;
         const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.sample.option.delete}]]}</option>`;
         return `<select id="project-${row.id}" class="form-control" onChange="handleSampleAction(this)">
                     <option value="" disabled selected>${[[#{table.select.option.default}]]}</option>
+                    ${exportOpts}
                     ${[[${role}]] === 'owner' ? deleteOpt : ''}
                 </select>`;
     };
-
-    function renderSampleData(sampleId) {
-        if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))
-            && selectedSampleData.id === sampleId) {
-            const role = /*[[${role}]]*/;
-            const deleteBtnExists = $("#deleteSampleBtn").length > 0;
-            if (role === 'owner' && !deleteBtnExists) {
-                const deleteBtn = `<span id="deleteSampleBtn" class='d-flex align-self-center ml-3'>
-                    <button class="btn btn-danger btn-sm my-auto" onclick='deleteSample(${sampleId})'>
-                        <i class="fas fa-trash"></i>
-                    </button></span>`;
-                $("#sampleModal .modal-title").after(deleteBtn);
-            }
-            $("#sampleDate").empty();
-            $("#sampleDate").append(`<i class="fas fa-calendar-day"></i> ${selectedSampleData.sampleDate}`)
-
-            const headerRow = $("<tr></tr>");
-            $(headerRow).append(`<th scope="col">#</th>`);
-
-            selectedSampleData?.dataChannels?.forEach((c) => {
-                let channelInfo = '';
-                channelInfo += "<ul class='list-unstyled'>";
-                channelInfo += `<li><strong>${[[#{sample.channel.name}]]}</strong> ${c.channelName ?? 'N/A'}</li>`;
-                channelInfo += `<li><strong>${[[#{sample.channel.label}]]}</strong> ${c.channelLabel ?? 'N/A'}</li>`;
-                channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
-                    ? c.resolution : 'N/A'}</li>`;
-                channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
-                    ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]]}</li>`;
-                channelInfo += `<li><strong>${[[#{sample.channel.type.io}]]}</strong> ${c.input
-                    ? [[#{sample.channel.input}]] : [[#{sample.channel.output}]]}</li>`;
-                channelInfo += `<li><strong>Sensor:</strong> ${c.sensor.name ?? 'N/A'}</li>`;
-                channelInfo += `<li><strong>Sensor(alias):</strong> ${c.sensor.alias ?? 'RAW'}</li>`;
-                channelInfo += "</ul>";
-
-                $(headerRow).append(`<th data-toggle="tooltip" data-placement="left" data-html="true"
-                title="${channelInfo}" scope="col">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
-            });
-
-            $("#sampleTable thead").append(headerRow);
-            
-            const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
-
-            data[0].forEach((value, index1) => {
-                const newRow = $("<tr></tr>");
-                $(newRow).append(`<th scope="row">${(index1+1)}</th>`);
-                selectedSampleData.dataChannels.forEach((channel, index2) => {
-                    const newCell = $(`<td>${data[index2][index1]}</td>`);
-                    $(newRow).append(newCell);
-                });
-                $("#sampleTable tbody").append(newRow);
-            });
-
-            $('[data-toggle="tooltip"]').tooltip();
-            $("#sampleModalLabel").children().remove();
-            $("#sampleModalLabel").append(`<span>&nbsp;#${sampleId}</span>`);
-            $("#sampleId").val(sampleId);
-            $("#sampleModal").modal('show');
-        } else {
-            $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
-        }
-    }
 
     function drawSamplesTable(samples) {
         if (lang && lang === 'es') {
@@ -436,7 +400,7 @@
                             selectedSampleValuesNorm = undefined;
                             $("#normalizeSwitch").prop("checked", false);
                             normalized = false;
-                            fetchSample(data);
+                            fetchSample(data.id);
                         };
                     });
                 },

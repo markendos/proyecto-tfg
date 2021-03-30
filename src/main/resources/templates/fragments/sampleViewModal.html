@@ -28,8 +28,8 @@
                         <div class="dropdown-menu">
                             <button class="dropdown-item btn btn-link" onclick="toggleView('statsUni')"
                                     th:utext="#{sample.tab.stats.univariate}">Univariate</button>
-                            <button class="dropdown-item btn btn-link" onclick="toggleView('statsMulti')"
-                                    th:utext="#{sample.tab.stats.multivariate }">Multivariate</button>
+                            <button id="statsMultiBtn" class="dropdown-item btn btn-link" onclick="toggleView('statsMulti')"
+                                    th:utext="#{sample.tab.stats.multivariate }" disabled>Multivariate</button>
                         </div>
                     </li>
                 </ul>
@@ -107,10 +107,24 @@
         let selectedSampleValuesNorm = undefined
         let normalized = false;
         let correlationMatrix = undefined;
-
+        const limit = 200; //Table rows to render at once
         $(document).ready(function () {
             $("#normalizeSwitch").change(() => toggleDataNormalization());
         });
+
+        function addRows(offset) {
+            const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
+            const newLimit = limit + offset;
+            for(let index1 = offset; index1 < selectedSampleData.size && index1 < newLimit; index1++) {
+                const newRow = $("<tr></tr>");
+                $(newRow).append(`<th scope="row">${(index1+1)}</th>`);
+                selectedSampleData.dataChannels.forEach((channel, index2) => {
+                    const newCell = $(`<td>${data[index2][index1]}</td>`);
+                    $(newRow).append(newCell);
+                });
+                $("#sampleTable tbody").append(newRow);
+            }
+        }
 
         function toggleDataNormalization() {
             normalized = !normalized;
@@ -245,6 +259,73 @@
             }
         }
 
+        function renderSampleData(sampleId) {
+            if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))
+                && selectedSampleData.id === sampleId) {
+                const role = /*[[${role}]]*/;
+                const deleteBtnExists = $("#deleteSampleBtn").length > 0;
+                if (role === 'owner' && !deleteBtnExists) {
+                    const deleteBtn = `<span id="deleteSampleBtn" class='d-flex align-self-center ml-3'>
+                    <button class="btn btn-danger btn-sm my-auto" onclick='deleteSample(${sampleId})'>
+                        <i class="fas fa-trash"></i>
+                    </button></span>`;
+                    $("#sampleModal .modal-title").after(deleteBtn);
+                }
+                $("#sampleDate").empty();
+                const date = (new Date(selectedSampleData.sampleDate)).toLocaleDateString();
+                $("#sampleDate").append(`<i class="fas fa-calendar-day"></i> ${date}`)
+
+                const headerRow = $("<tr></tr>");
+                $(headerRow).append(`<th scope="col">#</th>`);
+
+                selectedSampleData?.dataChannels?.forEach((c) => {
+                    let channelInfo = '';
+                    channelInfo += "<ul class='list-unstyled'>";
+                    channelInfo += `<li><strong>${[[#{sample.channel.name}]]}</strong> ${c.channelName ?? 'N/A'}</li>`;
+                    channelInfo += `<li><strong>${[[#{sample.channel.label}]]}</strong> ${c.channelLabel ?? 'N/A'}</li>`;
+                    channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
+                        ? c.resolution : 'N/A'}</li>`;
+                    channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
+                        ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]]}</li>`;
+                    channelInfo += `<li><strong>${[[#{sample.channel.type.io}]]}</strong> ${c.input
+                        ? [[#{sample.channel.input}]] : [[#{sample.channel.output}]]}</li>`;
+                    channelInfo += `<li><strong>Sensor:</strong> ${c.sensor.name ?? 'N/A'}</li>`;
+                    channelInfo += `<li><strong>Sensor(alias):</strong> ${c.sensor.alias ?? 'RAW'}</li>`;
+                    channelInfo += "</ul>";
+
+                    $(headerRow).append(`<th data-toggle="tooltip" data-placement="left" data-html="true"
+                title="${channelInfo}" scope="col">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
+                });
+
+                $("#sampleTable thead").append(headerRow);
+
+                const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
+                for(let index1 = 0; index1 < selectedSampleData.size && index1 < limit; index1++) {
+                    const newRow = $("<tr></tr>");
+                    $(newRow).append(`<th scope="row">${(index1+1)}</th>`);
+                    selectedSampleData.dataChannels.forEach((channel, index2) => {
+                        const newCell = $(`<td>${data[index2][index1]}</td>`);
+                        $(newRow).append(newCell);
+                    });
+                    $("#sampleTable tbody").append(newRow);
+                }
+                $('[data-toggle="tooltip"]').tooltip();
+                $("#sampleModalLabel").children().remove();
+                $("#sampleModalLabel").append(`<span>&nbsp;#${sampleId}</span>`);
+                $("#sampleId").val(sampleId);
+                $("#sampleModal").modal('show');
+
+                $('#sampleModal .modal-body').scroll(function() {
+                    if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                        const offset = $('#sampleTable tbody').children().toArray().length;
+                        addRows(offset);
+                    }
+                });
+            } else {
+                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+            }
+        }
+
         function generateStatistics(sampleId) {
             $.ajax({
                 type: 'GET',
@@ -296,7 +377,6 @@
                     hAxis: {title: htmlDecode([[#{sample.table.column.id}]]), gridlines: {count: -1} },
                     explorer: { axis: 'horizontal' , maxZoomIn: calculateZoom(selectedSampleData.size)},
                 };
-                console.log(calculateZoom(selectedSampleData.size));
                 const chart = new google.visualization.LineChart(document.getElementById("chartContent"));
                 google.visualization.events.addListener(chart, 'ready', () => {
                     $("#chartLoader").hide();

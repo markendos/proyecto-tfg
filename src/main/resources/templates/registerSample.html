@@ -89,7 +89,7 @@
                                           th:utext="#{sample.modal.save.remote}"></span>
                                 </div>
                                 <div class="custom-control custom-switch ml-2 my-auto">
-                                    <input type="checkbox" class="custom-control-input" id="dbSwitch">
+                                    <input type="checkbox" class="custom-control-input" id="dbSwitch" checked>
                                     <label class="custom-control-label" for="dbSwitch" data-toggle="tooltip"
                                            data-placement="top" th:attr="title=#{sample.modal.save.tooltip.project}">
                                         <i class="fas fa-cloud-upload-alt fa-2x"></i>
@@ -109,9 +109,11 @@
             <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                        th:utext="#{label.form.cancel}">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmSaveBtn" onclick="handleSampleExport()"
-                        th:utext="#{label.form.confirm}">Confirm</button>
+                        th:utext="#{label.form.cancel}">Cancel
+                </button>
+                <button type="button" class="btn btn-primary" id="confirmSaveBtn" onclick="handleSampleSave()"
+                        th:utext="#{label.form.confirm}">Confirm
+                </button>
             </div>
         </div>
     </div>
@@ -148,6 +150,9 @@
                     </li>
                 </ol>
             </nav>
+            <h3 id="projectTitle" class="my-0" data-toggle="tooltip" data-placement="top"
+                th:utext="${project.name}">
+            </h3>
             <div class="btn-toolbar mb-2 mb-md-0">
                 <button th:inline="text" class="btn btn-info mr-2" id="saveDataBtn" data-toggle="modal"
                         data-target="#modalFileSave" disabled>
@@ -170,7 +175,7 @@
                 <div class="custom-file w-25 ml-auto">
                     <input type="file" class="custom-file-input" id="sampleFile" accept=".txt">
                     <label class="custom-file-label" for="sampleFile" th:utext="#{sample.file.upload}"
-                    th:attr="data-browse=#{sample.file.browse}">
+                           th:attr="data-browse=#{sample.file.browse}">
                     </label>
                 </div>
             </div>
@@ -186,11 +191,12 @@
                     <input class="my-auto mx-1" id="isSimulated" type="checkbox" disabled>
 
                     <label class="my-auto ml-2 mr-1" for="isPlot" th:utext="#{sample.label.plot}">plot</label>
-                    <input class="my-auto" id="isPlot" type="checkbox"  disabled>
+                    <input class="my-auto" id="isPlot" type="checkbox" disabled>
                 </div>
                 <div class="col text-center">
                     <label class="my-auto" for="samplingRate" th:utext="#{sample.label.samplingRate}"></label>
-                    <select id="samplingRate" class="form-control form-control-sm d-inline ml-1" style="width: auto" disabled>
+                    <select id="samplingRate" class="form-control form-control-sm d-inline ml-1" style="width: auto"
+                            disabled>
                         <option value=1>1</option>
                         <option value=10 selected>10</option>
                         <option value=100 disabled>100</option>
@@ -198,11 +204,14 @@
                     </select>
                 </div>
                 <div class="col text-center">
-                    <button type="button" class="btn btn-success btn-sm mx-2" id="startSamplingBtn" disabled>START</button>
-                    <button type="button" class="btn btn-warning btn-sm mx-2" id="stopSamplingBtn" disabled>STOP</button>
+                    <button type="button" class="btn btn-success btn-sm mx-2" id="startSamplingBtn" disabled>START
+                    </button>
+                    <button type="button" class="btn btn-warning btn-sm mx-2" id="stopSamplingBtn" disabled>STOP
+                    </button>
                 </div>
                 <div class="col progress px-0">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="sampling-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="sampling-progress"
+                         role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
             <hr class="my-4"/>
@@ -215,13 +224,15 @@
                                 <table>
                                     <thead>
                                     <tr class="row100 head">
-                                        <th class="cell100 column border-left-0" th:utext="#{sample.table.column.id}"></th>
-                                        <th id="ch-1" class="cell100 column channel clickeable">A1</th>
-                                        <th id="ch-2" class="cell100 column channel clickeable">A2</th>
-                                        <th id="ch-3" class="cell100 column channel clickeable">A3</th>
-                                        <th id="ch-4" class="cell100 column channel clickeable">A4</th>
-                                        <th id="ch-5" class="cell100 column channel clickeable">A5</th>
-                                        <th id="ch-6" class="cell100 column channel clickeable border-right-0">A6</th>
+                                        <th scope="col" class="cell100 column border-left-0"
+                                            th:utext="#{sample.table.column.id}"></th>
+                                        <th scope="col" id="ch-1" class="cell100 column channel clickeable">A1</th>
+                                        <th scope="col" id="ch-2" class="cell100 column channel clickeable">A2</th>
+                                        <th scope="col" id="ch-3" class="cell100 column channel clickeable">A3</th>
+                                        <th scope="col" id="ch-4" class="cell100 column channel clickeable">A4</th>
+                                        <th scope="col" id="ch-5" class="cell100 column channel clickeable">A5</th>
+                                        <th scope="col" id="ch-6"
+                                            class="cell100 column channel clickeable border-right-0">A6</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -245,6 +256,7 @@
 <!--Page Footer-->
 <footer th:replace="/fragments/footer :: pageFooter"></footer>
 
+<!--JS Global Variables-->
 <script th:inline="javascript">
     let device = {};
     let commands = undefined;
@@ -254,15 +266,63 @@
     let limit = -1;
     const numChannels = 6
     let aChannels = (new Array(numChannels)).fill(false);
-    let imported = { sensors: undefined, labels: undefined, resolutions: undefined, comments: undefined };
+    let imported = {sensors: undefined, labels: undefined, resolutions: undefined, comments: undefined};
     let sampling = false;
     let sampledData = undefined;
     let sampledFrames = undefined;
     let chart = undefined;
-    const disconnected = /*[[#{sample.device.status.disconnected}]]*/;
-    const connecting = /*[[#{sample.device.status.connecting}]]*/;
-    const ready = htmlDecode(/*[[#{sample.device.status.ready}]]*/);
-    const acquiring = /*[[#{sample.device.status.acquiring}]]*/;
+    const disconnected = [[#{sample.device.status.disconnected}]];
+    const connecting = [[#{sample.device.status.connecting}]];
+    const ready = htmlDecode([[#{sample.device.status.ready}]]);
+    const acquiring = [[#{sample.device.status.acquiring}]];
+    const renderAtOnce = 200; //Table rows to render at once (for file import)
+</script>
+
+<!--JS Utilities-->
+<script th:inline="javascript">
+    $(document).ready(function () {
+        $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
+        $('[data-toggle="tooltip"]').tooltip();
+
+        $('#sampleContainer').scroll(function () {
+            if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                const offset = $('#samples tbody').children().toArray().length;
+                addRows(offset);
+            }
+        });
+
+        $("th.channel").click(function () {
+            $(this).fadeOut(100).toggleClass("channel").fadeIn(100);
+
+            if (sampling) {
+                stopSampling();
+            }
+
+            let id = $(this).attr("id");
+            let ch = Number.parseInt(id.split("ch-")[1]);
+            aChannels[ch - 1] = (aChannels[ch - 1] == 0);
+        });
+
+        $("#isPlot").change(function () {
+            if (this.checked && sampledData?.length > 0) {
+                drawChart();
+            }
+        });
+
+        $("#resetBtn").click(function () {
+            $("th.clickeable").addClass("channel");
+            aChannels.fill(false);
+            clearData();
+        });
+
+    });
+
+    function Frame(crc, seq, analog, digital) {
+        this.crc = crc;
+        this.seq = seq;
+        this.analog = analog;
+        this.digital = digital;
+    }
 
     Frame.prototype.toString = function frameToString() {
         const str = "Frame{" + "CRC=" + this.crc + ", seq=" + this.seq + ", analog=" + this.analog
@@ -270,6 +330,57 @@
 
         return str;
     }
+
+    function clearData() {
+        if (sampling) {
+            stopSampling();
+        }
+        chart = undefined;
+        $("#samples tbody").empty();
+        sampledData = [];
+        sampledFrames = [];
+        let imported = {sensors: undefined, labels: undefined, resolutions: undefined, comments: undefined};
+        $("#linechart").empty();
+        $("#saveDataBtn").attr("disabled", true);
+        $("#sampling-progress").attr("aria-valuenow", 0);
+        $("#sampling-progress").css("width", 0 + "%");
+        $("#sampling-progress").text("");
+        $("numSamples").val("");
+        count = 0;
+    }
+</script>
+
+<!--Bluetooth Connectivity (BITalino) JS Functionalities-->
+<script th:inline="javascript">
+    $(document).ready(() => {
+        $("#connectBtn").click(function () {
+            if (isWebBluetoothEnabled()) {
+                discoverDevices();
+            }
+        });
+        $("#getVersionBtn").click(function () {
+            getVersion();
+        });
+
+        $("#startSamplingBtn").click(function () {
+            if (aChannels.indexOf(true) >= 0) {
+                let clear = true;
+                if ((sampledData !== undefined && sampledData.length > 0)
+                    || (sampledFrames !== undefined && sampledFrames.length > 1)) {
+                    clear = confirm(htmlDecode([[#{message.confirm.sample.reset}]]));
+                }
+                if (clear) {
+                    clearData();
+                    startSampling();
+                }
+            } else {
+                alert(htmlDecode([[#{message.alert.sample.activeChannel}]]));
+            }
+        });
+        $("#stopSamplingBtn").click(function () {
+            stopSampling();
+        });
+    });
 
     function isWebBluetoothEnabled() {
         return (navigator.bluetooth);
@@ -309,6 +420,7 @@
             getVersion();
 
             $("#status").text(ready);
+            clearData();
             $("#status").addClass("ready my-auto mx-2");
 
             // Set up event listener for when device gets disconnected.
@@ -378,7 +490,7 @@
             await commands.writeValue(new Uint8Array([(sr << 6) | 0x3]));
             sampling = true;
             $("#status").text(acquiring);
-            $("#status").css("animation", `blinker ${1/selected}s linear infinite`);
+            $("#status").css("animation", `blinker ${1 / selected}s linear infinite`);
         } catch (error) {
             console.log("Error:" + error);
         }
@@ -442,7 +554,7 @@
             }
         }
         console.log('> ' + str);
-        device = Object.assign(device, { firmware: str.slice(str.indexOf("v") + 1) });
+        device = Object.assign(device, {firmware: str.slice(str.indexOf("v") + 1)});
 
         //Remove event handler function for the 'firmware version' command
         await frames.removeEventListener('characteristicvaluechanged', handleFirmwareVersionNotification);
@@ -542,18 +654,28 @@
             currentDate = Date.now();
         } while (currentDate - date < milliseconds);
     }
+</script>
 
-    function Frame(crc, seq, analog, digital) {
-        this.crc = crc;
-        this.seq = seq;
-        this.analog = analog;
-        this.digital = digital;
+<!--Sample Data Visualization JS Functionalities-->
+<script th:inline="javascript">
+    function addRows(offset) {
+        const newLimit = renderAtOnce + offset;
+        for (let index1 = offset; index1 < sampledData.length && index1 < newLimit; index1++) {
+            const newRow = $("<tr></tr>");
+            $(newRow).append(`<th scope='row' class='cell100 column'>${(index1 + 1)}</th>`);
+            let aux = 0;
+            aChannels.forEach((channel, index2) => {
+                const newCell = $(`<td class='cell100 column'>${channel ? sampledData[index1][aux++] : '-'}</td>`);
+                $(newRow).append(newCell);
+            });
+            $("#samples tbody").append(newRow);
+        }
     }
 
     async function addSampleRow(frame) {
         const row = $("<tr class='row100 body'></tr>");
         $(row).attr("id", "sample_" + count);
-        let cell = $("<td class='cell100 column'></td>");
+        let cell = $("<th scope='row' class='cell100 column'></th>");
 
         $(cell).text(count);
         $(row).append(cell);
@@ -573,83 +695,49 @@
         const div = document.getElementById("sampleContainer");
         div.scrollTop = div.scrollHeight - div.clientHeight;
 
-        aux = [count];
-        for (let i = 0; i < frame.analog.length; i++) {
-            aux.push(frame.analog[i]);
-        }
-        sampledData.push(aux);
+        sampledData.push(frame.analog);
 
         if ($("#isPlot").is(":checked") && count % 5 == 0) {
             drawChart();
         }
     }
-</script>
-<script th:inline="javascript">
-    $("#connectBtn").click(function () {
-        if (isWebBluetoothEnabled()) {
-            discoverDevices();
+
+    //Load Line chart from Google Charts API
+    google.charts.load('current', {'packages': ['line']});
+
+    function drawChart() {
+        let dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                dataTable.addColumn('number', 'A' + (i + 1));
+            }
         }
-    });
-    $("#getVersionBtn").click(function () {
-        getVersion();
-    });
+        const limit = 200;
+        const offset = parseInt(sampledData.length / limit);
+        dataTable.addRows(sampledData.slice(offset * limit))
 
-    $("#startSamplingBtn").click(function () {
-        if (aChannels.indexOf(true) >= 0) {
-            let clear = true;
-            if ((sampledData !== undefined && sampledData.length > 0)
-                || (sampledFrames !== undefined && sampledFrames.length > 1)) {
-                clear = confirm(htmlDecode([[#{message.confirm.sample.reset}]]));
-            }
-            if (clear) {
-                clearData();
-                startSampling();
-            }
-        } else {
-            alert(htmlDecode([[#{message.alert.sample.activeChannel}]]));
+        const options = {
+            chart: {
+                title: htmlDecode([[#{sample.title.plot}]]),
+                subtitle: ''
+            },
+            height: 500,
+            hAxis: {gridlines: {count: -1}},
+        };
+
+        if (chart == null) {
+            chart = new google.charts.Line(document.getElementById("linechart"));
         }
-    });
-    $("#stopSamplingBtn").click(function () {
-        stopSampling();
-    });
+
+        chart.draw(dataTable, google.charts.Line.convertOptions(options));
+    }
 </script>
+
+<!--Sample Save JS Utils-->
 <script th:inline="javascript">
-    $(document).ready(function () {
-
-        $("#sampleFile").change((event) => {
-            $(".alert").hide();
-            const file = event.target.files[0];
-            if(file?.type === 'text/plain') {
-                readFile(file);
-            } else if(file){
-                $("#errormsg").show().html([[#{message.sample.file.error.type}]]);
-                $(".alert").children("i.fa-window-close").remove();
-                $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
-            }
-        });
-
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip()
-        });
-
-        $("th.channel").click(function () {
-            $(this).fadeOut(100).toggleClass("channel").fadeIn(100);
-
-            if (sampling) {
-                stopSampling();
-            }
-
-            let id = $(this).attr("id");
-            let ch = Number.parseInt(id.split("ch-")[1]);
-            aChannels[ch - 1] = (aChannels[ch - 1] == 0);
-        });
-
-        $("#isPlot").change(function () {
-            if (this.checked && sampledData != undefined && sampledData.length > 0) {
-                drawChart();
-            }
-        });
-
+    $(document).ready(() => {
         $("#modalFileSave").on('shown.bs.modal', function () {
             let chInfo = $("#fileSaveForm").find($("div.channelInfo"));
 
@@ -664,10 +752,9 @@
             });
             let resolutions;
 
-            if(imported?.resolutions) {
+            if (imported?.resolutions) {
                 resolutions = imported.resolutions.slice();
-            }
-            else {
+            } else {
                 resolutions = [];
                 active.forEach((c, i) => {
                     if (active.length == 6 && i >= 4) {
@@ -684,15 +771,16 @@
                     let row = $("<div class='row my-2 text-center align-items-center channelInfo'></div>");
 
                     let col = $("<div class='col-2 align-middle py-2'></div>");
-                    $(col).append(`<input name="channelNames" value="A${i+1}" class="w-100 form-control" readonly/>`);
+                    $(col).append(`<input name="channelNames" value="A${i + 1}" class="w-100 form-control" readonly/>`);
 
                     $(row).append(col);
 
                     col = $("<div class='col-3'></div>");
                     let sensorSelector = $("<select class='form-control' name='sensors'></select>");
                     sensors.forEach((sensor) => {
-                        let selected =  false;
-                        if((sensor.alias === 'RAW' && !imported?.sensors) || imported?.sensors[i] === sensor.alias) {
+                        let selected = false;
+                        if ((sensor.alias === 'RAW' && !imported?.sensors)
+                            || (imported?.sensors?.[i] === sensor.alias)) {
                             selected = true;
                         }
                         let opt = $(`<option value="${sensor.id}" ${selected ? 'selected' : ''}>${sensor.alias}</option>`);
@@ -702,9 +790,8 @@
                     $(row).append(col);
 
                     col = $("<div class='col-5'></div>");
-                    let label = $(`<input name="channelLabels" class="form-control chLabel" value=""/>`);
-                    $(label).css("width", "100%");
-                    if(imported?.labels[i]) {
+                    let label = $(`<input name="channelLabels" class="form-control chLabel w-100" value=""/>`);
+                    if (imported?.labels?.[i]) {
                         $(label).val(imported.labels[i])
                     }
 
@@ -712,9 +799,8 @@
                     $(row).append(col);
 
                     col = $("<div class='col-2'></div>");
-                    let check = $(`<input class='form-control mx-auto channelCheck' type='checkbox'/>`);
+                    let check = $(`<input class='form-control mx-auto channelCheck w-25' type='checkbox'/>`);
                     $(check).attr("checked", true);
-                    $(check).css("width", "30%");
 
                     $(col).append(check);
                     $(row).append(col);
@@ -723,7 +809,7 @@
                     $("#fileSaveForm>hr").before(row);
                 }
             }
-            if(imported?.comments) {
+            if (imported?.comments) {
                 $("#comments").val(imported.comments);
             }
             $("#deviceName").val(device.name);
@@ -731,18 +817,11 @@
             $("#sRate").val(sampledFrames[0][1]);
             $("#size").val(sampledData.length);
         });
-
-        $("#resetBtn").click(function () {
-            $("th.clickeable").addClass("channel");
-            aChannels.fill(false);
-            clearData();
-        });
-
     });
 
-    function handleSampleExport() {
+    function handleSampleSave() {
         $('#modalFileSave').modal('hide');
-        if($("#dbSwitch").is(":checked")) {
+        if ($("#dbSwitch").is(":checked")) {
             showSpinner();
             saveSample();
         }
@@ -750,11 +829,187 @@
         if ($("#txtSwitch").is(":checked")) {
             saveOpenSignalsData(date);
         }
-        if($("#csvSwitch").is(":checked")) {
+        if ($("#csvSwitch").is(":checked")) {
             saveCSV(date);
         }
     }
 
+    function saveCSV(date) {
+        let sRate = sampledFrames[0][1];
+        let timeIncrement = (1 / sRate) * 1000;
+
+        let labels = $("#fileSaveForm").find("input.chLabel");
+        let checks = $("#fileSaveForm").find("input.channelCheck");
+        let aChannels = [...sampledFrames[0][0]];
+
+        let aux = 0;
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                if (!$(checks[aux++]).is(":checked")) {
+                    aChannels[i] = false;
+                }
+            }
+        }
+
+        let csv = `"seq","timestamp",`;
+
+        aux = 0;
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                const label = $(labels[aux++]).val();
+                csv += `"A${i + 1}${label ? '[' + label + ']' : ''}",`;
+                csv += `"A${i + 1}${label ? '[' + label + ']' : ''}_norm",`;
+            }
+        }
+        csv = csv.slice(0, -1);
+        csv += "\n";
+
+        const active = aChannels.filter((x) => x);
+        const resolutions = [];
+        for (let i = 0; i < active.length; i++) {
+            if (active.length == 6 && i >= 4) {
+                resolutions.push(6);
+            } else {
+                resolutions.push(10);
+            }
+        }
+
+        for (let i = 1; i < sampledFrames.length; i++) {
+            date = new Date(date.getTime() + timeIncrement);
+            let month = (date.getMonth() + 1).toString().padStart(2, 0);
+            let day = date.getDate().toString().padStart(2, 0);
+            let hours = date.getHours().toString().padStart(2, 0);
+            let minutes = date.getMinutes().toString().padStart(2, 0);
+            let seconds = date.getSeconds().toString().padStart(2, 0);
+            csv += `${i},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}"`;
+            for (let j = 0; j < sampledFrames[i].analog.length; j++) {
+                if ($(checks[j]).is(":checked")) {
+                    csv += "," + sampledFrames[i].analog[j];
+                    csv += "," + normalizeValue(sampledFrames[i].analog[j], resolutions[j]);
+                }
+            }
+            csv += "\n";
+        }
+
+        const blob = new Blob([csv],
+            {type: "text/plain;charset=ascii"});
+
+        let filename = "data_" + device.name + "_" + date.getTime() + ".csv";
+
+        saveAs(blob, filename);
+    }
+
+    function normalizeValue(value, bits) {
+        const min = 0;
+        const max = Math.pow(2, Number.parseInt(bits));
+        return ((value - min) / (max - min)).toPrecision(6);
+    }
+
+    function saveOpenSignalsData(date) {
+        const comments = $("#saveComments").val();
+        let sensors = $("#fileSaveForm").find("select");
+        let labels = $("#fileSaveForm").find("input.chLabel");
+        let checks = $("#fileSaveForm").find("input.channelCheck");
+
+        let month = (date.getMonth() + 1).toString().padStart(2, 0);
+        let day = date.getDate().toString().padStart(2, 0);
+        let hours = date.getHours().toString().padStart(2, 0);
+        let minutes = date.getMinutes().toString().padStart(2, 0);
+        let seconds = date.getSeconds().toString().padStart(2, 0);
+
+        let aChannels = [...sampledFrames[0][0]];
+        let sRate = sampledFrames[0][1];
+
+        let aux = 0;
+
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                if (!$(checks[aux++]).is(":checked")) {
+                    aChannels[i] = false;
+                }
+            }
+        }
+        const sensorsArr = [];
+        for (let i = 0; i < sensors.length; i++) {
+            if ($(checks[i]).is(":checked")) {
+                let sensorName = getSensorById($(sensors[i]).val()).alias;
+                sensorsArr.push(sensorName ?? 'RAW');
+            }
+        }
+        const columns = ['nSeq', 'I1', 'I2', 'O1', 'O2'];
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                columns.push(`A${i + 1}`);
+            }
+        }
+        const channels = [];
+        for (let i = 0; i < aChannels.length; i++) {
+            if (aChannels[i]) {
+                channels.push(i + 1);
+            }
+        }
+        const labelsArr = [];
+        for (let i = 0; i < labels.length; i++) {
+            if ($(checks[i]).is(":checked")) {
+                labelsArr.push($(labels[i]).val() ?? '');
+            }
+        }
+        const resolutions = [4, 1, 1, 1, 1];
+        const active = aChannels.filter((x) => x);
+        for (let i = 0; i < active.length; i++) {
+            if (active.length == 6 && i >= 4) {
+                resolutions.push(6);
+            } else {
+                resolutions.push(10);
+            }
+        }
+
+        let txt = '# OpenSignals Text File Format\n';
+        const header = {
+            [device.name]: {
+                sensor: sensorsArr,
+                'device name': device.name,
+                column: columns,
+                'sync interval': 2,
+                time: `${hours}:${minutes}:${seconds}.${date.getMilliseconds()}`,
+                comments: comments ?? '',
+                'device connection': device.name,
+                channels: channels,
+                date: `${date.getFullYear()}-${month}-${day}`,
+                mode: 0,
+                "digital IO": [0, 0, 1, 1],
+                'firmware version': device.firmware ?? '',
+                device: 'bitalino_rev',
+                position: 0,
+                'sampling rate': sRate,
+                label: labelsArr,
+                resolution: resolutions,
+            }
+        };
+        txt += '# ' + JSON.stringify(header);
+        txt += '\n' + "# EndOfHeader";
+
+        for (let i = 1; i < sampledFrames.length; i++) {
+            txt += "\n";
+            txt += sampledFrames[i].seq + "\t" + sampledFrames[i].digital[0] + "\t" + sampledFrames[i].digital[1]
+                + "\t" + sampledFrames[i].digital[2] + "\t" + sampledFrames[i].digital[3];
+            for (let j = 0; j < sampledFrames[i].analog.length; j++) {
+                if ($(checks[j]).is(":checked")) {
+                    txt += "\t" + sampledFrames[i].analog[j];
+                }
+            }
+        }
+
+        const blob = new Blob([txt],
+            {type: "text/plain;charset=ascii"});
+
+        let filename = "opensignals_" + device.name + "_" + date.getFullYear() + month + day;
+        filename += "_" + hours + "_" + minutes + "_" + seconds + ".txt";
+
+        saveAs(blob, filename);
+    }
+
+    /* Registers the data sample in the system (only contextual info, no values) */
     function saveSample() {
         $(".alert").html("").hide();
         $(".error-list").html("");
@@ -777,31 +1032,31 @@
         });
     }
 
+    /* Stores the values of the sample in the system */
     async function saveValues(sample) {
-        if(sample?.size === sampledData.length) {
-            const offset = 1;
+        if (sample?.size === sampledData.length) {
             const promises = [];
             const channelValues = [];
-
+            console.log(sampledData);
             const checks = $("#fileSaveForm").find("input.channelCheck");
             let aux = 0;
             let aChannels = [...sampledFrames[0][0]];
 
-            for(let i = 0; i < aChannels.length; i++) {
-                if(aChannels[i]) {
-                    if(!$(checks[aux++]).is(":checked")) {
+            for (let i = 0; i < aChannels.length; i++) {
+                if (aChannels[i]) {
+                    if (!$(checks[aux++]).is(":checked")) {
                         aChannels[i] = false;
                     }
                 }
             }
-            for(let i = 0; i < aChannels.length; i++) {
-                    channelValues.push([]);
+            for (let i = 0; i < aChannels.length; i++) {
+                channelValues.push([]);
             }
             sampledData.forEach((v) => {
                 let aux = 0;
-                for(let j = offset; j < channelValues.length + offset; j++) {
-                    if(aChannels[j - offset]) {
-                        channelValues[j - offset].push(v[offset + aux++]);
+                for (let j = 0; j < channelValues.length; j++) {
+                    if (aChannels[j]) {
+                        channelValues[j].push(v[aux++]);
                     }
                 }
             });
@@ -819,7 +1074,6 @@
                                 reject();
                             }
                         };
-
                         req.send(JSON.stringify({
                             sampleId: sample.id,
                             channelName: sample.dataChannels[aux++].channelName ?? `A${i + 1}`,
@@ -850,238 +1104,36 @@
             });
         }
     }
-</script>
-<script th:inline="javascript">
-    function clearData() {
-        if (sampling) {
-            stopSampling();
-        }
-        chart = undefined;
-        $("#samples tbody").empty();
-        sampledData = [];
-        sampledFrames = [];
-        let imported = { sensors: undefined, labels: undefined, resolutions: undefined, comments: undefined };
-        $("#linechart").empty();
-        $("#saveDataBtn").attr("disabled", true);
-        $("#sampling-progress").attr("aria-valuenow", 0);
-        $("#sampling-progress").css("width", 0 + "%");
-        $("#sampling-progress").text("");
-        count = 0;
-    }
-
-    google.charts.load('current', {'packages': ['line']});
-    function drawChart() {
-        let dataTable = new google.visualization.DataTable();
-        dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
-
-        for(let i = 0; i < aChannels.length; i++) {
-            if(aChannels[i]) {
-                dataTable.addColumn('number', 'A'+(i+1));
-            }
-        }
-        const limit = 200;
-        const offset = parseInt(sampledData.length / limit);
-        dataTable.addRows(sampledData.slice(offset * limit))
-
-        const options = {
-            chart: {
-                title: htmlDecode([[#{sample.title.plot}]]),
-                subtitle: ''
-            },
-            height: 500,
-            hAxis: {gridlines: {count: -1}},
-        };
-
-        if(chart == null) {
-            chart = new google.charts.Line(document.getElementById("linechart"));
-        }
-
-        chart.draw(dataTable, google.charts.Line.convertOptions(options));
-    }
-
-    function saveCSV(date) {
-        let sRate = sampledFrames[0][1];
-        let timeIncrement = (1/sRate)*1000;
-
-        let labels = $("#fileSaveForm").find("input.chLabel");
-        let checks = $("#fileSaveForm").find("input.channelCheck");
-        let aChannels = [...sampledFrames[0][0]];
-
-        let aux = 0;
-        for(let i = 0; i < aChannels.length; i++) {
-            if(aChannels[i]) {
-                if(!$(checks[aux++]).is(":checked")) {
-                    aChannels[i] = false;
-                }
-            }
-        }
-
-        let csv = `"seq","timestamp",`;
-
-        aux = 0;
-        for(let i = 0; i < aChannels.length; i++) {
-            if(aChannels[i]) {
-                const label = $(labels[aux++]).val();
-                csv += `"A${i+1}${label ? '[' + label + ']' : '' }",`;
-                csv += `"A${i+1}${label ? '[' + label + ']' : '' }_norm",`;
-            }
-        }
-        csv = csv.slice(0, -1);
-        csv += "\n";
-
-        const active = aChannels.filter((x) => x);
-        const resolutions = [];
-        for(let i = 0; i < active.length; i++) {
-            if(active.length == 6 && i >= 4) {
-                resolutions.push(6);
-            }
-            else {
-                resolutions.push(10);
-            }
-        }
-
-        for(let i = 1; i < sampledFrames.length; i++) {
-            date = new Date(date.getTime() + timeIncrement);
-            let month = (date.getMonth()+1).toString().padStart(2,0);
-            let day = date.getDate().toString().padStart(2,0);
-            let hours = date.getHours().toString().padStart(2,0);
-            let minutes = date.getMinutes().toString().padStart(2,0);
-            let seconds = date.getSeconds().toString().padStart(2,0);
-            csv += `${i},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}"`;
-            for(let j = 0; j < sampledFrames[i].analog.length; j++) {
-                if($(checks[j]).is(":checked")) {
-                    csv += "," + sampledFrames[i].analog[j];
-                    csv += "," + normalizeValue(sampledFrames[i].analog[j], resolutions[j]);
-                }
-            }
-            csv += "\n";
-        }
-
-        const blob = new Blob([csv],
-            {type: "text/plain;charset=ascii"});
-
-        let filename = "data_" + device.name + "_" + date.getTime() + ".csv";
-
-        saveAs(blob, filename);
-    }
-
-    function normalizeValue(value, bits) {
-        const min = 0;
-        const max = Math.pow(2, Number.parseInt(bits));
-        return ((value - min) / (max - min)).toPrecision(6);
-    }
-
-    function saveOpenSignalsData(date) {
-        const comments = $("#saveComments").val();
-        let sensors = $("#fileSaveForm").find("select");
-        let labels = $("#fileSaveForm").find("input.chLabel");
-        let checks = $("#fileSaveForm").find("input.channelCheck");
-
-        let month = (date.getMonth()+1).toString().padStart(2,0);
-        let day = date.getDate().toString().padStart(2,0);
-        let hours = date.getHours().toString().padStart(2,0);
-        let minutes = date.getMinutes().toString().padStart(2,0);
-        let seconds = date.getSeconds().toString().padStart(2,0);
-
-        let aChannels = [...sampledFrames[0][0]];
-        let sRate = sampledFrames[0][1];
-
-        let aux = 0;
-
-        for(let i = 0; i < aChannels.length; i++) {
-            if(aChannels[i]) {
-                if(!$(checks[aux++]).is(":checked")) {
-                    aChannels[i] = false;
-                }
-            }
-        }
-        const sensorsArr= [];
-        for(let i = 0; i < sensors.length; i++) {
-            if($(checks[i]).is(":checked")) {
-                let sensorName = getSensorById($(sensors[i]).val()).alias;
-                sensorsArr.push(sensorName ?? 'RAW');
-            }
-        }
-        const columns = ['nSeq', 'I1', 'I2', 'O1', 'O2'];
-        for(let i = 0; i < aChannels.length; i++) {
-            if(aChannels[i]) {
-                columns.push(`A${i+1}`);
-            }
-        }
-        const channels = [];
-        for(let i = 0; i < aChannels.length; i++) {
-            if(aChannels[i]) {
-                channels.push(i+1);
-            }
-        }
-        const labelsArr = [];
-        for(let i = 0; i < labels.length; i++) {
-            if($(checks[i]).is(":checked")) {
-                labelsArr.push($(labels[i]).val() ?? '');
-            }
-        }
-        const resolutions = [4, 1, 1, 1, 1];
-        const active = aChannels.filter((x) => x);
-        for(let i = 0; i < active.length; i++) {
-            if(active.length == 6 && i >= 4) {
-                resolutions.push(6);
-            }
-            else {
-                resolutions.push(10);
-            }
-        }
-
-        let txt = '# OpenSignals Text File Format\n';
-        const header = {[device.name]: {
-                sensor: sensorsArr,
-                'device name': device.name,
-                column: columns,
-                'sync interval': 2,
-                time: `${hours}:${minutes}:${seconds}.${date.getMilliseconds()}`,
-                comments: comments ?? '',
-                'device connection': device.name,
-                channels: channels,
-                date: `${date.getFullYear()}-${month}-${day}`,
-                mode: 0,
-                "digital IO": [0, 0, 1, 1],
-                'firmware version': device.firmware ?? '',
-                device: 'bitalino_rev',
-                position: 0,
-                'sampling rate': sRate,
-                label: labelsArr,
-                resolution: resolutions,
-            }};
-        txt += '# ' + JSON.stringify(header);
-        txt += '\n' + "# EndOfHeader";
-
-        for(let i = 1; i < sampledFrames.length; i++) {
-            txt += "\n";
-            txt += sampledFrames[i].seq + "\t" + sampledFrames[i].digital[0] + "\t"+ sampledFrames[i].digital[1]
-                + "\t" + sampledFrames[i].digital[2] + "\t" + sampledFrames[i].digital[3];
-            for(let j = 0; j < sampledFrames[i].analog.length; j++) {
-                if($(checks[j]).is(":checked")) {
-                    txt += "\t" + sampledFrames[i].analog[j];
-                }
-            }
-        }
-
-        const blob = new Blob([txt],
-            {type: "text/plain;charset=ascii"});
-
-        let filename = "opensignals_" + device.name + "_" + date.getFullYear() + month + day;
-        filename += "_" + hours + "_" + minutes + "_" + seconds + ".txt";
-
-        saveAs(blob, filename);
-    }
 
     function getSensorById(sensorId) {
         const sensors = [[${sensors}]];
         return sensors.find((s) => s.id === parseInt(sensorId));
     }
+</script>
+
+<!--File Import JS Functionalities-->
+<script th:inline="javascript">
+    $(document).ready(() => {
+        $('#sampleFile').on('click touchstart' , function(){
+            $(this).val('');
+        });
+
+        $("#sampleFile").change((event) => {
+            $(".alert").hide();
+            const file = event.target.files[0];
+            if (file?.type === 'text/plain') {
+                readFile(file);
+            } else if (file) {
+                $("#errormsg").show().html([[#{message.sample.file.error.type}]]);
+                $(".alert").children("i.fa-window-close").remove();
+                $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
+            }
+        });
+    });
 
     function readFile(file) {
         const reader = new FileReader();
-        const maxLines = 3000;
+        const maxLines = 100000;
         showSpinner();
         clearData();
         reader.onload = ((reader) => {
@@ -1097,8 +1149,8 @@
     }
 
     function parseSampleFromFile(lines, maxLines) {
-        if(lines.length > 1 && lines.length < maxLines) {
-            if(device?.id) {
+        if (lines.length > 1 && lines.length < maxLines) {
+            if (device?.id) {
                 device.gatt.disconnect();
             }
             clearData();
@@ -1112,43 +1164,40 @@
             let errors = false;
             let endHeader = false;
 
-            while(i < lines.length && !errors) {
+            while (i < lines.length && !errors) {
                 const line = lines[i].trim();
 
-                if(i === 0 && line.startsWith('# OpenSignals Text File Format')) {
-                    const header = JSON.parse(lines[i+1].substr(2));
+                if (i === 0 && line.startsWith('# OpenSignals Text File Format')) {
+                    const header = JSON.parse(lines[i + 1].substr(2));
                     info = Object.values(header)[0];
-                    device = { name: info[ 'device name' ], firmware: info['firmware version'] };
+                    device = {name: info['device name'], firmware: info['firmware version']};
                     aChannels = (new Array(numChannels)).fill(false);
 
-                    for(let j = 0; j < numChannels; j++) {
-                        for(let k = 0; k < info?.channels?.length; k++) {
-                            if((j + 1) === info?.channels[k]) {
+                    for (let j = 0; j < numChannels; j++) {
+                        for (let k = 0; k < info?.channels?.length; k++) {
+                            if ((j + 1) === info?.channels[k]) {
                                 aChannels[j] = true;
                             }
                         }
                     }
                     //Add acquisition info to the sampled frames array
-                    let status = [aChannels.slice(), info[ 'sampling rate' ] ?? 10];
+                    let status = [aChannels.slice(), info['sampling rate'] ?? 10];
                     sampledFrames.push(status);
 
-                    if(info?.sensor) {
+                    if (info?.sensor) {
                         imported.sensors = [...info.sensor];
                     }
-                    if(info?.label) {
+                    if (info?.label) {
                         imported.labels = [...info.label];
                     }
-                    if(info?.comments) {
+                    if (info?.comments) {
                         imported.comments = info.comments;
                     }
-                }
-                else if (line.startsWith('# EndOfHeader')) {
+                } else if (line.startsWith('# EndOfHeader')) {
                     endHeader = true;
-                }
-
-                else if(!line.startsWith('#') && info) {
+                } else if (!line.startsWith('#') && info) {
                     const values = line.split('\t');
-                    if(info?.column.length === values.length) {
+                    if (info?.column.length === values.length) {
                         digital = [];
                         analog = [];
                         resolutions = [];
@@ -1159,37 +1208,39 @@
                                 digital.push(values[i]);
                             } else if (col.startsWith('A')) {
                                 analog.push(values[i]);
-                                if(info.resolution[i]) {
+                                if (info.resolution[i]) {
                                     resolutions.push(info.resolution[i]);
                                 }
                             }
                         });
 
-                        if(resolutions?.length) {
+                        if (resolutions?.length) {
                             imported.resolutions = resolutions.slice();
                         }
                         frame = new Frame(0, seq, analog, digital);
                         sampledFrames.push(frame);
-                        ++count;
-                        addSampleRow(frame);
+                        sampledData.push(analog);
                     }
 
-                } else if(endHeader){
+                } else if (endHeader) {
                     errors = true;
                 }
                 i++;
             }
-            if(errors) {
+            if (errors) {
                 $("#errormsg").show().html(/*[[#{message.sample.file.error.format}]]*/);
                 $(".alert").children("i.fa-window-close").remove();
                 $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
             } else {
+                $('#numSamples').val(sampledData.length);
+                $('#samplingRate').val(sampledFrames[0][1] ?? 10);
+                addRows(0);
                 $("#saveDataBtn").attr("disabled", false);
             }
         } else {
-            if(lines.length <= 1) {
+            if (lines.length <= 1) {
                 $("#errormsg").show().html(/*[[#{message.sample.file.error.empty}]]*/);
-            } else if(lines.length > maxLines) {
+            } else if (lines.length > maxLines) {
                 $("#errormsg").show().html(/*[[#{message.sample.file.error.size}]]*/);
             }
             $(".alert").children("i.fa-window-close").remove();
