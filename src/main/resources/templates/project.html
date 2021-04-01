@@ -35,8 +35,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"
             integrity="sha512-k8F8QynmFNURwbUJC8drKA+fo3YfNvjqKzStdydD6au+MzvxBoRnxH8E31RJXwDY9DrnEiPhh9wBoDSIxhkyHQ=="
             crossorigin="anonymous"></script>
+    <!-- JS PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
     <!-- Simple Statistics JS -->
     <script src="https://unpkg.com/simple-statistics@7.6.0/dist/simple-statistics.min.js"></script>
+    <!-- Plotly JS -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
     <!-- Custom JS -->
     <script th:inline="javascript">const requiredMessage = [[#{label.form.requiredFields}]];</script>
     <script th:src="@{/resources/js/util.js}"></script>
@@ -260,8 +264,6 @@
                     $('#statsMultiBtn').attr('disabled', false);
                 }
                 if(exportOpt) {
-                    console.log(exportOpt);
-                    console.log("AAAA");
                    switch (exportOpt) {
                        case 'csv':
                            exportCSV(); break;
@@ -329,7 +331,7 @@
         return `<i class="fas fa-info-circle" data-toggle="tooltip" data-placement="left" data-html="true"
                 title="<ul class='list-unstyled'>
                 <li><strong>${[[#{sample.label.samplingRate}]]}</strong> ${row.samplingRate ? row.samplingRate : 'N/A'}</li>
-                <li><strong>${[[#{table.sample.tooltip.comments}]]}</strong> ${row.comments ?? 'N/A'}</li>
+                <li><strong>${[[#{table.sample.tooltip.comments}]]}</strong> ${row.comments ? row.comments : 'N/A'}</li>
                 </ul>"></i>`;
     };
 
@@ -343,8 +345,8 @@
             channelInfo += "</ul>";
         });
         return channelInfo === '' ? 'N/A'
-            : `${row.dataChannels.length} <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="left" data-html="true"
-                title="${channelInfo}"></i>`;
+            : `${row.dataChannels.length} <i class="fas fa-info-circle" data-toggle="tooltip" data-placement="left"
+            data-html="true" title="${channelInfo}"></i>`;
     };
 
     const renderSampleActions = (data, type, row) => {
@@ -384,13 +386,14 @@
                     $("#dataTable button, #dataTable select").click(function (event) {
                         event.stopPropagation();
                     });
-                    $('#dataTable tbody tr').on('click', 'td', function () {
-                        const data = table.row(this).data();
+                    $('#dataTable tbody tr').off().click((e) => {
+                        const data = table.row(e.target).data();
                         if(selectedSampleData && selectedSampleValues && selectedSampleData.id === data.id) {
                             $("#sampleModal").modal('show');
                         } else {
                             $("#sampleTable").children().empty();
                             $("#statsUniTable").children().empty();
+                            $("#plots").empty();
                             $("#statsMultiTable").children().empty();
                             $("#sampleModalLabel span").remove();
                             $("#chartContent").empty();
@@ -406,6 +409,7 @@
                 },
                 data: samples,
                 columnDefs: [],
+                pageLength: 5,
                 columns: [
                     {title: "#Id", data: "id"},
                     {title: [[#{table.sample.column.date}]], data: "sampleDate"},

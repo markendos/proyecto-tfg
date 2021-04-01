@@ -86,7 +86,8 @@
                 </div>
                 <div class="modal-footer">
                     <input type="text" name="id" id="id" value="" hidden>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:utext="#{label.form.cancel}">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                            th:utext="#{label.form.cancel}">
                         cancel
                     </button>
                     <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
@@ -113,11 +114,12 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a th:href="@{/console}" th:utext="#{label.nav.console}">Console</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/console}" th:utext="#{label.nav.console}">Console</a>
+                    </li>
                     <li class="breadcrumb-item active" aria-current="page" th:utext="#{label.pages.title.users}"
-                    th:unless="${#strings.contains(#httpServletRequest.requestURI.toLowerCase(), 'sensors')}"></li>
+                        th:unless="${#strings.contains(#httpServletRequest.requestURI.toLowerCase(), 'sensors')}"></li>
                     <li class="breadcrumb-item active" aria-current="page" th:utext="#{label.pages.title.sensors}"
-                    th:if="${#strings.contains(#httpServletRequest.requestURI.toLowerCase(), 'sensors')}"></li>
+                        th:if="${#strings.contains(#httpServletRequest.requestURI.toLowerCase(), 'sensors')}"></li>
                 </ol>
             </nav>
 
@@ -153,7 +155,9 @@
         </section>
     </main>
 </div>
-</body>
+
+<!--Page Footer-->
+<footer th:replace="/fragments/footer :: pageFooter"></footer>
 
 <!--DataTables JS Functionalities-->
 <script th:inline="javascript">
@@ -161,14 +165,10 @@
 
     $(document).ready(() => {
         startLoad();
-        let sensors = /*[[${sensors}]]*/;
+        let sensors = [[${sensors}]];
         if (sensors) {
             sensors = JSON.parse(sensors);
-            const table = drawSensorsTable(sensors.all);
-            $('#dataTable tbody').on('click', 'tr', function () {
-                const data = table.row(this).data();
-                loadSensorModal(data);
-            });
+            drawSensorsTable(sensors.all);
         } else {
             fetchUsers();
         }
@@ -267,10 +267,15 @@
                 drawCallback: () => {
                     $('[data-toggle="tooltip"]').tooltip();
                     endLoad();
+                    const table = $('#dataTable').DataTable();
+                    $('#dataTable tbody tr').off().click((e) => {
+                        const data = table.row(e.target).data();
+                        loadSensorModal(data);
+                    });
                 },
                 data: sensors,
                 columnDefs: [
-                    { targets: 2, render: $.fn.dataTable.render.ellipsis( 100 ) }
+                    {targets: 2, render: $.fn.dataTable.render.ellipsis(100)}
                 ],
                 columns: [
                     {title: [[#{table.sensor.column.name}]], data: "name"},
@@ -350,7 +355,7 @@
         $.post(serverContext + "admin/sensor/add", formData, function (data) {
             $('#sensorModal').modal('hide');
             fetchSensors();
-            if(data === 'updated') {
+            if (data === 'updated') {
                 $("#successmsg").show().html(/*[[#{message.sensor.success.update}]]*/);
             } else {
                 $("#successmsg").show().html(/*[[#{message.sensor.success.register}]]*/);
@@ -376,4 +381,5 @@
             });
     }
 </script>
+</body>
 </html>

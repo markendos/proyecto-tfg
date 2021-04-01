@@ -1,6 +1,7 @@
 <header class="sticky-top" th:fragment="pageHeader">
     <script th:inline="javascript">
         const serverContext = /*[[@{/}]]*/;
+
         function signOut() {
             var auth2 = gapi.auth2.getAuthInstance();
             if (auth2) {
@@ -25,7 +26,8 @@
     <!-- Font Awesome Icons -->
     <script src="https://kit.fontawesome.com/ebf145548d.js" crossorigin="anonymous"></script>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="topnav" th:with="url=${#httpServletRequest.requestURI}">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="topnav"
+         th:with="url=${#httpServletRequest.requestURI}">
         <a class="navbar-brand" th:href="@{/}">Navbar</a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
@@ -132,11 +134,12 @@
             $("body").append($("#notificationModal"));
 
             $("#notifications, #notificationsPanel").click(function (e) {
-                e.stopPropagation(); //stops click event from reaching document
+                e.stopPropagation(); // stops click event from reaching document
             });
             $(document).click(function () {
-                $("#notificationsPanel").hide(); //click came from somewhere else
+                $("#notificationsPanel").hide(); // click came from somewhere else
             });
+            setInterval(fetchCollaborationRequests, 30000); // check for new collaboration requests periodically
         });
 
         function toggleNotificationsPanel() {
@@ -169,41 +172,41 @@
 
         function fetchCollaborationRequests() {
             loadingData = true;
-            const serverCtx = /*[[@{/}]]*/;
-            $.get(serverCtx + "collaboration/all", function (data) {
-                const requests = data.all;
-                $("#notificationCounter").text(requests.length);
-                if(requests.length) {
-                    showRequests(requests);
-                } else {
-                    $("#notificationsPanel").append(`<span>${[[#{message.notification.empty}]]}</span>`);
-                }
-                loadingData = false;
-            }).fail(function (data) {
-                loadingData = false;
-            });
+            const serverCtx = [[@{/}]];
+                $.get(serverCtx + "collaboration/all", function (data) {
+                    const requests = data.all;
+                    $("#notificationCounter").text(requests.length);
+                    if (requests.length) {
+                        showRequests(requests);
+                    } else {
+                        $("#notificationsPanel").append(`<span>${[[#{message.notification.empty}]]}</span>`);
+                    }
+                    loadingData = false;
+                }).fail(function (data) {
+                    loadingData = false;
+                });
         }
 
-        function showRequests(requests) {
-            $("#notificationsPanel").empty();
-            const notifications = $("#notificationsPanel");
-            requests.forEach(r => {
-                $(notifications).append(`<a id="${utf8_to_b64(JSON.stringify(r))}" onclick="handleCollaborationRequest(this)">` +
-                    `${r.collaborator.username} ${[[#{message.notification.request}]]}` + '</a>');
-            });
-        }
+            function showRequests(requests) {
+                $("#notificationsPanel").empty();
+                const notifications = $("#notificationsPanel");
+                requests.forEach(r => {
+                    $(notifications).append(`<a id="${utf8_to_b64(JSON.stringify(r))}" onclick="handleCollaborationRequest(this)">` +
+                        `${r.collaborator.username} ${[[#{message.notification.request}]]}` + '</a>');
+                });
+            }
 
-        function handleCollaborationRequest(element) {
-            const request = JSON.parse(b64_to_utf8(element.id));
-            let msg = [[#{message.collaboration.request}]]
-                .replace(/-username-/g, `<strong>${request.collaborator.username}</strong>`)
-                .replace(/-id-/g, `<strong>${request.project.id}</strong>`);
-            $("#notificationText").html(msg);
-            $("#requestMessage").val(request.requestMessage);
-            $("#requestUserEmail").val(request.collaborator.email);
-            $("#requestProjectId").val(request.project.id);
-            toggleNotificationsPanel();
-            $("#notificationModal").modal('show');
-        }
+            function handleCollaborationRequest(element) {
+                const request = JSON.parse(b64_to_utf8(element.id));
+                let msg = [[#{message.collaboration.request}]]
+                    .replace(/-username-/g, `<strong>${request.collaborator.username}</strong>`)
+                    .replace(/-id-/g, `<strong>${request.project.id}</strong>`);
+                $("#notificationText").html(msg);
+                $("#requestMessage").val(request.requestMessage);
+                $("#requestUserEmail").val(request.collaborator.email);
+                $("#requestProjectId").val(request.project.id);
+                toggleNotificationsPanel();
+                $("#notificationModal").modal('show');
+            }
     </script>
 </header>

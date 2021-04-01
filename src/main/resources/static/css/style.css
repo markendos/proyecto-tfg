@@ -460,11 +460,14 @@ th, td {
     vertical-align: middle !important;
 }
 
-#chartLoader, #statsLoader {
+.tabLoader {
+    display: flex;
     position: absolute;
     z-index: 9999;
     top: 40%;
     left: 50%;
+    width: 3rem;
+    height: 3rem;
 }
 
 #sampleModal .modal-body {

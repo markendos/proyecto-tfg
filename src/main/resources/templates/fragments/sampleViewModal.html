@@ -15,11 +15,13 @@
                 <ul id="sampleNav" class="nav nav-tabs">
                     <li class="nav-item" id="tableTab">
                         <button class="nav-link active btn btn-link" onclick="toggleView('table')"
-                                th:utext="#{sample.tab.table}">Table</button>
+                                th:utext="#{sample.tab.table}">Table
+                        </button>
                     </li>
                     <li class="nav-item" id="chartTab">
                         <button class="nav-link btn btn-link" onclick="toggleView('chart')"
-                                th:utext="#{sample.tab.chart}">Chart</button>
+                                th:utext="#{sample.tab.chart}">Chart
+                        </button>
                     </li>
                     <li class="nav-item dropdown" id="statsTab">
                         <button class="nav-link dropdown-toggle btn btn-link" data-toggle="dropdown" role="button"
@@ -27,39 +29,47 @@
                         </button>
                         <div class="dropdown-menu">
                             <button class="dropdown-item btn btn-link" onclick="toggleView('statsUni')"
-                                    th:utext="#{sample.tab.stats.univariate}">Univariate</button>
-                            <button id="statsMultiBtn" class="dropdown-item btn btn-link" onclick="toggleView('statsMulti')"
-                                    th:utext="#{sample.tab.stats.multivariate }" disabled>Multivariate</button>
+                                    th:utext="#{sample.tab.stats.univariate}">Univariate
+                            </button>
+                            <button id="statsMultiBtn" class="dropdown-item btn btn-link"
+                                    onclick="toggleView('statsMulti')"
+                                    th:utext="#{sample.tab.stats.multivariate }" disabled>Multivariate
+                            </button>
                         </div>
                     </li>
                 </ul>
                 <div class="modal-body">
                     <div class="table-responsive sampleTabContent" id="tableView">
+                        <div id="tableLoader" role="status" class="tabLoader spinner-grow text-primary">
+                            <span class="sr-only">Loading...</span>
+                        </div>
                         <table id="sampleTable" class="table table-striped text-center">
                             <thead class="thead-dark"></thead>
                             <tbody></tbody>
                         </table>
                     </div>
                     <div class="container-fluid sampleTabContent" id="chartView" style="display: none;">
-                        <div id="chartLoader" role="status" style="width: 3rem; height: 3rem;"
-                             class="spinner-grow text-primary">
+                        <div id="chartLoader" role="status" class="tabLoader spinner-grow text-primary">
                             <span class="sr-only">Loading...</span>
                         </div>
                         <div id="chartContent"></div>
                     </div>
                     <div class="table-responsive sampleTabContent" id="statsUniView" style="display: none;">
-                        <div id="statsUniLoader" role="status" style="width: 3rem; height: 3rem; display: flex"
-                             class="spinner-grow text-primary mx-auto">
+                        <div id="statsUniLoader" role="status" class="tabLoader spinner-grow text-primary mx-auto">
                             <span class="sr-only">Loading...</span>
                         </div>
-                        <table id="statsUniTable" class="table table-striped text-center">
+                        <table id="statsUniTable" class="table table-striped text-center my-0">
                             <thead class="thead-dark"></thead>
                             <tbody></tbody>
                         </table>
+                        <div id="plotLoader" role="status" style="margin-top:10%"
+                             class="tabLoader spinner-grow text-primary position-relative">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div id="plots" class="overflow-hidden"></div>
                     </div>
                     <div class="table-responsive sampleTabContent" id="statsMultiView" style="display: none;">
-                        <div id="statsMultiLoader" role="status" style="width: 3rem; height: 3rem; display: flex"
-                             class="spinner-grow text-primary mx-auto">
+                        <div id="statsMultiLoader" role="status" class="tabLoader spinner-grow text-primary mx-auto">
                             <span class="sr-only">Loading...</span>
                         </div>
                         <table id="statsMultiTable" class="table table-striped text-center">
@@ -78,8 +88,8 @@
                         </label>
                     </div>
                     <input type="text" id="sampleId" name="projectId" value="" hidden>
-                    <button class="btn btn-secondary" data-toggle="tooltip" data-placement="top"
-                            th:attr="title=#{sample.button.report.generate}">
+                    <button class="btn btn-secondary" th:inline="text" onclick="generateReport()">
+                        [[#{sample.button.report.generate}]] &nbsp;
                         <i class="fas fa-file-pdf"></i>
                     </button>
                     <div class="dropdown">
@@ -115,9 +125,9 @@
         function addRows(offset) {
             const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
             const newLimit = limit + offset;
-            for(let index1 = offset; index1 < selectedSampleData.size && index1 < newLimit; index1++) {
+            for (let index1 = offset; index1 < selectedSampleData.size && index1 < newLimit; index1++) {
                 const newRow = $("<tr></tr>");
-                $(newRow).append(`<th scope="row">${(index1+1)}</th>`);
+                $(newRow).append(`<th scope="row">${(index1 + 1)}</th>`);
                 selectedSampleData.dataChannels.forEach((channel, index2) => {
                     const newCell = $(`<td>${data[index2][index1]}</td>`);
                     $(newRow).append(newCell);
@@ -128,7 +138,7 @@
 
         function toggleDataNormalization() {
             normalized = !normalized;
-            if(normalized && !selectedSampleValuesNorm) {
+            if (normalized && !selectedSampleValuesNorm) {
                 normalizeValues();
             }
             $("#sampleTable thead").empty();
@@ -137,9 +147,15 @@
             renderSampleData(selectedSampleData.id);
             const currentViewId = $("#sampleNav .nav-link.active").closest("li.nav-item").attr("id");
             switch (currentViewId) {
-                case 'tableTab': toggleView('table'); break;
-                case 'chartTab': toggleView('chart'); break;
-                case 'statsTab': toggleView('statsUni'); break;
+                case 'tableTab':
+                    toggleView('table');
+                    break;
+                case 'chartTab':
+                    toggleView('chart');
+                    break;
+                case 'statsTab':
+                    toggleView('statsUni');
+                    break;
             }
         }
 
@@ -153,55 +169,82 @@
         async function toggleView(view) {
             switch (view) {
                 case 'chart':
-                    $(".sampleTabContent").hide();
                     $("#sampleNav li.nav-item button.nav-link").removeClass("active");
                     $("#chartTab button.nav-link").addClass("active");
-                    $("#chartView").show();
-                    if(!$("#chartContent").children().length) {
-                        $("#chartLoader").show();
-                        await new Promise(r => setTimeout(r, 500));
-                        drawChart();
-                    }
+                    $(".sampleTabContent").hide();
+                    $("#chartLoader").show();
+                    $("#chartView").show({
+                        done: () => {
+                            if (!$("#chartContent").children().length) {
+                                drawChart();
+                            } else {
+                                $("#chartLoader").hide();
+                            }
+                        }
+                    });
                     break;
                 case 'table':
-                    $(".sampleTabContent").hide();
                     $("#sampleNav li.nav-item button.nav-link").removeClass("active");
                     $("#tableTab button.nav-link").addClass("active");
-                    $("#tableView").show();
+                    $(".sampleTabContent").hide();
+                    $("#tableLoader").show();
+                    $("#tableView").show({
+                        done: () => {
+                            $("#tableLoader").hide();
+                        }
+                    });
                     break;
                 case 'statsUni':
-                    $(".sampleTabContent").hide();
                     $("#sampleNav li.nav-item button.nav-link").removeClass("active");
                     $("#statsTab button.nav-link").addClass("active");
-                    $("#statsUniView").show();
-                    $("#statsUniLoader").show();
-                    loadUnivariateStatistics();
-                    $("#statsUniLoader").hide();
+                    $(".sampleTabContent").hide();
+                    $("#statsUniView").show({
+                        done: () => {
+                            $("#statsUniLoader").show();
+                            loadUnivariateStatistics();
+                            $("#statsUniLoader").hide({
+                                done: () => {
+                                    if (!$("#plots").children().length) {
+                                        $("#plotLoader").show({
+                                            done: () => {
+                                                plotChannels();
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    });
                     break;
                 case 'statsMulti':
-                    $(".sampleTabContent").hide();
                     $("#sampleNav li.nav-item button.nav-link").removeClass("active");
                     $("#statsTab button.nav-link").addClass("active");
-                    $("#statsMultiView").show();
-                    $("#statsMultiLoader").show();
-                    loadMultivariateStatistics();
-                    $("#statsMultiLoader").hide();
+                    $(".sampleTabContent").hide();
+                    $("#statsMultiView").show({
+                        done: () => {
+                            if (!$("#statsMultiTable tbody").children().length) {
+                                $("#statsMultiLoader").show();
+                                loadMultivariateStatistics();
+                                $("#statsMultiLoader").hide();
+                            }
+                        }
+                    });
                     break;
             }
         }
 
         function loadUnivariateStatistics() {
-            if(selectedSampleData) {
-                if(!selectedSampleData.statsGenerated) {
-                    if(confirm(htmlDecode([[#{message.confirm.sample.generateStatistics}]]))) {
+            if (selectedSampleData) {
+                if (!selectedSampleData.statsGenerated) {
+                    if (confirm(htmlDecode([[#{message.confirm.sample.generateStatistics}]]))) {
                         $("#statsUniLoader").show();
                         generateStatistics(selectedSampleData.id);
                     } else {
                         toggleView('table');
                     }
-                } else if($("#statsUniTable tbody").children().length === 0) {
+                } else if ($("#statsUniTable tbody").children().length === 0) {
                     selectedSampleData.dataChannels.forEach((c, i) => {
-                        if(i === 0) {
+                        if (i === 0) {
                             const statNames = Object.keys(c.statistics);
                             const headerRow = $("<tr></tr>");
                             const chName = $(`<th scope="col">${[[#{sample.table.channel}]]}</th>`);
@@ -213,7 +256,7 @@
                             $("#statsUniTable thead").append(headerRow);
                         }
                         const row = $("<tr></tr>");
-                        const ch = $(`<th scope="row">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
+                        const ch = $(`<th scope="row">${c.channelName} ${c.channelLabel ? '[' + c.channelLabel + ']' : ''}</th>`);
                         $(row).append(ch);
                         const stats = Object.values(c.statistics);
                         stats.forEach((v) => {
@@ -230,10 +273,10 @@
 
         function loadMultivariateStatistics() {
             if (selectedSampleData) {
-                if(!correlationMatrix) {
+                if (!correlationMatrix) {
                     correlationMatrix = calculateCorrelations(selectedSampleValues);
                 }
-                if($("#statsMultiTable tbody").children().length === 0) {
+                if ($("#statsMultiTable tbody").children().length === 0) {
                     $("#statsMultiTable caption").text(htmlDecode([[#{sample.stats.correlation}]]));
 
                     selectedSampleData.dataChannels.forEach((c, i) => {
@@ -260,7 +303,7 @@
         }
 
         function renderSampleData(sampleId) {
-            if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))
+            if (selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))
                 && selectedSampleData.id === sampleId) {
                 const role = [[${role}]];
                 const deleteBtnExists = $("#deleteSampleBtn").length > 0;
@@ -281,8 +324,6 @@
                 selectedSampleData?.dataChannels?.forEach((c) => {
                     let channelInfo = '';
                     channelInfo += "<ul class='list-unstyled'>";
-                    channelInfo += `<li><strong>${[[#{sample.channel.name}]]}</strong> ${c.channelName ?? 'N/A'}</li>`;
-                    channelInfo += `<li><strong>${[[#{sample.channel.label}]]}</strong> ${c.channelLabel ?? 'N/A'}</li>`;
                     channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
                         ? c.resolution : 'N/A'}</li>`;
                     channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
@@ -294,15 +335,15 @@
                     channelInfo += "</ul>";
 
                     $(headerRow).append(`<th data-toggle="tooltip" data-placement="left" data-html="true"
-                title="${channelInfo}" scope="col">${c.channelName} ${c.channelLabel ? '('+c.channelLabel+')' : ''}</th>`);
+                title="${channelInfo}" scope="col">${c.channelName} ${c.channelLabel ? '[' + c.channelLabel + ']' : ''}</th>`);
                 });
 
                 $("#sampleTable thead").append(headerRow);
 
                 const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
-                for(let index1 = 0; index1 < selectedSampleData.size && index1 < limit; index1++) {
+                for (let index1 = 0; index1 < selectedSampleData.size && index1 < limit; index1++) {
                     const newRow = $("<tr></tr>");
-                    $(newRow).append(`<th scope="row">${(index1+1)}</th>`);
+                    $(newRow).append(`<th scope="row">${(index1 + 1)}</th>`);
                     selectedSampleData.dataChannels.forEach((channel, index2) => {
                         const newCell = $(`<td>${data[index2][index1]}</td>`);
                         $(newRow).append(newCell);
@@ -315,8 +356,8 @@
                 $("#sampleId").val(sampleId);
                 $("#sampleModal").modal('show');
 
-                $('#sampleModal .modal-body').scroll(function() {
-                    if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                $('#sampleModal .modal-body').scroll(function () {
+                    if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
                         const offset = $('#sampleTable tbody').children().toArray().length;
                         addRows(offset);
                     }
@@ -344,8 +385,9 @@
         }
 
         google.charts.load('current', {'packages': ['corechart']});
+
         function drawChart() {
-            if(selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))) {
+            if (selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))) {
                 const dataTable = new google.visualization.DataTable();
                 dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
 
@@ -374,8 +416,8 @@
                     },
                     height: 500,
                     width: '100%',
-                    hAxis: {title: htmlDecode([[#{sample.table.column.id}]]), gridlines: {count: -1} },
-                    explorer: { axis: 'horizontal' , maxZoomIn: calculateZoom(selectedSampleData.size)},
+                    hAxis: {title: htmlDecode([[#{sample.table.column.id}]]), gridlines: {count: -1}},
+                    explorer: {axis: 'horizontal', maxZoomIn: calculateZoom(selectedSampleData.size)},
                 };
                 const chart = new google.visualization.LineChart(document.getElementById("chartContent"));
                 google.visualization.events.addListener(chart, 'ready', () => {
@@ -384,6 +426,7 @@
                 chart.draw(dataTable, options);
             }
         }
+
         function calculateZoom(size) {
             const value = Math.round(log3(size)) - 1;
             return Math.pow(2, value);
@@ -394,34 +437,34 @@
         }
 
         function exportCSV() {
-            if(selectedSampleData && selectedSampleValues) {
-                if(!selectedSampleValuesNorm) {
+            if (selectedSampleData && selectedSampleValues) {
+                if (!selectedSampleValuesNorm) {
                     normalizeValues();
                 }
                 let date = new Date();
                 let sRate = selectedSampleData.samplingRate;
-                let timeIncrement = (1/sRate)*1000;
+                let timeIncrement = (1 / sRate) * 1000;
 
 
                 let csv = `"seq","timestamp",`;
 
                 selectedSampleData.dataChannels.forEach((c, i) => {
-                    csv += `"${c.channelName}${c.channelLabel ? '[' + c.channelLabel + ']' : '' }",`;
-                    csv += `"${c.channelName}${c.channelLabel ? '[' + c.channelLabel + ']' : '' }_norm",`;
+                    csv += `"${c.channelName}${c.channelLabel ? '[' + c.channelLabel + ']' : ''}",`;
+                    csv += `"${c.channelName}${c.channelLabel ? '[' + c.channelLabel + ']' : ''}_norm",`;
                 });
 
                 csv = csv.slice(0, -1);
                 csv += "\n";
 
 
-                for(let i = 0; i < selectedSampleData.size; i++) {
+                for (let i = 0; i < selectedSampleData.size; i++) {
                     date = new Date(date.getTime() + timeIncrement);
-                    let month = (date.getMonth()+1).toString().padStart(2,0);
-                    let day = date.getDate().toString().padStart(2,0);
-                    let hours = date.getHours().toString().padStart(2,0);
-                    let minutes = date.getMinutes().toString().padStart(2,0);
-                    let seconds = date.getSeconds().toString().padStart(2,0);
-                    csv += `${i+1},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}"`;
+                    let month = (date.getMonth() + 1).toString().padStart(2, 0);
+                    let day = date.getDate().toString().padStart(2, 0);
+                    let hours = date.getHours().toString().padStart(2, 0);
+                    let minutes = date.getMinutes().toString().padStart(2, 0);
+                    let seconds = date.getSeconds().toString().padStart(2, 0);
+                    csv += `${i + 1},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}"`;
 
                     for (let j = 0; j < selectedSampleData.dataChannels.length; j++) {
                         csv += "," + selectedSampleValues[j][i];
@@ -440,7 +483,7 @@
         }
 
         function exportTXT() {
-            if(selectedSampleData && selectedSampleValues) {
+            if (selectedSampleData && selectedSampleValues) {
                 const date = new Date();
                 const columns = ['nSeq'];
                 const channels = []
@@ -452,12 +495,13 @@
                     sensors.push(c.sensor.alias ?? 'RAW');
                     columns.push(c.channelName ?? `A${i}`);
                     labels.push(c.channelLabel ?? `A${i}`);
-                    channels.push(c.channelName ? parseInt(c.channelName.charAt(c.channelName.length-1)) : i+1);
+                    channels.push(c.channelName ? parseInt(c.channelName.charAt(c.channelName.length - 1)) : i + 1);
                     resolutions.push(c.resolution ?? 10);
                 });
 
                 let txt = '# OpenSignals Text File Format\n';
-                const header = {[selectedSampleData.deviceName]: {
+                const header = {
+                    [selectedSampleData.deviceName]: {
                         sensor: sensors,
                         'device name': selectedSampleData.deviceName,
                         column: columns,
@@ -473,7 +517,8 @@
                         'sampling rate': selectedSampleData.samplingRate,
                         label: labels,
                         resolution: resolutions,
-                    }};
+                    }
+                };
                 txt += '# ' + JSON.stringify(header);
                 txt += '\n' + "# EndOfHeader";
                 let aux = 0;
@@ -494,5 +539,78 @@
                 saveAs(blob, filename);
             }
         }
+
+        async function plotChannels() {
+            if (selectedSampleData && selectedSampleValues) {
+                if (!selectedSampleValuesNorm) {
+                    normalizeValues();
+                }
+                const data = [];
+                selectedSampleData.dataChannels?.forEach((c, i) => {
+                    const trace = {
+                        y: selectedSampleValuesNorm[i],
+                        type: 'box',
+                        name: c.channelName,
+                        boxpoints: 'suspectedoutliers',
+                        jitter: 0.5,
+                        whiskerwidth: 0.2,
+                        fillcolor: 'cls',
+                        marker: {
+                            outliercolor: 'rgba(219, 64, 82, 0.6)',
+                            line: {
+                                outliercolor: 'rgba(219, 64, 82, 1.0)',
+                                outlierwidth: 2
+                            }
+                        },
+                    };
+                    data.push(trace);
+                });
+                layout = {
+                    title: 'Box Plot',
+                    yaxis: {
+                        showgrid: true,
+                        zeroline: false,
+                    },
+                    margin: {
+                        l: 40,
+                        r: 30,
+                        b: 80,
+                        t: 100
+                    },
+                    paper_bgcolor: 'rgb(243, 243, 243)',
+                    plot_bgcolor: 'rgb(243, 243, 243)',
+                    showlegend: false
+                };
+                const config = {responsive: true};
+                Plotly.newPlot('plots', data, layout, config).then((gd) => {
+                    $("#plotLoader").hide();
+                    return gd;
+                });
+            }
+        }
+
+        async function generateReport() {
+            if(selectedSampleData && selectedSampleValues) {
+                let plot;
+                if (!$("#plots").children().length) {
+                    plot = plotChannels();
+                } else {
+                    plot = document.getElementById("plots");
+                }
+                console.log(plot);
+                window.jsPDF = window.jspdf.jsPDF
+                const doc = new jsPDF();
+
+                Plotly.toImage(plot, {format: 'png', height: 500, width: 500})
+                    .then((url) => {
+                            doc.addImage(url, 'PNG', 15, 40, 180, 160);
+                            const blob = doc.output("blob");
+                            window.open(URL.createObjectURL(blob));
+                            //doc.save("a4.pdf");
+                        }
+                    )
+            }
+        }
+
     </script>
 </div>

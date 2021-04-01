@@ -220,8 +220,8 @@
                     $("#dataTable button, #dataTable select").click(function(event){
                         event.stopPropagation();
                     });
-                    $('#dataTable tbody tr').on('click', 'td', function () {
-                        const data = table.row(this).data();
+                    $('#dataTable tbody tr').off().click((e) => {
+                        const data = table.row(e.target).data();
                         goToProject(data.id);
                     });
                 },
