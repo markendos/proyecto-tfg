@@ -111,15 +111,16 @@
     </div>
     <!--Sample Modal JS Functionalities-->
     <script th:inline="javascript">
-        //Global variables to store retrieved sample data
+        // Global variables to store retrieved sample data
         let selectedSampleData = undefined;
         let selectedSampleValues = undefined
         let selectedSampleValuesNorm = undefined
         let normalized = false;
         let correlationMatrix = undefined;
-        const limit = 200; //Table rows to render at once
+        const limit = 200; // table rows to render at once
         $(document).ready(function () {
             $("#normalizeSwitch").change(() => toggleDataNormalization());
+            $(".tabLoader").hide();
         });
 
         function addRows(offset) {
@@ -207,9 +208,13 @@
                                     if (!$("#plots").children().length) {
                                         $("#plotLoader").show({
                                             done: () => {
-                                                plotChannels();
+                                                plotChannels().then((gd) => {
+                                                    $("#plotLoader").hide();
+                                                });
                                             }
                                         });
+                                    } else {
+                                        Plotly.Plots.resize(document.getElementById("plots"));
                                     }
                                 }
                             });
@@ -582,18 +587,18 @@
                     showlegend: false
                 };
                 const config = {responsive: true};
-                Plotly.newPlot('plots', data, layout, config).then((gd) => {
-                    $("#plotLoader").hide();
-                    return gd;
-                });
+                return Plotly.newPlot('plots', data, layout, config);
             }
         }
 
         async function generateReport() {
-            if(selectedSampleData && selectedSampleValues) {
+            if (selectedSampleData && selectedSampleValues) {
                 let plot;
                 if (!$("#plots").children().length) {
-                    plot = plotChannels();
+                    plot = await plotChannels().then((gd) => {
+                        $("#plotLoader").hide();
+                        return gd;
+                    });
                 } else {
                     plot = document.getElementById("plots");
                 }
@@ -601,9 +606,9 @@
                 window.jsPDF = window.jspdf.jsPDF
                 const doc = new jsPDF();
 
-                Plotly.toImage(plot, {format: 'png', height: 500, width: 500})
+                Plotly.toImage(plot, {format: 'png', height: 300, width: 500})
                     .then((url) => {
-                            doc.addImage(url, 'PNG', 15, 40, 180, 160);
+                            doc.addImage(url, 'PNG', 15, 40, 180, 100);
                             const blob = doc.output("blob");
                             window.open(URL.createObjectURL(blob));
                             //doc.save("a4.pdf");

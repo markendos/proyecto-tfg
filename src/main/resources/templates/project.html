@@ -393,7 +393,7 @@
                         } else {
                             $("#sampleTable").children().empty();
                             $("#statsUniTable").children().empty();
-                            $("#plots").empty();
+                            Plotly.purge(document.getElementById("plots"));
                             $("#statsMultiTable").children().empty();
                             $("#sampleModalLabel span").remove();
                             $("#chartContent").empty();
