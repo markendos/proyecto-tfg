@@ -1,18 +1,18 @@
 let loadingData = false;
 
-$(document).ready(function () {
+$(document).ready(() => {
     markRequiredFields();
 
     $(".alert").children("i.fa-window-close").remove();
     $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
 });
-$(document).ajaxStart(function () {
-    const openModals = $("div.modal[aria-modal='true']");
+$(document).ajaxStart(() => {
+    const openModals = $("div.no-loader[aria-modal='true']");
     if (openModals.length === 0 && loadingData === false) {
         showSpinner();
     }
 });
-$(document).ajaxStop(function () {
+$(document).ajaxStop(() => {
     hideSpinner();
     $(".alert").children("i.fa-window-close").remove();
     $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
@@ -40,12 +40,12 @@ function b64_to_utf8(str) {
 
 // Function to hide the Loading Wrapper
 function hideSpinner() {
-    $('#load-wrapper').addClass("d-none");
+    $('#load-wrapper').hide();
 }
 
 // Function to show the Loading Wrapper
 function showSpinner() {
-    $('#load-wrapper').removeClass("d-none");
+    $('#load-wrapper').show();
 }
 
 // Function to close alert banners

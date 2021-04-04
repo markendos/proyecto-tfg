@@ -173,7 +173,7 @@
         function fetchCollaborationRequests() {
             loadingData = true;
             const serverCtx = [[@{/}]];
-                $.get(serverCtx + "collaboration/all", function (data) {
+                $.get(serverCtx + "collaboration/all").done((data) => {
                     const requests = data.all;
                     $("#notificationCounter").text(requests.length);
                     if (requests.length) {
@@ -182,7 +182,7 @@
                         $("#notificationsPanel").append(`<span>${[[#{message.notification.empty}]]}</span>`);
                     }
                     loadingData = false;
-                }).fail(function (data) {
+                }).fail(() => {
                     loadingData = false;
                 });
         }

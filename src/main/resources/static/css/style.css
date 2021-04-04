@@ -116,9 +116,9 @@ div.alert {
     left: 0;
     background-color: black;
     opacity: 0.5;
-    z-index: 999;
+    z-index: 99999;
 }
-.spinner-border {
+.custom-spinner {
     position: fixed;
     left: 0;
     right: 0;
@@ -397,6 +397,10 @@ a.article:hover {
     padding-left: 90px !important;
 }
 
+button, a.btn {
+    text-transform: capitalize;
+}
+
 /* ---------------------------------------------------
     MEDIAQUERIES
 ----------------------------------------------------- */
@@ -473,6 +477,23 @@ th, td {
 #sampleModal .modal-body {
     overflow: auto;
     padding: 0;
+}
+
+/* CSS styling for before/after/avoid. */
+.break-before {
+    page-break-before: always;
+}
+
+.break-after {
+    page-break-after: always;
+}
+
+.break-avoid {
+    page-break-inside: avoid;
+}
+
+.fullpage {
+    height: 792pt;
 }
 
 /***** Main Section *****/

@@ -88,9 +88,11 @@
                         </label>
                     </div>
                     <input type="text" id="sampleId" name="projectId" value="" hidden>
-                    <button class="btn btn-secondary" th:inline="text" onclick="generateReport()">
+                    <button id="reportBtn" class="btn btn-secondary" th:inline="text" onclick="generateReport()">
                         [[#{sample.button.report.generate}]] &nbsp;
                         <i class="fas fa-file-pdf"></i>
+                        <span id="reportSpinner" class="m-1 spinner-border spinner-border-sm" role="status"
+                              style="display: none" aria-hidden="true"></span>
                     </button>
                     <div class="dropdown">
                         <button class="btn btn-info dropdown-toggle" id="exportMenuButton"
@@ -108,6 +110,7 @@
                 </div>
             </div>
         </div>
+        <div id="myDiv" class="d-none"></div>
     </div>
     <!--Sample Modal JS Functionalities-->
     <script th:inline="javascript">
@@ -169,6 +172,20 @@
 
         async function toggleView(view) {
             switch (view) {
+                case 'table':
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#tableTab button.nav-link").addClass("active");
+                    $(".sampleTabContent").hide();
+                    $("#tableLoader").show();
+                    if (!$('#sampleTable tbody').children().length) {
+                        renderSampleData(selectedSampleData.id);
+                    }
+                    $("#tableView").show({
+                        done: () => {
+                            $("#tableLoader").hide();
+                        }
+                    });
+                    break;
                 case 'chart':
                     $("#sampleNav li.nav-item button.nav-link").removeClass("active");
                     $("#chartTab button.nav-link").addClass("active");
@@ -181,17 +198,6 @@
                             } else {
                                 $("#chartLoader").hide();
                             }
-                        }
-                    });
-                    break;
-                case 'table':
-                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
-                    $("#tableTab button.nav-link").addClass("active");
-                    $(".sampleTabContent").hide();
-                    $("#tableLoader").show();
-                    $("#tableView").show({
-                        done: () => {
-                            $("#tableLoader").hide();
                         }
                     });
                     break;
@@ -241,12 +247,8 @@
         function loadUnivariateStatistics() {
             if (selectedSampleData) {
                 if (!selectedSampleData.statsGenerated) {
-                    if (confirm(htmlDecode([[#{message.confirm.sample.generateStatistics}]]))) {
-                        $("#statsUniLoader").show();
-                        generateStatistics(selectedSampleData.id);
-                    } else {
-                        toggleView('table');
-                    }
+                    $("#statsUniLoader").show();
+                    generateStatistics(selectedSampleData.id);
                 } else if ($("#statsUniTable tbody").children().length === 0) {
                     selectedSampleData.dataChannels.forEach((c, i) => {
                         if (i === 0) {
@@ -368,19 +370,23 @@
                     }
                 });
             } else {
-                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                $("#errormsg").show().html([[#{message.error.operation}]]);
             }
         }
 
-        function generateStatistics(sampleId) {
+        async function generateStatistics(sampleId, report) {
             $.ajax({
                 type: 'GET',
                 url: serverContext + 'sample/statistics/' + sampleId,
                 success: (data) => {
                     selectedSampleData = data.sample;
-                    loadUnivariateStatistics();
-                    fetchSamples();
-                    $("#statsUniLoader").hide();
+                    if (!report) {
+                        loadUnivariateStatistics();
+                        fetchSamples();
+                        $("#statsUniLoader").hide();
+                    } else {
+                        generateReport();
+                    }
                 },
                 error: (data) => {
                     $("#statsUniLoader").hide();
@@ -570,7 +576,7 @@
                     };
                     data.push(trace);
                 });
-                layout = {
+                const layout = {
                     title: 'Box Plot',
                     yaxis: {
                         showgrid: true,
@@ -578,42 +584,244 @@
                     },
                     margin: {
                         l: 40,
-                        r: 30,
-                        b: 80,
-                        t: 100
+                        r: 40,
+                        b: 40,
+                        t: 80
                     },
                     paper_bgcolor: 'rgb(243, 243, 243)',
                     plot_bgcolor: 'rgb(243, 243, 243)',
-                    showlegend: false
+                    showlegend: true,
                 };
                 const config = {responsive: true};
                 return Plotly.newPlot('plots', data, layout, config);
             }
         }
 
+        async function channelToChart(index) {
+            const val = {x: [], y: []};
+            selectedSampleValuesNorm[index].forEach((v, i) => {
+                val.x.push(i);
+                val.y.push(v);
+            });
+            const trace1 = {
+                x: val.x,
+                y: val.y,
+                mode: 'lines',
+                connectgaps: true
+            };
+
+            const data = [trace1];
+
+            const layout = {
+                title: selectedSampleData.dataChannels[index].channelName,
+                yaxis: {
+                    showgrid: true,
+                    zeroline: false,
+                },
+                margin: {
+                    l: 30,
+                    r: 20,
+                    b: 20,
+                    t: 40
+                },
+                paper_bgcolor: 'rgb(243, 243, 243)',
+                plot_bgcolor: 'rgb(243, 243, 243)',
+                showlegend: false,
+            };
+            const config = {responsive: true};
+            return Plotly.newPlot('myDiv', data, layout, config);
+        }
+
         async function generateReport() {
             if (selectedSampleData && selectedSampleValues) {
-                let plot;
-                if (!$("#plots").children().length) {
-                    plot = await plotChannels().then((gd) => {
-                        $("#plotLoader").hide();
-                        return gd;
-                    });
-                } else {
-                    plot = document.getElementById("plots");
+                if(!selectedSampleValuesNorm) {
+                    normalizeValues();
                 }
-                console.log(plot);
-                window.jsPDF = window.jspdf.jsPDF
-                const doc = new jsPDF();
+                if (!selectedSampleData.statsGenerated) {
+                    generateStatistics(selectedSampleData.id, true);
+                } else {
+                    $("#reportBtn i").hide();
+                    $("#reportSpinner").show();
+                    const date = new Date();
+                    let content = `<div class="text-monospace">`;
+                    // Report info
+                    content += `<h2 class="text-center mb-4" style="text-decoration: underline">${[[#{report.sample.report.title}]]}</h2>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    const creationDateLabel = htmlDecode([[#{report.sample.report.date}]]);
+                    const createdBy = htmlDecode([[#{report.sample.report.creator}]]);
+                    const creator = htmlDecode([[${#authentication.getPrincipal().getUsername()}]]);
+                    content += `<span class="d-flex">${creationDateLabel} ${date.toLocaleString()}</span>`;
+                    content += `<span class="d-flex">${createdBy} ${creator}</span></p><hr/>`;
+                    // Project info
+                    const project = [[${project}]];
+                    content += `<h3>${[[#{report.sample.project.title}]]}</h3>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">${[[#{table.project.column.name}]]}: ${project.name}</span>`;
+                    const projectDescLabel = htmlDecode([[#{table.project.column.description}]]);
+                    content += `<span class="d-flex">${projectDescLabel}: ${project.description}</span></p>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">#Id: ${project.id}</span>`;
+                    const projectDateLabel = htmlDecode([[#{table.project.column.date}]]);
+                    const projectDate = new Date(project.startDate);
+                    content += `<span class="d-flex">${projectDateLabel}: ${projectDate.toLocaleString()}</span>`;
+                    content += `<span class="d-flex">${[[#{table.project.column.role.owner}]]}: ${project.user.username}</span></p><hr/>`;
+                    // Subject info
+                    if (project.subject) {
+                        const subject = project.subject;
+                        content += `<h3>${[[#{report.sample.subject.title}]]}</h3>`;
+                        const subjectGenderLabel = [[#{label.form.subject.gender}]];
+                        content += `<p class="d-flex justify-content-between">`;
+                        content += `<span class="d-flex">${subjectGenderLabel}&nbsp;<span class="text-uppercase">${subject.gender}</span></span>`;
+                        const subjectAge = calculateAge(new Date(subject.birthDate));
+                        content += `<span class="d-flex">${[[#{label.form.subject.age}]]} ${subjectAge}</span>`;
+                        const subjectSmoker = subject.smoker ? [[#{label.yes}]] : [[#{label.no}]];
+                        content += `<span class="d-flex">${[[#{label.form.subject.smoker}]]}: ${subjectSmoker}</span></p>`;
+                        content += `<p class="d-flex justify-content-between">`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.weight}]]} ${subject.weight}</span>`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.bmi}]]} ${subject.bmi}</span>`;
+                        content += `<p class="d-flex justify-content-between">`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.height}]]} ${subject.height}</span>`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.bfp}]]} ${subject.bfp}</span></p><hr/>`;
+                    }
+                    // Sample info
+                    content += `<h3>${[[#{sample.modal.title}]]}</h3>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">#Id: ${selectedSampleData.id}</span>`;
+                    const sampleDate = new Date(selectedSampleData.sampleDate);
+                    content += `<span class="d-flex">${[[#{table.sample.column.date}]]}: ${sampleDate.toLocaleString()}</span>`;
+                    const sampleSizeLabel = htmlDecode([[#{table.sample.column.size}]]);
+                    content += `<span class="d-flex">${sampleSizeLabel}: ${selectedSampleData.size}</span></p>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">${[[#{table.sample.column.channels}]]}: ${selectedSampleData.dataChannels.length}</span>`;
+                    content += `<span class="d-flex">${[[#{sample.label.samplingRate}]]} ${selectedSampleData.samplingRate}</span>`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.comments}]]} ${selectedSampleData.comments}</span></p>`;
+                    content += `<h5>${[[#{table.sample.column.device}]]}</h5>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.device.name}]]} ${selectedSampleData.deviceName}</span>`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.device.model}]]} ${selectedSampleData.deviceModel}</span>`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.device.firmware}]]} ${selectedSampleData.deviceFirmware}</span></p><hr/>`;
 
-                Plotly.toImage(plot, {format: 'png', height: 300, width: 500})
-                    .then((url) => {
-                            doc.addImage(url, 'PNG', 15, 40, 180, 100);
-                            const blob = doc.output("blob");
-                            window.open(URL.createObjectURL(blob));
-                            //doc.save("a4.pdf");
+                    // Channel info
+                    for (const c of selectedSampleData.dataChannels) {
+                        let i = selectedSampleData.dataChannels.indexOf(c);
+                        let chart = await channelToChart(i).then((gd) => {
+                            return gd;
+                        });
+                        await Plotly.toImage(chart, {format: 'png', height: 230, width: 600})
+                            .then((url) => {
+                                    content += `<h4>${[[#{sample.table.channel}]]}: `;
+                                    content += `${c.channelName} ${c.channelLabel ? '[' + c.channelLabel + ']' : ''}</h4>`;
+                                    content += `<p class="d-flex justify-content-between">`;
+                                    content += `<span class="d-flex">${[[#{sample.channel.resolution}]]} ${c.resolution}</span>`;
+                                    const io = c.input ? [[#{sample.channel.input}]] : [[#{sample.channel.output}]];
+                                    content += `<span class="d-flex">${[[#{sample.channel.type.io}]]} ${io}</span>`;
+                                    const ad = c.digital ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]];
+                                    content += `<span class="d-flex">${[[#{sample.channel.type.ad}]]} ${ad}</span></p>`;
+                                    content += `<h5>${[[#{report.sample.sensor.title}]]}</h5>`;
+                                    content += `<p class="d-flex justify-content-between">`;
+                                    content += `<span class="d-flex">${[[#{label.sensor.alias}]]} ${c.sensor.alias}</span>`;
+                                    content += `<span class="d-flex">${[[#{label.sensor.name}]]} ${c.sensor.name}</span>`;
+                                    content += `<span class="d-flex">${[[#{label.sensor.description}]]} ${c.sensor.description}</span></p>`;
+                                    content += `<div class="d-flex justify-content-center ${i % 2 === 0 ? 'break-after' : ''}">`;
+                                    console.log($(`<img src='${url}'/>`));
+                                    content += `<img src="${url}" /></div><br/><hr/>`
+                                }
+                            );
+                    }
+                    // Sample stats
+                    content += `<h3>${[[#{sample.tab.stats}]]}</h3>`;
+                    // Stats uni
+                    content += `<h4>${[[#{sample.tab.stats.univariate}]]}</h4>`;
+                    const breakPage = selectedSampleData.dataChannels.length % 2 === 0 ? 'break-after': '';
+                    let statsUniTable = `<table class="table table-striped break-avoid ${breakPage}"><thead>`;
+                    const classCenter = 'text-center align-middle';
+                    selectedSampleData.dataChannels.forEach((c, i) => {
+                        if (i === 0) {
+                            const statNames = Object.keys(c.statistics);
+                            let headerRow = "<tr>";
+                            const chName = `<th class="${classCenter}" scope="col">${[[#{sample.table.channel}]]}</th>`;
+                            headerRow += chName;
+                            statNames.forEach((k) => {
+                                const cell = `<th class="${classCenter}" scope="col">${k}</th>`;
+                                headerRow += cell;
+                            });
+                            statsUniTable += headerRow + '</tr></thead><tbody></tbody>';
                         }
-                    )
+                        let row = '<tr>';
+                        const ch = `<th class="${classCenter}" scope="row">${c.channelName}</th>`;
+                        row += ch;
+                        const stats = Object.values(c.statistics);
+                        stats.forEach((v) => {
+                            const stat = `<td class="${classCenter}">${isNaN(v) ? v : v.toPrecision(6)}</td>`;
+                            row += stat;
+                        });
+                        statsUniTable += row + '</tr>';
+                    });
+                    content += statsUniTable + '</tbody></table><hr/>';
+                    let plot;
+                    if (!$("#plots").children().length) {
+                        plot = await plotChannels().then((gd) => {
+                            $("#plotLoader").hide();
+                            return gd;
+                        });
+                    } else {
+                        plot = document.getElementById("plots");
+                    }
+                    await Plotly.toImage(plot, {format: 'png', height: 300, width: 600})
+                        .then((url) => {
+                                content += `<div class="d-flex justify-content-center break-avoid"><img src="${url}" /></div><hr/>`;
+                            }
+                        );
+                    if (selectedSampleData.dataChannels.length > 1) {
+                        // Stats multi
+                        if (!correlationMatrix) {
+                            correlationMatrix = calculateCorrelations(selectedSampleValues);
+                        }
+                        content += `<h4>${[[#{sample.tab.stats.multivariate}]]}</h4>`;
+                        const tableCaption = htmlDecode([[#{sample.stats.correlation}]]);
+                        let statsMultiTable = `<table class="table table-striped break-avoid"><caption>${tableCaption}</caption><thead>`;
+                        selectedSampleData.dataChannels.forEach((c, i) => {
+                            if (i === 0) {
+                                let headerRow = '<tr>';
+                                headerRow += `<th class="${classCenter}" scope="col">${[[#{sample.table.channel}]]}</th>`;
+                                selectedSampleData.dataChannels.forEach((ch, j) => {
+                                    const cell = `<th class="${classCenter}" scope="col">${ch.channelName}</th>`;
+                                    headerRow += cell;
+                                });
+                                statsMultiTable += headerRow + '</tr></thead><tbody></tbody>';
+                            }
+                            let row = '<tr>';
+                            const ch = `<th class="${classCenter}" scope="row">${c.channelName}</th>`;
+                            row += ch;
+                            correlationMatrix[i].forEach((v) => {
+                                const correlation = `<td class="${classCenter}">${v ?? '-'}</td>`;
+                                row += correlation;
+                            });
+                            statsMultiTable += row + '</tr>';
+                        });
+                        content += statsMultiTable + '</tbody></table><hr/>';
+                    }
+                    content += '</div>';
+                    html2pdf().set({
+                        margin: 12,
+                        filename: `report_sample_${selectedSampleData.id}_${date.getTime()}.pdf`,
+                        pagebreak: {mode: 'css', before: '.break-before', after: '.break-after', avoid: '.break-avoid'},
+                    }).from(content).toPdf().get('pdf').then(function (pdf) {
+                        const totalPages = pdf.internal.getNumberOfPages();
+                        const page = htmlDecode([[#{report.sample.page}]]);
+                        for (let i = 1; i <= totalPages; i++) {
+                            pdf.setPage(i);
+                            pdf.setFontSize(10);
+                            pdf.setTextColor(150);
+                            pdf.text(`${page} ${i} / ${totalPages}`, pdf.internal.pageSize.getWidth() - 110,
+                                pdf.internal.pageSize.getHeight() - 5);
+                        }
+                        window.open(pdf.output('bloburl'), '_blank');
+                        $("#reportSpinner").hide();
+                        $("#reportBtn i").show();
+                        endLoad();
+                    });
+                }
             }
         }
 

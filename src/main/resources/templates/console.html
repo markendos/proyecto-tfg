@@ -139,7 +139,7 @@
             </div>
         </div>
         <section>
-            <div id="tableSpinner" class="spinner-border" role="status" style="display: none">
+            <div id="tableSpinner" class="custom-spinner spinner-border" role="status" style="display: none">
                 <span class="sr-only">Loading...</span>
             </div>
             <table id="dataTable" class="table table-striped table-bordered" style="width:100%">
@@ -269,7 +269,7 @@
                     endLoad();
                     const table = $('#dataTable').DataTable();
                     $('#dataTable tbody tr').off().click((e) => {
-                        const data = table.row(e.target).data();
+                        const data = table.row(e.currentTarget).data();
                         loadSensorModal(data);
                     });
                 },

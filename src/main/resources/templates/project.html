@@ -35,8 +35,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.2/FileSaver.min.js"
             integrity="sha512-k8F8QynmFNURwbUJC8drKA+fo3YfNvjqKzStdydD6au+MzvxBoRnxH8E31RJXwDY9DrnEiPhh9wBoDSIxhkyHQ=="
             crossorigin="anonymous"></script>
-    <!-- JS PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <!-- HTML2PDF JS -->
+    <script th:src="@{/resources/js/html2pdf.bundle.min.js}"></script>
     <!-- Simple Statistics JS -->
     <script src="https://unpkg.com/simple-statistics@7.6.0/dist/simple-statistics.min.js"></script>
     <!-- Plotly JS -->
@@ -172,7 +172,7 @@
             </div>
         </div>
         <section>
-            <div id="tableSpinner" class="spinner-border" role="status" style="display: none">
+            <div id="tableSpinner" class="custom-spinner spinner-border" role="status" style="display: none">
                 <span class="sr-only">Loading...</span>
             </div>
             <table id="dataTable" class="table table-striped table-bordered" style="width:100%">
@@ -184,6 +184,8 @@
         </section>
     </main>
 </div>
+
+<div id="end"></div>
 
 <!--Page Footer-->
 <footer th:replace="/fragments/footer :: pageFooter"></footer>
@@ -254,24 +256,30 @@
     }
 
     function fetchSample(sampleId, exportOpt) {
+        clearSelectedSample();
         $.ajax({
             type: 'GET',
             url: serverContext + 'sample/' + sampleId,
             success: (data) => {
                 selectedSampleData = data.sample;
-                selectedSampleValues= data.values;
-                if(selectedSampleData.dataChannels.length > 1) {
+                selectedSampleValues = data.values;
+                if (selectedSampleData.dataChannels.length > 1) {
                     $('#statsMultiBtn').attr('disabled', false);
                 }
-                if(exportOpt) {
-                   switch (exportOpt) {
-                       case 'csv':
-                           exportCSV(); break;
-                       case 'txt':
-                           exportTXT(); break;
-                   }
-                }else {
-                    renderSampleData(sampleId);
+                if (exportOpt) {
+                    switch (exportOpt) {
+                        case 'csv':
+                            exportCSV();
+                            break;
+                        case 'txt':
+                            exportTXT();
+                            break;
+                        case 'report':
+                            startLoad();
+                            generateReport();
+                            break;
+                    }
+                } else {
                     toggleView('table');
                 }
             },
@@ -289,6 +297,9 @@
                 fetchSample(id, selectedOption);
                 break;
             case 'txt':
+                fetchSample(id, selectedOption);
+                break;
+            case 'report':
                 fetchSample(id, selectedOption);
                 break;
             case 'delete':
@@ -351,13 +362,15 @@
 
     const renderSampleActions = (data, type, row) => {
         const exportOpts = `<optgroup label="${[[#{sample.button.export}]]}">`
-                            + `<option value="csv">${[[#{sample.modal.save.tooltip.csv}]]}</option>`
-                            + `<option value="txt">${[[#{sample.modal.save.tooltip.txt}]]}</option>`
-                            + `</optgroup>`;
+            + `<option value="csv">${[[#{sample.modal.save.tooltip.csv}]]}</option>`
+            + `<option value="txt">${[[#{sample.modal.save.tooltip.txt}]]}</option>`
+            + `</optgroup>`;
+        const reportOpt = `<option value="report">${[[#{sample.button.report.generate}]]}</option>`
         const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.sample.option.delete}]]}</option>`;
         return `<select id="project-${row.id}" class="form-control" onChange="handleSampleAction(this)">
                     <option value="" disabled selected>${[[#{table.select.option.default}]]}</option>
                     ${exportOpts}
+                    ${reportOpt}
                     ${[[${role}]] === 'owner' ? deleteOpt : ''}
                 </select>`;
     };
@@ -387,29 +400,18 @@
                         event.stopPropagation();
                     });
                     $('#dataTable tbody tr').off().click((e) => {
-                        const data = table.row(e.target).data();
-                        if(selectedSampleData && selectedSampleValues && selectedSampleData.id === data.id) {
+                        const data = table.row(e.currentTarget).data();
+                        if (selectedSampleData && selectedSampleValues && selectedSampleData.id === data.id) {
+                            toggleView('table');
                             $("#sampleModal").modal('show');
                         } else {
-                            $("#sampleTable").children().empty();
-                            $("#statsUniTable").children().empty();
-                            Plotly.purge(document.getElementById("plots"));
-                            $("#statsMultiTable").children().empty();
-                            $("#sampleModalLabel span").remove();
-                            $("#chartContent").empty();
-                            correlationMatrix = undefined;
-                            selectedSampleData = undefined;
-                            selectedSampleValues = undefined;
-                            selectedSampleValuesNorm = undefined;
-                            $("#normalizeSwitch").prop("checked", false);
-                            normalized = false;
                             fetchSample(data.id);
-                        };
+                        }
+                        ;
                     });
                 },
                 data: samples,
                 columnDefs: [],
-                pageLength: 5,
                 columns: [
                     {title: "#Id", data: "id"},
                     {title: [[#{table.sample.column.date}]], data: "sampleDate"},
@@ -427,6 +429,22 @@
                 responsive: true,
             });
         }
+    }
+
+    function clearSelectedSample() {
+        $("#sampleTable").children().empty();
+        $("#statsUniTable").children().empty();
+        Plotly.purge(document.getElementById("plots"));
+        Plotly.purge(document.getElementById("myDiv"));
+        $("#statsMultiTable").children().empty();
+        $("#sampleModalLabel span").remove();
+        $("#chartContent").empty();
+        correlationMatrix = undefined;
+        selectedSampleData = undefined;
+        selectedSampleValues = undefined;
+        selectedSampleValuesNorm = undefined;
+        $("#normalizeSwitch").prop("checked", false);
+        normalized = false;
     }
 </script>
 </body>
