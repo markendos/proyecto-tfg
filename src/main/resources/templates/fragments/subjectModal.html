@@ -116,34 +116,35 @@
             event.preventDefault();
             $(".alert").html("").hide();
             $(".error-list").html("");
-            const formData = $('#subjectForm').serialize();
-            $.post(serverContext + "subject/add", formData, function (data) {
-                $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
-                $('#subjectModal').modal('hide');
-                if(window.location.pathname.includes('/home')) {
-                    fetchProjects();
-                } else if(window.location.pathname.includes('/project')) {
-                    location.reload();
-                }
-            }).fail(function (data) {
-                if (data.responseJSON) {
-                    if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                        $("#errormsg").show().append(data.responseJSON.message);
-                        $('#subjectModal').modal('hide');
-                    } else {
-                        const errors = $.parseJSON(data.responseJSON.message);
-                        $.each(errors, function (index, item) {
-                            if (item.field) {
-                                $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                            } else {
-                                $("#globalError").show().append(item.defaultMessage + "<br/>");
-                            }
-                        });
+            $('#subjectModal').modal('hide');
+            $('#subjectModal').one('hidden.bs.modal', (e) => {
+                const formData = $('#subjectForm').serialize();
+                $.post(serverContext + "subject/add", formData, function (data) {
+                    if(window.location.pathname.includes('/home')) {
+                        $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
+                        fetchProjects();
+                    } else if(window.location.pathname.includes('/project')) {
+                        window.location.assign(window.location.pathname + '?message=message.project.success.update');
                     }
-                } else {
-                    $("#errormsg").show().append(`ERROR: ${data.status}`);
-                    $('#subjectModal').modal('hide');
-                }
+                }).fail(function (data) {
+                    if (data.responseJSON) {
+                        if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                            $("#errormsg").show().append(data.responseJSON.message);
+                        } else {
+                            $('#subjectModal').modal('show');
+                            const errors = $.parseJSON(data.responseJSON.message);
+                            $.each(errors, function (index, item) {
+                                if (item.field) {
+                                    $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                                } else {
+                                    $("#globalError").show().append(item.defaultMessage + "<br/>");
+                                }
+                            });
+                        }
+                    } else {
+                        $("#errormsg").show().append(`ERROR: ${data.status}`);
+                    }
+                });
             });
         }
 

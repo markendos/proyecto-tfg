@@ -144,7 +144,6 @@
                 ...p,
                 requested: data.requested.find((project) => (project.id === p.id) && project) ? true : false,
             }));
-            console.log(projects);
             drawProjectsTable(projects);
         }).fail(function (data) {
             alert("ERROR: Could not fetch data");
@@ -177,27 +176,30 @@
     }
 
     function sendCollaborationRequest(event) {
-        $('#requestModal').modal('hide');
         event.preventDefault();
         $(".alert").html("").hide();
         $(".error-list").html("");
-        const formData = $('#requestForm').serialize();
-        $.post(serverContext + "collaboration/request", formData, function (data) {
-            fetchProjects();
-            $("#successmsg").show().html(/*[[#{message.request.success}]]*/);
-        }).fail(function (data) {
-            if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                $("#errormsg").show().append(data.responseJSON.message);
-            } else {
-                const errors = $.parseJSON(data.responseJSON.message);
-                $.each(errors, function (index, item) {
-                    if (item.field) {
-                        $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                    } else {
-                        $("#globalError").show().append(item.defaultMessage + "<br/>");
-                    }
-                });
-            }
+        $('#requestModal').modal('hide');
+        $('#requestModal').one('hidden.bs.modal', (e) => {
+            const formData = $('#requestForm').serialize();
+            $.post(serverContext + "collaboration/request", formData, function (data) {
+                fetchProjects();
+                $("#successmsg").show().html(/*[[#{message.request.success}]]*/);
+            }).fail(function (data) {
+                if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                    $("#errormsg").show().append(data.responseJSON.message);
+                } else {
+                    $('#requestModal').modal('show');
+                    const errors = $.parseJSON(data.responseJSON.message);
+                    $.each(errors, function (index, item) {
+                        if (item.field) {
+                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                        } else {
+                            $("#globalError").show().append(item.defaultMessage + "<br/>");
+                        }
+                    });
+                }
+            });
         });
     }
 

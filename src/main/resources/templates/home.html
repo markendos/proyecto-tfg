@@ -314,26 +314,28 @@
         event.preventDefault();
         $(".alert").html("").hide();
         $(".error-list").html("");
-        const formData = $('#projectForm').serialize();
-        $.post(serverContext + "project/add", formData, function (data) {
-            $('#projectModal').modal('hide');
-            fetchProjects();
-            $("#successmsg").show().html(/*[[#{message.project.success.create}]]*/);
-            addOrRemoveLabels(data.new.id);
-        }).fail(function (data) {
-            if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                $("#errormsg").show().append(data.responseJSON.message);
-                $('#projectModal').modal('hide');
-            } else {
-                const errors = $.parseJSON(data.responseJSON.message);
-                $.each(errors, function (index, item) {
-                    if (item.field) {
-                        $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                    } else {
-                        $("#globalError").show().append(item.defaultMessage + "<br/>");
-                    }
-                });
-            }
+        $('#projectModal').modal('hide');
+        $('#projectModal').one('hidden.bs.modal', (e) => {
+            const formData = $('#projectForm').serialize();
+            $.post(serverContext + "project/add", formData, function (data) {
+                fetchProjects();
+                $("#successmsg").show().html(/*[[#{message.project.success.create}]]*/);
+                addOrRemoveLabels(data.new.id);
+            }).fail(function (data) {
+                if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                    $("#errormsg").show().append(data.responseJSON.message);
+                } else {
+                    $('#projectModal').modal('show');
+                    const errors = $.parseJSON(data.responseJSON.message);
+                    $.each(errors, function (index, item) {
+                        if (item.field) {
+                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                        } else {
+                            $("#globalError").show().append(item.defaultMessage + "<br/>");
+                        }
+                    });
+                }
+            });
         });
     }
 </script>

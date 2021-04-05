@@ -110,8 +110,11 @@
                 </div>
             </div>
         </div>
-        <div id="myDiv" class="d-none"></div>
+        <div id="reportChartContainer" class="d-none"></div>
     </div>
+    <!--Plotly Language Config-->
+    <script src="https://cdn.plot.ly/plotly-locale-es-2.0.0-rc.0.js"></script>
+    <script>Plotly.setPlotConfig({locale: lang})</script>
     <!--Sample Modal JS Functionalities-->
     <script th:inline="javascript">
         // Global variables to store retrieved sample data
@@ -629,7 +632,7 @@
                 showlegend: false,
             };
             const config = {responsive: true};
-            return Plotly.newPlot('myDiv', data, layout, config);
+            return Plotly.newPlot('reportChartContainer', data, layout, config);
         }
 
         async function generateReport() {
@@ -806,6 +809,8 @@
                         margin: 12,
                         filename: `report_sample_${selectedSampleData.id}_${date.getTime()}.pdf`,
                         pagebreak: {mode: 'css', before: '.break-before', after: '.break-after', avoid: '.break-avoid'},
+                        image: {type: 'jpeg', quality: 1},
+                        html2canvas: {scale: 2, logging: true},
                     }).from(content).toPdf().get('pdf').then(function (pdf) {
                         const totalPages = pdf.internal.getNumberOfPages();
                         const page = htmlDecode([[#{report.sample.page}]]);
