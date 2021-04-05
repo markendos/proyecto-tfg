@@ -148,25 +148,27 @@
 
         function manageRequest(status) {
             $("#notificationModal").modal('hide');
-            const serverCtx = /*[[@{/}]]*/;
-            const data = {
-                collaboratorEmail: utf8_to_b64($("#requestUserEmail").val()),
-                projectId: $("#requestProjectId").val(),
-                requestStatus: status,
-            }
-            $.ajax({
-                url: serverCtx + 'collaboration/update',
-                type: 'PUT',
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                success: (data) => {
-                    $("#successmsg").show().html(/*[[#{message.request.success.update}]]*/);
-                    fetchCollaborationRequests();
-                    fetchProjects();
-                },
-                error: (data) => {
-                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+            $('#notificationModal').one('hidden.bs.modal', (e) => {
+                const serverCtx = /*[[@{/}]]*/;
+                const data = {
+                    collaboratorEmail: utf8_to_b64($("#requestUserEmail").val()),
+                    projectId: $("#requestProjectId").val(),
+                    requestStatus: status,
                 }
+                $.ajax({
+                    url: serverCtx + 'collaboration/update',
+                    type: 'PUT',
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: (data) => {
+                        $("#successmsg").show().html(/*[[#{message.request.success.update}]]*/);
+                        fetchCollaborationRequests();
+                        fetchProjects();
+                    },
+                    error: (data) => {
+                        $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                    }
+                });
             });
         }
 

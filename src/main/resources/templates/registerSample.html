@@ -822,7 +822,6 @@
     function handleSampleSave() {
         $('#modalFileSave').modal('hide');
         if ($("#dbSwitch").is(":checked")) {
-            showSpinner();
             saveSample();
         }
         const date = new Date();
@@ -1013,22 +1012,24 @@
     function saveSample() {
         $(".alert").html("").hide();
         $(".error-list").html("");
-        $("input.channelCheck:not(:checked)").closest(".row").find("input,select").attr("disabled", true);
-        const formData = $('#fileSaveForm').serializeArray();
+        $('#modalFileSave').modal('hide');
+        $('#modalFileSave').one('hidden.bs.modal', (e) => {
+            $("input.channelCheck:not(:checked)").closest(".row").find("input,select").attr("disabled", true);
+            const formData = $('#fileSaveForm').serializeArray();
 
-        $.post(serverContext + "sample/add", formData, function (data) {
-            const sample = data.new;
-            saveValues(sample);
-        }).fail(function (data) {
-            hideSpinner();
-            if (data.responseJSON?.error?.indexOf("InternalError") > -1) {
-                $("#errormsg").show().append(data.responseJSON.message);
-            } else {
-                const errors = $.parseJSON(data.responseJSON.message);
-                $.each(errors, function (index, item) {
-                    $("#errormsg").show().append(`${item.field} ${item.defaultMessage}<br/>`);
-                });
-            }
+            $.post(serverContext + "sample/add", formData, function (data) {
+                const sample = data.new;
+                saveValues(sample);
+            }).fail(function (data) {
+                if (data.responseJSON?.error?.indexOf("InternalError") > -1) {
+                    $("#errormsg").show().append(data.responseJSON.message);
+                } else {
+                    const errors = $.parseJSON(data.responseJSON.message);
+                    $.each(errors, function (index, item) {
+                        $("#errormsg").show().append(`${item.field} ${item.defaultMessage}<br/>`);
+                    });
+                }
+            });
         });
     }
 
@@ -1084,7 +1085,6 @@
             }));
 
             Promise.all(promises).then(results => {
-                hideSpinner();
                 $("#successmsg").show().html([[#{message.sample.success.register}]]);
                 $(".alert").children("i.fa-window-close").remove();
                 $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
@@ -1093,11 +1093,9 @@
                     type: 'DELETE',
                     url: serverContext + 'sample/delete/' + sample.id,
                     success: (data) => {
-                        hideSpinner();
                         $("#errormsg").show().html(/*[[#{message.sample.error.register}]]*/);
                     },
                     error: (data) => {
-                        hideSpinner();
                         $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
                     }
                 });
