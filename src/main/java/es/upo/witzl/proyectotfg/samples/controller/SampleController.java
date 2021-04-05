@@ -131,7 +131,7 @@ public class SampleController {
                 Project project = projectOpt.get();
                 boolean isCollaborator = collaborationRequestService.isCollaborator(project, user);
                 if(project.getUser().equals(user) || isCollaborator) {
-                    redirect =  "/registerSample";
+                    redirect =  "registerSample";
                     List<Sensor> sensors = sensorService.getSensors();
                     model.addAttribute("project", project);
                     model.addAttribute("sensors", sensors);
