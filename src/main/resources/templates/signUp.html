@@ -51,7 +51,7 @@
             <label for="password" class="col-sm-3" th:utext="#{label.user.password}">Password</label>
             <span class="col-sm-5">
                 <input id="password" class="form-control" name="password" value="" type="password"
-                                          autocomplete="new-password" required/>
+                       autocomplete="new-password" required/>
             </span>
             <span id="passwordError" class="alert alert-danger col-sm-4" style="display:none"></span>
         </div>
@@ -159,27 +159,26 @@
                 window.location.href = serverContext + "successRegister?email=" + $("#email").val();
             }
 
-        })
-            .fail(function (data) {
-                if (data.responseJSON.error.indexOf("MailError") > -1) {
-                    window.location.href = serverContext + "emailError";
-                } else if (data.responseJSON.error == "UserAlreadyExist") {
-                    $("#emailError").show().html(data.responseJSON.message);
-                } else if (data.responseJSON.error == "UsernameTaken") {
-                    $("#usernameError").show().html(data.responseJSON.message);
-                } else if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                    window.location.href = serverContext + "login?message=" + data.responseJSON.message;
-                } else {
-                    const errors = $.parseJSON(data.responseJSON.message);
-                    $.each(errors, function (index, item) {
-                        if (item.field) {
-                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                        } else {
-                            $("#globalError").show().append(item.defaultMessage + "<br/>");
-                        }
-                    });
-                }
-            });
+        }).fail(function (data) {
+            if (data.responseJSON.error.indexOf("MailError") > -1) {
+                window.location.href = serverContext + "emailError";
+            } else if (data.responseJSON.error === "UserAlreadyExists") {
+                $("#emailError").show().html(data.responseJSON.message);
+            } else if (data.responseJSON.error === "UsernameTaken") {
+                $("#usernameError").show().html(data.responseJSON.message);
+            } else if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                window.location.href = serverContext + "login?message=" + data.responseJSON.message;
+            } else {
+                const errors = $.parseJSON(data.responseJSON.message);
+                $.each(errors, function (index, item) {
+                    if (item.field) {
+                        $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                    } else {
+                        $("#globalError").show().append(item.defaultMessage + "<br/>");
+                    }
+                });
+            }
+        });
     }
 </script>
 </body>

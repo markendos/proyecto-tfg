@@ -5,10 +5,10 @@ import es.upo.witzl.proyectotfg.users.validation.EmailValidator;
 import es.upo.witzl.proyectotfg.users.validation.PasswordMatchesValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.context.request.RequestContextListener;
@@ -28,9 +28,6 @@ public class MvcConfig implements WebMvcConfigurer {
     public MvcConfig() {
         super();
     }
-
-    @Autowired
-    private MessageSource messageSource;
 
     @Autowired
     ServletContext context;
@@ -83,8 +80,18 @@ public class MvcConfig implements WebMvcConfigurer {
     public LocaleContextResolver localeResolver() {
         final CookieLocaleResolver cookieLocaleResolver = new CookieLocaleResolver();
         cookieLocaleResolver.setCookieName("language");
-        //cookieLocaleResolver.setDefaultLocale(Locale.ENGLISH);
+        cookieLocaleResolver.setDefaultLocale(new Locale("es","ES"));
         return cookieLocaleResolver;
+    }
+
+    @Bean
+    public ResourceBundleMessageSource messageSource() {
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasenames("classpath:/messages");
+        messageSource.setUseCodeAsDefaultMessage(true);
+        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setFallbackToSystemLocale(false);
+        return messageSource;
     }
 
     @Bean
@@ -106,7 +113,7 @@ public class MvcConfig implements WebMvcConfigurer {
     @Override
     public Validator getValidator() {
         LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
-        validator.setValidationMessageSource(messageSource);
+        validator.setValidationMessageSource(messageSource());
         return validator;
     }
 
