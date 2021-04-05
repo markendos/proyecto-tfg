@@ -86,7 +86,7 @@ public class RegistrationController {
                     redirect = "redirect:/login?message=" + message;
                 }else if(result.equals("expired")) {
                     message = "auth.message.expired";
-                    redirect = "/badUser";
+                    redirect = "badUser";
                     model.addAttribute("email", user.getEmail());
                     model.addAttribute("token", token);
                     model.addAttribute("message", message);
@@ -162,7 +162,7 @@ public class RegistrationController {
             userService.authWithoutPassword(new MyUserPrincipal(resetToken.getUser()));
             model.addAttribute("token", token);
             model.addAttribute("username", username);
-            redirect = "/updatePassword";
+            redirect = "updatePassword";
         } else {
             if (result.equals("expired")) {
                 message = "aut.message.resetToken.expired";

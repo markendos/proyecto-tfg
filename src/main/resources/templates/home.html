@@ -222,7 +222,6 @@
                     });
                     $('#dataTable tbody tr').off().click((e) => {
                         const data = table.row(e.currentTarget).data();
-                        console.log(e);
                         goToProject(data.id);
                     });
                 },

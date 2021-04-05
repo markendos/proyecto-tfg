@@ -59,7 +59,7 @@ public class SensorController {
         }
         model.addAttribute("sensors", mapper.writeValueAsString(aux));
 
-        return new ModelAndView("/console", model);
+        return new ModelAndView("console", model);
     }
 
     @GetMapping(value = "/sensor/all", produces = MediaType.APPLICATION_JSON_VALUE)

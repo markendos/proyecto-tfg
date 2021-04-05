@@ -177,7 +177,7 @@ public class ProjectController {
                 Project project = projectOpt.get();
                 boolean isCollaborator = collaborationRequestService.isCollaborator(project, user);
                 if(project.getUser().equals(user) || isCollaborator) {
-                    redirect =  "/project";
+                    redirect =  "project";
                     model.addAttribute("project", project);
                     model.addAttribute("role", isCollaborator ? "collaborator" : "owner");
                     return new ModelAndView(redirect, model);
