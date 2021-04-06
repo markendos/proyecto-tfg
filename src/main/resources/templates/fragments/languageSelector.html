@@ -10,7 +10,7 @@
         </select>
         </script>
         <script th:inline="javascript">
-            const lang = Cookies.get("language");
+            const lang = Cookies.get("language") ?? getLang();
 
             $(document).ready(function () {
                 if (lang && (lang === 'en' || lang === 'es')) {

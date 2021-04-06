@@ -3,7 +3,7 @@
         const serverContext = /*[[@{/}]]*/;
 
         function signOut() {
-            var auth2 = gapi.auth2.getAuthInstance();
+            const auth2 = gapi.auth2.getAuthInstance();
             if (auth2) {
                 auth2.signOut().then(function () {
                     console.log('User signed out.');
@@ -12,9 +12,13 @@
         }
 
         function onLoad() {
-            gapi.load('auth2', function () {
-                gapi.auth2.init();
-            });
+            try{
+                gapi.load('auth2', function () {
+                    gapi.auth2.init();
+                });
+            } catch (e) {
+                console.log(e);
+            }
         }
     </script>
     <!-- Google Sign-In API -->
