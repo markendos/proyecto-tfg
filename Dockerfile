@@ -1,4 +1,9 @@
-FROM openjdk:11
-VOLUME /tmp
-COPY ./target/proyecto-tfg-0.0.1-SNAPSHOT.jar proyecto-tfg-0.0.1-SNAPSHOT.jar
-ENTRYPOINT ["java","-jar","proyecto-tfg-0.0.1-SNAPSHOT.jar"]
+FROM maven:3.6.3-openjdk-11-slim AS MAVEN_ENV
+WORKDIR /build/
+COPY pom.xml /build
+COPY src /build/src
+RUN mvn -Pprod clean package -DskipTests=true
+
+FROM openjdk:11.0.10-jre-slim
+COPY  --from=MAVEN_ENV /build/target/proyecto-tfg-*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
