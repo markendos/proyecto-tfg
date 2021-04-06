@@ -24,7 +24,7 @@
     <!-- Google Sign-In API -->
     <meta name="google-signin-client_id"
           th:content="${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}">
-    <script src="https://apis.google.com/js/platform.js?onload=onLoad&hl=es" async defer></script>
+    <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
     <!-- Bootstrap Bundle JS -->
     <script th:src="@{/resources/js/bootstrap.bundle.min.js}"></script>
     <!-- Font Awesome Icons -->
