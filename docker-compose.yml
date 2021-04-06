@@ -24,7 +24,7 @@ services:
             - 27017:27017
     web-app:
         restart: on-failure
-        build: ./
+        image: markendos/tfg-app:latest
         expose:
             - "8443"
             - "8080"
