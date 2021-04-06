@@ -1,0 +1,54 @@
+name: Preproduction Branch
+on:
+  pull_request:
+    branches: [ pre ]
+  push:
+    branches: [ pre ]
+jobs:
+  build:
+    name: Test, package and merge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      #- name: Maven Test
+      #  run: mvn -B clean test
+      - name: Maven Verify
+        run: mvn -B -Pprod clean verify -DskipTests
+      - name: Automerge
+        uses: "pascalgn/automerge-action@v0.12.0"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MERGE_LABELS: ""
+  artifact:
+    name: Publish Artifact 
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Publish artifact on GitHub Packages
+        run: mvn -B clean deploy -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
+  docker:
+    name: Publish Docker Image
+    runs-on: ubuntu-latest
+    needs: [build, artifact]
+    env:
+      REPO: ${{ secrets.DOCKER_REPO }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Docker Hub Sign-in
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Building Docker Image
+        run: docker build -t $REPO:latest -t $REPO:${GITHUB_RUN_ID} .
+      - name: Publish Docker Image
+        run: docker push $REPO
+          echo test, and deploy your project.
