@@ -44,8 +44,6 @@ jobs:
     name: Publish Docker Image
     runs-on: ubuntu-latest
     needs: [build, artifact]
-    env:
-      REPO: ${{ secrets.DOCKER_REPO }}
     steps:
       - 
         uses: actions/checkout@v2
@@ -61,7 +59,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: $REPO:latest
+          tags: ${{ secrets.DOCKER_REPO }}:latest
       -   
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
