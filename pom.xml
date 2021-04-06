@@ -20,6 +20,14 @@
 		<java.version>11</java.version>
 	</properties>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>markendos</name>
+			<url>https://maven.pkg.github.com/markendos/proyecto-tfg</url>
+		</repository>
+	</distributionManagement>
+
 	<dependencies>
 
 		<dependency>
