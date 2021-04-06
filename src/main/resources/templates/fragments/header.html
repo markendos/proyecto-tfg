@@ -12,13 +12,9 @@
         }
 
         function onLoad() {
-            try{
-                gapi.load('auth2', function () {
-                    gapi.auth2.init();
-                });
-            } catch (e) {
-                console.log(e);
-            }
+            gapi.load('auth2', function () {
+                gapi.auth2.init();
+            });
         }
     </script>
     <!-- Google Sign-In API -->
