@@ -32,7 +32,7 @@ jobs:
           java-version: 11
       - 
         name: Publish artifact on GitHub Packages
-        run: mvn -B clean deploy -DskipTests
+        run: mvn -B -Pprod clean deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
   docker:
