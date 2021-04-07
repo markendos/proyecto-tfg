@@ -50,7 +50,9 @@ public class LoginController {
 
                 if(user.isEnabled()) {
                     final Authentication authentication = userService.authGoogleSignIn(new MyUserPrincipal(user));
-                    CustomLoginAuthenticationSuccessHandler loginSuccessHandler = ctx.getBean("myAuthenticationSuccessHandler",CustomLoginAuthenticationSuccessHandler.class);
+                    CustomLoginAuthenticationSuccessHandler loginSuccessHandler =
+                            ctx.getBean("myAuthenticationSuccessHandler",
+                                    CustomLoginAuthenticationSuccessHandler.class);
                     loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
                     message = "success";
                 } else {
@@ -63,7 +65,8 @@ public class LoginController {
         return new GenericResponse(message);
     }
 
-    private String verifyToken(final String idTokenString, final String clientId) throws GeneralSecurityException, IOException {
+    private String verifyToken(final String idTokenString, final String clientId) throws GeneralSecurityException,
+            IOException {
         String email = "";
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 // Specify the CLIENT_ID of the app that accesses the backend:
