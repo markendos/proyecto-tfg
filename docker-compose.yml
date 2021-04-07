@@ -26,14 +26,21 @@ services:
         restart: on-failure
         container_name: web-app
         image: markendos/tfg-app:latest
-        expose:
-            - "8443"
-            - "8080"
         ports:
             - 8443:8443
-            - 8080:8080
         environment:
             WAIT_HOSTS: mysql:3306, mongo:27017
         depends_on:
             - mysqldb
             - mongodb            
+    nginx:
+        container_name: nginx
+        build:
+            context: ./nginx
+            dockerfile: Dockerfile
+        restart: always
+        ports:
+            - 80:80
+            - 443:443
+        depends_on:
+            - web-app
