@@ -1,4 +1,4 @@
-﻿FROM maven:3.6.3-openjdk-11-slim AS MAVEN_ENV
+FROM maven:3.6.3-openjdk-11-slim AS MAVEN_ENV
 WORKDIR /build/
 COPY pom.xml /build
 COPY src /build/src
