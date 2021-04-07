@@ -18,12 +18,6 @@ $(document).ajaxStop(() => {
     $(".alert").append($("<i onclick='closeAlert(this)' class='fas fa-window-close'></i>"));
 });
 
-function getLang() {
-    if (navigator.languages != undefined)
-        return navigator.languages[0];
-    return navigator.language;
-}
-
 function markRequiredFields() {
     const requiredFields = $(":input[required]");
     let requiredLabels = $(requiredFields).parent().prev('label');
