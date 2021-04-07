@@ -44,21 +44,9 @@ services:
         depends_on:
             - mysqldb
             - mongodb
-    networks:
-        static-net:
-            driver: bridge
-            ipam:
-                config:
-                  - subnet: 192.168.0.0/16
-                    gateway: 192.168.0.1
-#    nginx:
-#        container_name: nginx
-#        build:
-#            context: ./nginx
-#            dockerfile: Dockerfile
-#        restart: always
-#        ports:
-#            - 80:80
-#            - 443:443
-#        depends_on:
-#            - web-app
+networks:
+    static-net:
+        driver: bridge
+        ipam:
+            config:
+                cat- subnet: 192.168.0.0/16
