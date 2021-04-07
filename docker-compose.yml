@@ -13,8 +13,8 @@ services:
         ports:
             - 3306:3306
         networks:
-          net:
-            ipv4_address: 192.168.0.2              
+            static-net:
+                ipv4_address: 192.168.0.2
     mongodb:
         restart: always
         container_name: mongodb
@@ -26,8 +26,8 @@ services:
         ports:
             - 27017:27017
         networks:
-          net:
-            ipv4_address: 192.168.0.3           
+            static-net:
+                ipv4_address: 192.168.0.3
     web-app:
         restart: on-failure
         container_name: web-app
@@ -37,7 +37,7 @@ services:
         ports:
             - 8443:8443
         networks:
-            net:
+            static-net:
                 ipv4_address: 192.168.0.4
         environment:
             WAIT_HOSTS: mysql:3306, mongo:27017
@@ -45,12 +45,12 @@ services:
             - mysqldb
             - mongodb
     networks:
-        net:
-        driver: bridge
-        ipam:
-            config:
-              - subnet: 192.168.0.0/16
-                gateway: 192.168.0.1            
+        static-net:
+            driver: bridge
+            ipam:
+                config:
+                  - subnet: 192.168.0.0/16
+                    gateway: 192.168.0.1
 #    nginx:
 #        container_name: nginx
 #        build:
