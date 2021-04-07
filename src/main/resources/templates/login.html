@@ -89,7 +89,7 @@
 <script th:inline="javascript">
     function init() {
         gapi.load('auth2', function () {
-            auth2 = gapi.auth2.init({
+            const auth2 = gapi.auth2.init({
                 client_id: [[${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}]]
             });
             gapi.signin2.render('my-signin2', {
@@ -99,9 +99,9 @@
                 onfailure: onFailure
             });
                 function onSuccess(googleUser) {
-                    var idToken = googleUser.getAuthResponse().id_token;
-                    var email = googleUser.getBasicProfile().getEmail();
-                    var auth2 = gapi.auth2.getAuthInstance();
+                    const idToken = googleUser.getAuthResponse().id_token;
+                    const email = googleUser.getBasicProfile().getEmail();
+                    const auth2 = gapi.auth2.getAuthInstance();
                     $.post(serverContext + "oauth_login", {idtoken: idToken}, function (data) {
 
                         if (data.message != "success") {
@@ -127,9 +127,9 @@
 <script th:inline="javascript">
     function validate() {
         if ($("#username").val() == "" && $("#password").val() == "") {
-            let emptyEmail = /*[[#{message.email}]]*/;
-            let emptyPass = /*[[#{message.password}]]*/;
-            alert(emptyEmail + ". " + decodeURI(emptyPass));
+            let emptyEmail = [[#{message.email}]];
+            let emptyPass = [[#{message.password}]];
+            alert(emptyEmail + ". " + htmlDecode(emptyPass));
             $("#username").focus();
             return false;
         }
@@ -153,7 +153,7 @@
     }
 
     function display_username() {
-        var username = getCookie('welcome');
+        const username = getCookie('welcome');
         if (username) {
             $("#username").val(username);
         }

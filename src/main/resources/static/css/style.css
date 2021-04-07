@@ -28,6 +28,10 @@ body {
     max-height: 50px;
 }
 
+#topnav li.nav-item {
+    margin-left: 1.5rem;
+}
+
 i.userIcon {
     font-size: larger;
 }
