@@ -1,7 +1,7 @@
 <header class="sticky-top" th:fragment="pageHeader">
     <script th:inline="javascript">
         const serverContext = /*[[@{/}]]*/;
-
+        console.log([[${@environment.getActiveProfiles()[0]}]]);
         function signOut() {
             const auth2 = gapi.auth2.getAuthInstance();
             if (auth2) {
