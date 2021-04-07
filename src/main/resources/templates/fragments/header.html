@@ -1,0 +1,214 @@
+<header class="sticky-top" th:fragment="pageHeader">
+    <script th:inline="javascript">
+        const serverContext = /*[[@{/}]]*/;
+
+        function signOut() {
+            const auth2 = gapi.auth2.getAuthInstance();
+            if (auth2) {
+                auth2.signOut().then(function () {
+                    console.log('User signed out.');
+                });
+            }
+        }
+
+        function onLoad() {
+            gapi.load('auth2', function () {
+                gapi.auth2.init();
+            });
+        }
+    </script>
+    <!-- Google Sign-In API -->
+    <meta name="google-signin-client_id"
+          th:content="${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}">
+    <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+    <!-- Bootstrap Bundle JS -->
+    <script th:src="@{/resources/js/bootstrap.bundle.min.js}"></script>
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/ebf145548d.js" crossorigin="anonymous"></script>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" id="topnav"
+         th:with="url=${#httpServletRequest.requestURI}">
+        <a class="navbar-brand" th:href="@{/}">Navbar</a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler"
+                aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarToggler">
+            <ul sec:authorize="hasRole('USER')" class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item" th:classappend="${url} == '/home' ? active : ''">
+                    <a class="nav-link" th:href="@{/home}" th:utext="#{label.nav.home}"><span
+                            class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul sec:authorize="hasRole('ADMIN')" class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item" th:classappend="${url} == '/console' ? active : ''">
+                    <a class="nav-link" th:href="@{/console}" th:utext="#{label.nav.console}">
+                        <span class="sr-only">(current)</span></a>
+                </li>
+            </ul>
+            <ul sec:authorize="hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
+                <li sec:authorize="hasAnyRole('USER')" class="nav-item col">
+                    <div id="notifications" class="nav-link row" onclick="toggleNotificationsPanel()">
+                        <span id="notificationCounter" class="badge badge-light">0</span>
+                        <i class="notification fas fa-bell"></i>
+                        <i class="fas fa-caret-down"></i>
+                    </div>
+                    <div id="notificationsPanel" class="row mr-2" style="display: none"></div>
+                </li>
+                <li class="nav-item"
+                    th:classappend="${url} == '/changePassword' ? active : ''">
+                    <a class="nav-link" th:href="@{/changePassword}">
+                        <i class="userIcon fas fa-user-circle"></i>
+                        <span sec:authentication="name"></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/logout}" th:inline="text" onclick="signOut()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        [[#{label.pages.logout}]]
+                    </a>
+                </li>
+            </ul>
+            <ul sec:authorize="!hasAnyRole('USER', 'ADMIN')" class="navbar-nav ml-auto mt-2 mt-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/signUp}" th:unless="${url == '/signUp'}">
+                        <i class="fas fa-user-plus"></i>
+                        <span th:utext="#{label.form.loginSignUp}"></span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/login}" th:inline="text"
+                       th:unless="${url == '/login'}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        [[#{label.form.loginLink}]]
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Collaboration Request Notification Modal Form -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationModalLabel"
+                        th:utext="#{label.pages.title.request.notification}">Modal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="notificationText"></p>
+                    <div class="form-group row align-items-start">
+                        <label for="requestMessage" class="col-sm-3" th:utext="#{label.request.message}">message</label>
+                        <div class="col-sm-9">
+                            <textarea id="requestMessage" class="form-control" name="requestMessage" rows="3"
+                                      readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <form action="#" method="POST" enctype="utf8" id="notificationForm">
+                        <input type="text" id="requestProjectId" name="projectId" value="" hidden>
+                        <input type="text" id="requestUserEmail" name="userEmail" value="" hidden>
+                        <button type="button" class="btn btn-danger" onclick="manageRequest('denied')"
+                                th:utext="#{label.form.deny}">
+                            cancel
+                        </button>
+                        <button class="btn btn-success" type="button" th:utext="#{label.form.approve}"
+                                onclick="manageRequest('approved')">
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script sec:authorize="hasRole('USER')" th:inline="javascript">
+        $(document).ready(function () {
+            fetchCollaborationRequests();
+            $("body").append($("#notificationModal"));
+
+            $("#notifications, #notificationsPanel").click(function (e) {
+                e.stopPropagation(); // stops click event from reaching document
+            });
+            $(document).click(function () {
+                $("#notificationsPanel").hide(); // click came from somewhere else
+            });
+            setInterval(fetchCollaborationRequests, 30000); // check for new collaboration requests periodically
+        });
+
+        function toggleNotificationsPanel() {
+            $("#notificationsPanel").toggle();
+        }
+
+        function manageRequest(status) {
+            $("#notificationModal").modal('hide');
+            $('#notificationModal').one('hidden.bs.modal', (e) => {
+                const serverCtx = /*[[@{/}]]*/;
+                const data = {
+                    collaboratorEmail: utf8_to_b64($("#requestUserEmail").val()),
+                    projectId: $("#requestProjectId").val(),
+                    requestStatus: status,
+                }
+                $.ajax({
+                    url: serverCtx + 'collaboration/update',
+                    type: 'PUT',
+                    contentType: "application/json",
+                    data: JSON.stringify(data),
+                    success: (data) => {
+                        $("#successmsg").show().html(/*[[#{message.request.success.update}]]*/);
+                        fetchCollaborationRequests();
+                        fetchProjects();
+                    },
+                    error: (data) => {
+                        $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                    }
+                });
+            });
+        }
+
+        function fetchCollaborationRequests() {
+            loadingData = true;
+            const serverCtx = [[@{/}]];
+                $.get(serverCtx + "collaboration/all").done((data) => {
+                    const requests = data.all;
+                    $("#notificationCounter").text(requests.length);
+                    if (requests.length) {
+                        showRequests(requests);
+                    } else {
+                        $("#notificationsPanel").append(`<span>${[[#{message.notification.empty}]]}</span>`);
+                    }
+                    loadingData = false;
+                }).fail(() => {
+                    loadingData = false;
+                });
+        }
+
+            function showRequests(requests) {
+                $("#notificationsPanel").empty();
+                const notifications = $("#notificationsPanel");
+                requests.forEach(r => {
+                    $(notifications).append(`<a id="${utf8_to_b64(JSON.stringify(r))}" onclick="handleCollaborationRequest(this)">` +
+                        `${r.collaborator.username} ${[[#{message.notification.request}]]}` + '</a>');
+                });
+            }
+
+            function handleCollaborationRequest(element) {
+                const request = JSON.parse(b64_to_utf8(element.id));
+                let msg = [[#{message.collaboration.request}]]
+                    .replace(/-username-/g, `<strong>${request.collaborator.username}</strong>`)
+                    .replace(/-id-/g, `<strong>${request.project.id}</strong>`);
+                $("#notificationText").html(msg);
+                $("#requestMessage").val(request.requestMessage);
+                $("#requestUserEmail").val(request.collaborator.email);
+                $("#requestProjectId").val(request.project.id);
+                toggleNotificationsPanel();
+                $("#notificationModal").modal('show');
+            }
+    </script>
+</header>

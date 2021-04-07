@@ -1,0 +1,36 @@
+<div class="row w-100" th:fragment="languageSelector">
+    <!--  Cookie JS -->
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+
+    <div class="col d-flex mt-1 justify-content-end w-100">
+        <select id="locales" class="form-control form-control-sm d-inline" style="width:auto;">
+            <option value="" th:utext="#{label.form.languageSelector}" disabled selected></option>
+            <option value="en" th:utext="#{lang.option.english}"></option>
+            <option value="es" th:utext="#{lang.option.spanish}"></option>
+        </select>
+        </script>
+        <script th:inline="javascript">
+            const lang = Cookies.get("language") ?? getLang();
+
+            $(document).ready(function () {
+                if (lang && (lang === 'en' || lang === 'es')) {
+                    $("#locales").val(lang);
+                }
+                $("#locales").change(function () {
+                    const selectedOption = $('#locales').val();
+                    if (selectedOption != '') {
+                        const path = window.location.pathname;
+                        const args = window.location.href.split('?')[1];
+                        let newArgs = "";
+                        if (args) {
+                            newArgs = args.replace(/lang=([a-z][a-z])(&)?/, "");
+                            if (newArgs.length > 0)
+                                newArgs = "&" + newArgs;
+                        }
+                        window.location.replace(path + '?lang=' + selectedOption + newArgs);
+                    }
+                });
+            });
+        </script>
+    </div>
+</div>

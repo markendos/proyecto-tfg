@@ -1,0 +1,141 @@
+<div th:fragment="labelsModal">
+    <div class="modal fade no-loader" id="labelsModal" tabindex="-1" aria-labelledby="labelsModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="labelsModalLabel" th:utext="#{label.pages.title.project.labels}">Modal
+                        title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="#" method="POST" enctype="utf8" id="labelsForm">
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <div id="labelError" class="text-danger row col offset-3" style="display:none"></div>
+                            <label for="labels" class="col-sm-3" th:utext="#{label.project.label}">label</label>
+                            <div class="col-sm-9">
+                                <select id="labels" name="names" multiple>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="text" id="labelsProjectId" name="projectId" value="" hidden>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                th:utext="#{label.form.cancel}">
+                            cancel
+                        </button>
+                        <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--Labels JS Functionalities-->
+    <script th:inline="javascript">
+        $(document).ready(function () {
+            $('#labelsForm').submit(function (event) {
+                saveProjectLabels(event);
+            });
+
+            $('#labels').select2({
+                theme: 'bootstrap4',
+                width: 'resolve',
+                closeOnSelect: false,
+                tags: true,
+                language: lang,
+                tokenSeparators: [',', ' '],
+                ajax: {
+                    url: serverContext + 'labels/all',
+                    dataType: 'json',
+                    processResults: function (data) {
+
+                        return {
+                            results: data.all.map(({name: id, name: text}) => ({id, text}))
+                        };
+                    }
+                },
+                minimumInputLength: 1,
+                cache: true,
+                createTag: function (params) {
+                    const term = $.trim(params.term);
+
+                    if (term === '') {
+                        return null;
+                    }
+
+                    return {
+                        id: term,
+                        text: term,
+                        newTag: true // add additional parameters
+                    }
+                }
+            });
+        });
+
+        function addOrRemoveLabels(projectId) {
+            $('#labels').empty();
+            $('#labelsProjectId').val(projectId);
+            $('#labelsModal').modal('show');
+            // Fetch the preselected item, and add to the control
+            const labelsSelect = $('#labels');
+            $.ajax({
+                type: 'GET',
+                url: serverContext + 'labels/' + projectId
+            }).then(function (data) {
+                // create the option and append to Select2
+                data.tagged.forEach(tag => {
+                    let option = new Option(tag.name, tag.name, true, true);
+                    labelsSelect.append(option).trigger('change');
+
+                    // manually trigger the `select2:select` event
+                    labelsSelect.trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: data
+                        }
+                    });
+                });
+            });
+        }
+
+        function saveProjectLabels(event) {
+            event.preventDefault();
+            $(".alert").html("").hide();
+            $(".error-list").html("");
+            $('#labelsModal').modal('hide');
+            $('#labelsModal').one('hidden.bs.modal', (e) => {
+                const formData = $('#labelsForm').serialize();
+                $.post(serverContext + "labels/add", formData, function (data) {
+                    if(window.location.pathname.includes('/home')) {
+                        $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
+                        fetchProjects();
+                    }else if((window.location.pathname.includes('/project'))) {
+                        window.location.assign(window.location.pathname + '?message=message.project.success.update');
+                    }
+                }).fail(function (data) {
+                    if (data.responseJSON) {
+                        if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                            $("#errormsg").show().append(data.responseJSON.message);
+                        } else {
+                            $('#labelsModal').modal('show');
+                            const errors = $.parseJSON(data.responseJSON.message);
+                            $.each(errors, function (index, item) {
+                                if (item.field) {
+                                    $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                                } else {
+                                    $("#globalError").show().append(item.defaultMessage + "<br/>");
+                                }
+                            });
+                        }
+                    } else {
+                        $("#errormsg").show().append(`ERROR: ${data.status}`);
+                    }
+                });
+            });
+        }
+    </script>
+</div>

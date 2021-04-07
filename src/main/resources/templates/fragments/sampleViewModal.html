@@ -1,0 +1,834 @@
+<div th:fragment="sampleViewModal">
+    <div class="modal" id="sampleModal" tabindex="-1" aria-labelledby="sampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="sampleModalLabel" th:utext="#{sample.modal.title}">
+                        Modal title
+                    </h5>
+                    <span id="sampleDate" class="my-auto w-100 text-right">
+                    </span>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <ul id="sampleNav" class="nav nav-tabs">
+                    <li class="nav-item" id="tableTab">
+                        <button class="nav-link active btn btn-link" onclick="toggleView('table')"
+                                th:utext="#{sample.tab.table}">Table
+                        </button>
+                    </li>
+                    <li class="nav-item" id="chartTab">
+                        <button class="nav-link btn btn-link" onclick="toggleView('chart')"
+                                th:utext="#{sample.tab.chart}">Chart
+                        </button>
+                    </li>
+                    <li class="nav-item dropdown" id="statsTab">
+                        <button class="nav-link dropdown-toggle btn btn-link" data-toggle="dropdown" role="button"
+                                th:utext="#{sample.tab.stats}" aria-haspopup="true" aria-expanded="false">Statistics
+                        </button>
+                        <div class="dropdown-menu">
+                            <button class="dropdown-item btn btn-link" onclick="toggleView('statsUni')"
+                                    th:utext="#{sample.tab.stats.univariate}">Univariate
+                            </button>
+                            <button id="statsMultiBtn" class="dropdown-item btn btn-link"
+                                    onclick="toggleView('statsMulti')"
+                                    th:utext="#{sample.tab.stats.multivariate }" disabled>Multivariate
+                            </button>
+                        </div>
+                    </li>
+                </ul>
+                <div class="modal-body">
+                    <div class="table-responsive sampleTabContent" id="tableView">
+                        <div id="tableLoader" role="status" class="tabLoader spinner-grow text-primary">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <table id="sampleTable" class="table table-striped text-center">
+                            <thead class="thead-dark"></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="container-fluid sampleTabContent" id="chartView" style="display: none;">
+                        <div id="chartLoader" role="status" class="tabLoader spinner-grow text-primary">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div id="chartContent"></div>
+                    </div>
+                    <div class="table-responsive sampleTabContent" id="statsUniView" style="display: none;">
+                        <div id="statsUniLoader" role="status" class="tabLoader spinner-grow text-primary mx-auto">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <table id="statsUniTable" class="table table-striped text-center my-0">
+                            <thead class="thead-dark"></thead>
+                            <tbody></tbody>
+                        </table>
+                        <div id="plotLoader" role="status" style="margin-top:10%"
+                             class="tabLoader spinner-grow text-primary position-relative">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div id="plots" class="overflow-hidden"></div>
+                    </div>
+                    <div class="table-responsive sampleTabContent" id="statsMultiView" style="display: none;">
+                        <div id="statsMultiLoader" role="status" class="tabLoader spinner-grow text-primary mx-auto">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <table id="statsMultiTable" class="table table-striped text-center">
+                            <caption class="px-4"></caption>
+                            <thead class="thead-dark"></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="custom-control custom-switch mr-auto my-auto">
+                        <input type="checkbox" class="custom-control-input" id="normalizeSwitch">
+                        <label class="custom-control-label" for="normalizeSwitch"
+                               th:inline="text">
+                            [[#{sample.modal.normalize}]] [0, 1]
+                        </label>
+                    </div>
+                    <input type="text" id="sampleId" name="projectId" value="" hidden>
+                    <button id="reportBtn" class="btn btn-secondary" th:inline="text" onclick="generateReport()">
+                        [[#{sample.button.report.generate}]] &nbsp;
+                        <i class="fas fa-file-pdf"></i>
+                        <span id="reportSpinner" class="m-1 spinner-border spinner-border-sm" role="status"
+                              style="display: none" aria-hidden="true"></span>
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-info dropdown-toggle" id="exportMenuButton"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" th:inline="text">
+                            [[#{sample.button.export}]] &nbsp;
+                            <i class="fas fa-file-download"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="exportMenuButton">
+                            <button class="dropdown-item btn btn-link" th:utext="#{sample.modal.save.tooltip.csv}"
+                                    onclick="exportCSV()"></button>
+                            <button class="dropdown-item btn btn-link" th:utext="#{sample.modal.save.tooltip.txt}"
+                                    onclick="exportTXT()"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="reportChartContainer" class="d-none"></div>
+    </div>
+    <!--Plotly Language Config-->
+    <script src="https://cdn.plot.ly/plotly-locale-es-2.0.0-rc.0.js"></script>
+    <script>Plotly.setPlotConfig({locale: lang})</script>
+    <!--Sample Modal JS Functionalities-->
+    <script th:inline="javascript">
+        // Global variables to store retrieved sample data
+        let selectedSampleData = undefined;
+        let selectedSampleValues = undefined
+        let selectedSampleValuesNorm = undefined
+        let normalized = false;
+        let correlationMatrix = undefined;
+        const limit = 200; // table rows to render at once
+        $(document).ready(function () {
+            $("#normalizeSwitch").change(() => toggleDataNormalization());
+            $(".tabLoader").hide();
+        });
+
+        function addRows(offset) {
+            const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
+            const newLimit = limit + offset;
+            for (let index1 = offset; index1 < selectedSampleData.size && index1 < newLimit; index1++) {
+                const newRow = $("<tr></tr>");
+                $(newRow).append(`<th scope="row">${(index1 + 1)}</th>`);
+                selectedSampleData.dataChannels.forEach((channel, index2) => {
+                    const newCell = $(`<td>${data[index2][index1]}</td>`);
+                    $(newRow).append(newCell);
+                });
+                $("#sampleTable tbody").append(newRow);
+            }
+        }
+
+        function toggleDataNormalization() {
+            normalized = !normalized;
+            if (normalized && !selectedSampleValuesNorm) {
+                normalizeValues();
+            }
+            $("#sampleTable thead").empty();
+            $("#sampleTable tbody").empty();
+            $("#chartContent").empty();
+            renderSampleData(selectedSampleData.id);
+            const currentViewId = $("#sampleNav .nav-link.active").closest("li.nav-item").attr("id");
+            switch (currentViewId) {
+                case 'tableTab':
+                    toggleView('table');
+                    break;
+                case 'chartTab':
+                    toggleView('chart');
+                    break;
+                case 'statsTab':
+                    toggleView('statsUni');
+                    break;
+            }
+        }
+
+        function normalizeValues() {
+            selectedSampleValuesNorm = [];
+            selectedSampleValues.forEach((channel) => {
+                selectedSampleValuesNorm.push(normalizeZeroToOne(channel));
+            })
+        }
+
+        async function toggleView(view) {
+            switch (view) {
+                case 'table':
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#tableTab button.nav-link").addClass("active");
+                    $(".sampleTabContent").hide();
+                    $("#tableLoader").show();
+                    if (!$('#sampleTable tbody').children().length) {
+                        renderSampleData(selectedSampleData.id);
+                    }
+                    $("#tableView").show({
+                        done: () => {
+                            $("#tableLoader").hide();
+                        }
+                    });
+                    break;
+                case 'chart':
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#chartTab button.nav-link").addClass("active");
+                    $(".sampleTabContent").hide();
+                    $("#chartLoader").show();
+                    $("#chartView").show({
+                        done: () => {
+                            if (!$("#chartContent").children().length) {
+                                drawChart();
+                            } else {
+                                $("#chartLoader").hide();
+                            }
+                        }
+                    });
+                    break;
+                case 'statsUni':
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#statsTab button.nav-link").addClass("active");
+                    $(".sampleTabContent").hide();
+                    $("#statsUniView").show({
+                        done: () => {
+                            $("#statsUniLoader").show();
+                            loadUnivariateStatistics();
+                            $("#statsUniLoader").hide({
+                                done: () => {
+                                    if (!$("#plots").children().length) {
+                                        $("#plotLoader").show({
+                                            done: () => {
+                                                plotChannels().then((gd) => {
+                                                    $("#plotLoader").hide();
+                                                });
+                                            }
+                                        });
+                                    } else {
+                                        Plotly.Plots.resize(document.getElementById("plots"));
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    break;
+                case 'statsMulti':
+                    $("#sampleNav li.nav-item button.nav-link").removeClass("active");
+                    $("#statsTab button.nav-link").addClass("active");
+                    $(".sampleTabContent").hide();
+                    $("#statsMultiView").show({
+                        done: () => {
+                            if (!$("#statsMultiTable tbody").children().length) {
+                                $("#statsMultiLoader").show();
+                                loadMultivariateStatistics();
+                                $("#statsMultiLoader").hide();
+                            }
+                        }
+                    });
+                    break;
+            }
+        }
+
+        function loadUnivariateStatistics() {
+            if (selectedSampleData) {
+                if (!selectedSampleData.statsGenerated) {
+                    $("#statsUniLoader").show();
+                    generateStatistics(selectedSampleData.id);
+                } else if ($("#statsUniTable tbody").children().length === 0) {
+                    selectedSampleData.dataChannels.forEach((c, i) => {
+                        if (i === 0) {
+                            const statNames = Object.keys(c.statistics);
+                            const headerRow = $("<tr></tr>");
+                            const chName = $(`<th scope="col">${[[#{sample.table.channel}]]}</th>`);
+                            $(headerRow).append(chName);
+                            statNames.forEach((k) => {
+                                const cell = $(`<th scope="col">${k}</th>`);
+                                $(headerRow).append(cell);
+                            });
+                            $("#statsUniTable thead").append(headerRow);
+                        }
+                        const row = $("<tr></tr>");
+                        const ch = $(`<th scope="row">${c.channelName} ${c.channelLabel ? '[' + c.channelLabel + ']' : ''}</th>`);
+                        $(row).append(ch);
+                        const stats = Object.values(c.statistics);
+                        stats.forEach((v) => {
+                            const stat = $(`<td>${isNaN(v) ? v : v.toPrecision(6)}</td>`);
+                            $(row).append(stat);
+                        });
+                        $("#statsUniTable tbody").append(row);
+                    });
+                }
+            } else {
+                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+            }
+        }
+
+        function loadMultivariateStatistics() {
+            if (selectedSampleData) {
+                if (!correlationMatrix) {
+                    correlationMatrix = calculateCorrelations(selectedSampleValues);
+                }
+                if ($("#statsMultiTable tbody").children().length === 0) {
+                    $("#statsMultiTable caption").text(htmlDecode([[#{sample.stats.correlation}]]));
+
+                    selectedSampleData.dataChannels.forEach((c, i) => {
+                        if (i === 0) {
+                            const headerRow = $("<tr></tr>");
+                            $(headerRow).append($(`<th scope="col">${[[#{sample.table.channel}]]}</th>`));
+                            selectedSampleData.dataChannels.forEach((ch, j) => {
+                                const cell = $(`<th scope="col">${ch.channelName}</th>`);
+                                $(headerRow).append(cell);
+                            });
+                            $("#statsMultiTable thead").append(headerRow);
+                        }
+                        const row = $("<tr></tr>");
+                        const ch = $(`<th scope="row">${c.channelName}</th>`);
+                        $(row).append(ch);
+                        correlationMatrix[i].forEach((v) => {
+                            const correlation = $(`<td>${v ?? '-'}</td>`);
+                            $(row).append(correlation);
+                        });
+                        $("#statsMultiTable tbody").append(row);
+                    });
+                }
+            }
+        }
+
+        function renderSampleData(sampleId) {
+            if (selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))
+                && selectedSampleData.id === sampleId) {
+                const role = [[${role}]];
+                const deleteBtnExists = $("#deleteSampleBtn").length > 0;
+                if (role === 'owner' && !deleteBtnExists) {
+                    const deleteBtn = `<span id="deleteSampleBtn" class='d-flex align-self-center ml-3'>
+                    <button class="btn btn-danger btn-sm my-auto" onclick='deleteSample(${sampleId})'>
+                        <i class="fas fa-trash"></i>
+                    </button></span>`;
+                    $("#sampleModal .modal-title").after(deleteBtn);
+                }
+                $("#sampleDate").empty();
+                const date = (new Date(selectedSampleData.sampleDate)).toLocaleDateString();
+                $("#sampleDate").append(`<i class="fas fa-calendar-day"></i> ${date}`)
+
+                const headerRow = $("<tr></tr>");
+                $(headerRow).append(`<th scope="col">#</th>`);
+
+                selectedSampleData?.dataChannels?.forEach((c) => {
+                    let channelInfo = '';
+                    channelInfo += "<ul class='list-unstyled'>";
+                    channelInfo += `<li><strong>${htmlDecode([[#{sample.channel.resolution}]])}</strong> ${c.resolution
+                        ? c.resolution : 'N/A'}</li>`;
+                    channelInfo += `<li><strong>${[[#{sample.channel.type.ad}]]}</strong> ${c.digital
+                        ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]]}</li>`;
+                    channelInfo += `<li><strong>${[[#{sample.channel.type.io}]]}</strong> ${c.input
+                        ? [[#{sample.channel.input}]] : [[#{sample.channel.output}]]}</li>`;
+                    channelInfo += `<li><strong>Sensor:</strong> ${c.sensor.name ?? 'N/A'}</li>`;
+                    channelInfo += `<li><strong>Sensor(alias):</strong> ${c.sensor.alias ?? 'RAW'}</li>`;
+                    channelInfo += "</ul>";
+
+                    $(headerRow).append(`<th data-toggle="tooltip" data-placement="left" data-html="true"
+                title="${channelInfo}" scope="col">${c.channelName} ${c.channelLabel ? '[' + c.channelLabel + ']' : ''}</th>`);
+                });
+
+                $("#sampleTable thead").append(headerRow);
+
+                const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
+                for (let index1 = 0; index1 < selectedSampleData.size && index1 < limit; index1++) {
+                    const newRow = $("<tr></tr>");
+                    $(newRow).append(`<th scope="row">${(index1 + 1)}</th>`);
+                    selectedSampleData.dataChannels.forEach((channel, index2) => {
+                        const newCell = $(`<td>${data[index2][index1]}</td>`);
+                        $(newRow).append(newCell);
+                    });
+                    $("#sampleTable tbody").append(newRow);
+                }
+                $('[data-toggle="tooltip"]').tooltip();
+                $("#sampleModalLabel").children().remove();
+                $("#sampleModalLabel").append(`<span>&nbsp;#${sampleId}</span>`);
+                $("#sampleId").val(sampleId);
+                $("#sampleModal").modal('show');
+
+                $('#sampleModal .modal-body').scroll(function () {
+                    if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                        const offset = $('#sampleTable tbody').children().toArray().length;
+                        addRows(offset);
+                    }
+                });
+            } else {
+                $("#errormsg").show().html([[#{message.error.operation}]]);
+            }
+        }
+
+        async function generateStatistics(sampleId, report) {
+            $.ajax({
+                type: 'GET',
+                url: serverContext + 'sample/statistics/' + sampleId,
+                success: (data) => {
+                    selectedSampleData = data.sample;
+                    if (!report) {
+                        loadUnivariateStatistics();
+                        fetchSamples();
+                        $("#statsUniLoader").hide();
+                    } else {
+                        generateReport();
+                    }
+                },
+                error: (data) => {
+                    $("#statsUniLoader").hide();
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
+        }
+
+        google.charts.load('current', {'packages': ['corechart']});
+
+        function drawChart() {
+            if (selectedSampleData && (selectedSampleValues || (normalized && selectedSampleValuesNorm))) {
+                const dataTable = new google.visualization.DataTable();
+                dataTable.addColumn('number', htmlDecode([[#{sample.table.column.id}]]));
+
+                selectedSampleData.dataChannels.forEach((c) => {
+                    dataTable.addColumn('number', c.channelName);
+                });
+
+                const data = normalized ? selectedSampleValuesNorm : selectedSampleValues;
+
+                data[0].forEach((r, index1) => {
+                    const row = [index1 + 1];
+                    selectedSampleData.dataChannels.forEach((c, index2) => {
+                        row.push(Number.parseFloat(data[index2][index1]));
+                    })
+                    dataTable.addRow(row);
+                });
+
+                const options = {
+                    chart: {
+                        title: '',
+                        subtitle: '',
+                    },
+                    chartArea: {
+                        width: '83%',
+                        height: '75%',
+                    },
+                    height: 500,
+                    width: '100%',
+                    hAxis: {title: htmlDecode([[#{sample.table.column.id}]]), gridlines: {count: -1}},
+                    explorer: {axis: 'horizontal', maxZoomIn: calculateZoom(selectedSampleData.size)},
+                };
+                const chart = new google.visualization.LineChart(document.getElementById("chartContent"));
+                google.visualization.events.addListener(chart, 'ready', () => {
+                    $("#chartLoader").hide();
+                });
+                chart.draw(dataTable, options);
+            }
+        }
+
+        function calculateZoom(size) {
+            const value = Math.round(log3(size)) - 1;
+            return Math.pow(2, value);
+        }
+
+        function log3(val) {
+            return Math.log(val) / Math.log(3);
+        }
+
+        function exportCSV() {
+            if (selectedSampleData && selectedSampleValues) {
+                if (!selectedSampleValuesNorm) {
+                    normalizeValues();
+                }
+                let date = new Date();
+                let sRate = selectedSampleData.samplingRate;
+                let timeIncrement = (1 / sRate) * 1000;
+
+
+                let csv = `"seq","timestamp",`;
+
+                selectedSampleData.dataChannels.forEach((c, i) => {
+                    csv += `"${c.channelName}${c.channelLabel ? '[' + c.channelLabel + ']' : ''}",`;
+                    csv += `"${c.channelName}${c.channelLabel ? '[' + c.channelLabel + ']' : ''}_norm",`;
+                });
+
+                csv = csv.slice(0, -1);
+                csv += "\n";
+
+
+                for (let i = 0; i < selectedSampleData.size; i++) {
+                    date = new Date(date.getTime() + timeIncrement);
+                    let month = (date.getMonth() + 1).toString().padStart(2, 0);
+                    let day = date.getDate().toString().padStart(2, 0);
+                    let hours = date.getHours().toString().padStart(2, 0);
+                    let minutes = date.getMinutes().toString().padStart(2, 0);
+                    let seconds = date.getSeconds().toString().padStart(2, 0);
+                    csv += `${i + 1},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}"`;
+
+                    for (let j = 0; j < selectedSampleData.dataChannels.length; j++) {
+                        csv += "," + selectedSampleValues[j][i];
+                        csv += "," + selectedSampleValuesNorm[j][i];
+                    }
+                    csv += "\n";
+                }
+
+                const blob = new Blob([csv],
+                    {type: "text/plain;charset=ascii"});
+
+                let filename = "data_" + selectedSampleData.deviceName + "_" + date.getTime() + ".csv";
+
+                saveAs(blob, filename);
+            }
+        }
+
+        function exportTXT() {
+            if (selectedSampleData && selectedSampleValues) {
+                const date = new Date();
+                const columns = ['nSeq'];
+                const channels = []
+                const labels = [];
+                const sensors = [];
+                const resolutions = [4];
+
+                selectedSampleData.dataChannels.forEach((c, i) => {
+                    sensors.push(c.sensor.alias ?? 'RAW');
+                    columns.push(c.channelName ?? `A${i}`);
+                    labels.push(c.channelLabel ?? `A${i}`);
+                    channels.push(c.channelName ? parseInt(c.channelName.charAt(c.channelName.length - 1)) : i + 1);
+                    resolutions.push(c.resolution ?? 10);
+                });
+
+                let txt = '# OpenSignals Text File Format\n';
+                const header = {
+                    [selectedSampleData.deviceName]: {
+                        sensor: sensors,
+                        'device name': selectedSampleData.deviceName,
+                        column: columns,
+                        'sync interval': 2,
+                        comments: selectedSampleData.comments,
+                        'device connection': selectedSampleData.deviceName,
+                        channels: channels,
+                        date: selectedSampleData.sampleDate,
+                        mode: 0,
+                        'firmware version': selectedSampleData.deviceFirmware,
+                        device: selectedSampleData.deviceModel ?? 'bitalino_rev',
+                        position: 0,
+                        'sampling rate': selectedSampleData.samplingRate,
+                        label: labels,
+                        resolution: resolutions,
+                    }
+                };
+                txt += '# ' + JSON.stringify(header);
+                txt += '\n' + "# EndOfHeader";
+                let aux = 0;
+                for (let i = 0; i < selectedSampleData.size; i++) {
+                    txt += "\n";
+                    txt += aux++;
+                    for (let j = 0; j < selectedSampleData.dataChannels.length; j++) {
+                        txt += "\t" + selectedSampleValues[j][i];
+                    }
+                    aux = aux === 16 ? 0 : aux;
+                }
+
+                const blob = new Blob([txt],
+                    {type: "text/plain;charset=ascii"});
+
+                let filename = "opensignals_" + selectedSampleData.deviceName + "_" + date.getTime() + ".txt";
+
+                saveAs(blob, filename);
+            }
+        }
+
+        async function plotChannels() {
+            if (selectedSampleData && selectedSampleValues) {
+                if (!selectedSampleValuesNorm) {
+                    normalizeValues();
+                }
+                const data = [];
+                selectedSampleData.dataChannels?.forEach((c, i) => {
+                    const trace = {
+                        y: selectedSampleValuesNorm[i],
+                        type: 'box',
+                        name: c.channelName,
+                        boxpoints: 'suspectedoutliers',
+                        jitter: 0.5,
+                        whiskerwidth: 0.2,
+                        fillcolor: 'cls',
+                        marker: {
+                            outliercolor: 'rgba(219, 64, 82, 0.6)',
+                            line: {
+                                outliercolor: 'rgba(219, 64, 82, 1.0)',
+                                outlierwidth: 2
+                            }
+                        },
+                    };
+                    data.push(trace);
+                });
+                const layout = {
+                    title: 'Box Plot',
+                    yaxis: {
+                        showgrid: true,
+                        zeroline: false,
+                    },
+                    margin: {
+                        l: 40,
+                        r: 40,
+                        b: 40,
+                        t: 80
+                    },
+                    paper_bgcolor: 'rgb(243, 243, 243)',
+                    plot_bgcolor: 'rgb(243, 243, 243)',
+                    showlegend: true,
+                };
+                const config = {responsive: true};
+                return Plotly.newPlot('plots', data, layout, config);
+            }
+        }
+
+        async function channelToChart(index) {
+            const val = {x: [], y: []};
+            selectedSampleValuesNorm[index].forEach((v, i) => {
+                val.x.push(i);
+                val.y.push(v);
+            });
+            const trace1 = {
+                x: val.x,
+                y: val.y,
+                mode: 'lines',
+                connectgaps: true
+            };
+
+            const data = [trace1];
+
+            const layout = {
+                title: selectedSampleData.dataChannels[index].channelName,
+                yaxis: {
+                    showgrid: true,
+                    zeroline: false,
+                },
+                margin: {
+                    l: 30,
+                    r: 20,
+                    b: 20,
+                    t: 40
+                },
+                paper_bgcolor: 'rgb(243, 243, 243)',
+                plot_bgcolor: 'rgb(243, 243, 243)',
+                showlegend: false,
+            };
+            const config = {responsive: true};
+            return Plotly.newPlot('reportChartContainer', data, layout, config);
+        }
+
+        async function generateReport() {
+            if (selectedSampleData && selectedSampleValues) {
+                if(!selectedSampleValuesNorm) {
+                    normalizeValues();
+                }
+                if (!selectedSampleData.statsGenerated) {
+                    generateStatistics(selectedSampleData.id, true);
+                } else {
+                    $("#reportBtn i").hide();
+                    $("#reportSpinner").show();
+                    const date = new Date();
+                    let content = `<div class="text-monospace">`;
+                    // Report info
+                    content += `<h2 class="text-center mb-4" style="text-decoration: underline">${[[#{report.sample.report.title}]]}</h2>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    const creationDateLabel = htmlDecode([[#{report.sample.report.date}]]);
+                    const createdBy = htmlDecode([[#{report.sample.report.creator}]]);
+                    const creator = htmlDecode([[${#authentication.getPrincipal().getUsername()}]]);
+                    content += `<span class="d-flex">${creationDateLabel} ${date.toLocaleString()}</span>`;
+                    content += `<span class="d-flex">${createdBy} ${creator}</span></p><hr/>`;
+                    // Project info
+                    const project = [[${project}]];
+                    content += `<h3>${[[#{report.sample.project.title}]]}</h3>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">${[[#{table.project.column.name}]]}: ${project.name}</span>`;
+                    const projectDescLabel = htmlDecode([[#{table.project.column.description}]]);
+                    content += `<span class="d-flex">${projectDescLabel}: ${project.description}</span></p>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">#Id: ${project.id}</span>`;
+                    const projectDateLabel = htmlDecode([[#{table.project.column.date}]]);
+                    const projectDate = new Date(project.startDate);
+                    content += `<span class="d-flex">${projectDateLabel}: ${projectDate.toLocaleString()}</span>`;
+                    content += `<span class="d-flex">${[[#{table.project.column.role.owner}]]}: ${project.user.username}</span></p><hr/>`;
+                    // Subject info
+                    if (project.subject) {
+                        const subject = project.subject;
+                        content += `<h3>${[[#{report.sample.subject.title}]]}</h3>`;
+                        const subjectGenderLabel = [[#{label.form.subject.gender}]];
+                        content += `<p class="d-flex justify-content-between">`;
+                        content += `<span class="d-flex">${subjectGenderLabel}&nbsp;<span class="text-uppercase">${subject.gender}</span></span>`;
+                        const subjectAge = calculateAge(new Date(subject.birthDate));
+                        content += `<span class="d-flex">${[[#{label.form.subject.age}]]} ${subjectAge}</span>`;
+                        const subjectSmoker = subject.smoker ? [[#{label.yes}]] : [[#{label.no}]];
+                        content += `<span class="d-flex">${[[#{label.form.subject.smoker}]]}: ${subjectSmoker}</span></p>`;
+                        content += `<p class="d-flex justify-content-between">`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.weight}]]} ${subject.weight}</span>`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.bmi}]]} ${subject.bmi}</span>`;
+                        content += `<p class="d-flex justify-content-between">`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.height}]]} ${subject.height}</span>`;
+                        content += `<span class="d-flex">${[[#{label.form.subject.bfp}]]} ${subject.bfp}</span></p><hr/>`;
+                    }
+                    // Sample info
+                    content += `<h3>${[[#{sample.modal.title}]]}</h3>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">#Id: ${selectedSampleData.id}</span>`;
+                    const sampleDate = new Date(selectedSampleData.sampleDate);
+                    content += `<span class="d-flex">${[[#{table.sample.column.date}]]}: ${sampleDate.toLocaleString()}</span>`;
+                    const sampleSizeLabel = htmlDecode([[#{table.sample.column.size}]]);
+                    content += `<span class="d-flex">${sampleSizeLabel}: ${selectedSampleData.size}</span></p>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">${[[#{table.sample.column.channels}]]}: ${selectedSampleData.dataChannels.length}</span>`;
+                    content += `<span class="d-flex">${[[#{sample.label.samplingRate}]]} ${selectedSampleData.samplingRate}</span>`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.comments}]]} ${selectedSampleData.comments}</span></p>`;
+                    content += `<h5>${[[#{table.sample.column.device}]]}</h5>`;
+                    content += `<p class="d-flex justify-content-between">`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.device.name}]]} ${selectedSampleData.deviceName}</span>`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.device.model}]]} ${selectedSampleData.deviceModel}</span>`;
+                    content += `<span class="d-flex">${[[#{table.sample.tooltip.device.firmware}]]} ${selectedSampleData.deviceFirmware}</span></p><hr/>`;
+
+                    // Channel info
+                    for (const c of selectedSampleData.dataChannels) {
+                        let i = selectedSampleData.dataChannels.indexOf(c);
+                        let chart = await channelToChart(i).then((gd) => {
+                            return gd;
+                        });
+                        await Plotly.toImage(chart, {format: 'png', height: 230, width: 600})
+                            .then((url) => {
+                                    content += `<h4>${[[#{sample.table.channel}]]}: `;
+                                    content += `${c.channelName} ${c.channelLabel ? '[' + c.channelLabel + ']' : ''}</h4>`;
+                                    content += `<p class="d-flex justify-content-between">`;
+                                    content += `<span class="d-flex">${[[#{sample.channel.resolution}]]} ${c.resolution}</span>`;
+                                    const io = c.input ? [[#{sample.channel.input}]] : [[#{sample.channel.output}]];
+                                    content += `<span class="d-flex">${[[#{sample.channel.type.io}]]} ${io}</span>`;
+                                    const ad = c.digital ? [[#{sample.channel.digital}]] : [[#{sample.channel.analog}]];
+                                    content += `<span class="d-flex">${[[#{sample.channel.type.ad}]]} ${ad}</span></p>`;
+                                    content += `<h5>${[[#{report.sample.sensor.title}]]}</h5>`;
+                                    content += `<p class="d-flex justify-content-between">`;
+                                    content += `<span class="d-flex">${[[#{label.sensor.alias}]]} ${c.sensor.alias}</span>`;
+                                    content += `<span class="d-flex">${[[#{label.sensor.name}]]} ${c.sensor.name}</span>`;
+                                    content += `<span class="d-flex">${[[#{label.sensor.description}]]} ${c.sensor.description}</span></p>`;
+                                    content += `<div class="d-flex justify-content-center ${i % 2 === 0 ? 'break-after' : ''}">`;
+                                    console.log($(`<img src='${url}'/>`));
+                                    content += `<img src="${url}" /></div><br/><hr/>`
+                                }
+                            );
+                    }
+                    // Sample stats
+                    content += `<h3>${[[#{sample.tab.stats}]]}</h3>`;
+                    // Stats uni
+                    content += `<h4>${[[#{sample.tab.stats.univariate}]]}</h4>`;
+                    const breakPage = selectedSampleData.dataChannels.length % 2 === 0 ? 'break-after': '';
+                    let statsUniTable = `<table class="table table-striped break-avoid ${breakPage}"><thead>`;
+                    const classCenter = 'text-center align-middle';
+                    selectedSampleData.dataChannels.forEach((c, i) => {
+                        if (i === 0) {
+                            const statNames = Object.keys(c.statistics);
+                            let headerRow = "<tr>";
+                            const chName = `<th class="${classCenter}" scope="col">${[[#{sample.table.channel}]]}</th>`;
+                            headerRow += chName;
+                            statNames.forEach((k) => {
+                                const cell = `<th class="${classCenter}" scope="col">${k}</th>`;
+                                headerRow += cell;
+                            });
+                            statsUniTable += headerRow + '</tr></thead><tbody></tbody>';
+                        }
+                        let row = '<tr>';
+                        const ch = `<th class="${classCenter}" scope="row">${c.channelName}</th>`;
+                        row += ch;
+                        const stats = Object.values(c.statistics);
+                        stats.forEach((v) => {
+                            const stat = `<td class="${classCenter}">${isNaN(v) ? v : v.toPrecision(6)}</td>`;
+                            row += stat;
+                        });
+                        statsUniTable += row + '</tr>';
+                    });
+                    content += statsUniTable + '</tbody></table><hr/>';
+                    let plot;
+                    if (!$("#plots").children().length) {
+                        plot = await plotChannels().then((gd) => {
+                            $("#plotLoader").hide();
+                            return gd;
+                        });
+                    } else {
+                        plot = document.getElementById("plots");
+                    }
+                    await Plotly.toImage(plot, {format: 'png', height: 300, width: 600})
+                        .then((url) => {
+                                content += `<div class="d-flex justify-content-center break-avoid"><img src="${url}" /></div><hr/>`;
+                            }
+                        );
+                    if (selectedSampleData.dataChannels.length > 1) {
+                        // Stats multi
+                        if (!correlationMatrix) {
+                            correlationMatrix = calculateCorrelations(selectedSampleValues);
+                        }
+                        content += `<h4>${[[#{sample.tab.stats.multivariate}]]}</h4>`;
+                        const tableCaption = htmlDecode([[#{sample.stats.correlation}]]);
+                        let statsMultiTable = `<table class="table table-striped break-avoid"><caption>${tableCaption}</caption><thead>`;
+                        selectedSampleData.dataChannels.forEach((c, i) => {
+                            if (i === 0) {
+                                let headerRow = '<tr>';
+                                headerRow += `<th class="${classCenter}" scope="col">${[[#{sample.table.channel}]]}</th>`;
+                                selectedSampleData.dataChannels.forEach((ch, j) => {
+                                    const cell = `<th class="${classCenter}" scope="col">${ch.channelName}</th>`;
+                                    headerRow += cell;
+                                });
+                                statsMultiTable += headerRow + '</tr></thead><tbody></tbody>';
+                            }
+                            let row = '<tr>';
+                            const ch = `<th class="${classCenter}" scope="row">${c.channelName}</th>`;
+                            row += ch;
+                            correlationMatrix[i].forEach((v) => {
+                                const correlation = `<td class="${classCenter}">${v ?? '-'}</td>`;
+                                row += correlation;
+                            });
+                            statsMultiTable += row + '</tr>';
+                        });
+                        content += statsMultiTable + '</tbody></table><hr/>';
+                    }
+                    content += '</div>';
+                    html2pdf().set({
+                        margin: 12,
+                        filename: `report_sample_${selectedSampleData.id}_${date.getTime()}.pdf`,
+                        pagebreak: {mode: 'css', before: '.break-before', after: '.break-after', avoid: '.break-avoid'},
+                        image: {type: 'jpeg', quality: 1},
+                        html2canvas: {scale: 2, logging: true},
+                    }).from(content).toPdf().get('pdf').then(function (pdf) {
+                        const totalPages = pdf.internal.getNumberOfPages();
+                        const page = htmlDecode([[#{report.sample.page}]]);
+                        for (let i = 1; i <= totalPages; i++) {
+                            pdf.setPage(i);
+                            pdf.setFontSize(10);
+                            pdf.setTextColor(150);
+                            pdf.text(`${page} ${i} / ${totalPages}`, pdf.internal.pageSize.getWidth() - 110,
+                                pdf.internal.pageSize.getHeight() - 5);
+                        }
+                        window.open(pdf.output('bloburl'), '_blank');
+                        $("#reportSpinner").hide();
+                        $("#reportBtn i").show();
+                        endLoad();
+                    });
+                }
+            }
+        }
+
+    </script>
+</div>
