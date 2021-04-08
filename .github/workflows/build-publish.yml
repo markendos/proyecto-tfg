@@ -15,9 +15,9 @@ jobs:
         with:
           java-version: 11
       #- name: Maven Test
-      #  run: mvn -B -Dmailsecret=" clean test
+      #  run: mvn -B clean test
       - name: Maven Verify
-        run: mvn -B -Pprod "-Dmailsecret=${{ secrets.GOOGLE_APP_PASSWORD }}" clean verify -DskipTests
+        run: mvn -B -Pprod clean verify -DskipTests
   artifact:
     name: Publish Artifact 
     runs-on: ubuntu-latest
@@ -32,7 +32,7 @@ jobs:
           java-version: 11
       - 
         name: Publish artifact on GitHub Packages
-        run: mvn -B -Pprod "-Dmailsecret=${{ secrets.GOOGLE_APP_PASSWORD }}" clean deploy -DskipTests
+        run: mvn -B -Pprod clean deploy -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
   docker:
