@@ -180,6 +180,7 @@
 			<id>dev</id>
 			<properties>
 				<activatedProperties>dev</activatedProperties>
+				<mailsecret>${mailsecret}</mailsecret>
 			</properties>
 			<activation>
 				<activeByDefault>true</activeByDefault>
@@ -189,6 +190,7 @@
 			<id>prod</id>
 			<properties>
 				<activatedProperties>prod</activatedProperties>
+				<mailsecret>${mailsecret}</mailsecret>
 			</properties>
 		</profile>
 	</profiles>
