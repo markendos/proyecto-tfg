@@ -6,7 +6,7 @@ on:
     branches: [ pre ]
 jobs:
   build:
-    name: Test, package
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
       #- name: Maven Test
       #  run: mvn -B clean test
       - name: Maven Verify
-        run: mvn -B -Pprod "-Dmailkey=${{ secrets.GOOGLE_APP_PASSWORD }}" clean verify -DskipTests   
+        run: mvn -B -Pprod clean verify -DskipTests   
   docker:
     name: Publish Docker Image
     runs-on: ubuntu-latest
@@ -36,8 +36,6 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.DOCKER_REPO }}
-          secrets: |
-            "gmail_key=${{ secrets.GOOGLE_APP_PASSWORD }}"
       -   
         name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
