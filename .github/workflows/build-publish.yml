@@ -17,7 +17,7 @@ jobs:
       #- name: Maven Test
       #  run: mvn -B -Dmailsecret=" clean test
       - name: Maven Verify
-        run: mvn -B -Pprod -Dmailsecret=${{ secrets.GOOGLE_APP_PASSWORD }}" clean verify -DskipTests
+        run: mvn -B -Pprod "-Dmailsecret=${{ secrets.GOOGLE_APP_PASSWORD }}" clean verify -DskipTests
   artifact:
     name: Publish Artifact 
     runs-on: ubuntu-latest
