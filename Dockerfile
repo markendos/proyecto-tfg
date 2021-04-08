@@ -2,6 +2,8 @@ FROM maven:3.6.3-openjdk-11-slim AS MAVEN_ENV
 WORKDIR /build/
 COPY pom.xml /build
 COPY src /build/src
+RUN --mount=type=secret,id=gmail_key \
+  cat /run/secrets/gmail_key
 RUN mvn -Pprod clean package -DskipTests=true
 
 FROM openjdk:11-jre-slim
