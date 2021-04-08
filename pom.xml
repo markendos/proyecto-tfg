@@ -189,7 +189,6 @@
 			<id>prod</id>
 			<properties>
 				<activatedProperties>prod</activatedProperties>
-				<mailkey>${mailkey}</mailkey>
 			</properties>
 		</profile>
 	</profiles>
