@@ -183,17 +183,26 @@
     }
 
     function handleRoleChange(element) {
-        let data = {"user": element.id, "role": element.options[element.selectedIndex].value};
+        const role = element.options[element.selectedIndex].value
+        let data = {user: element.id, role: role};
         $.ajax({
             url: `${serverContext}admin/user/role`,
             type: 'PUT',
             contentType: "application/json",
             data: JSON.stringify(data),
             success: (data) => {
-                alert('SUCCESS: The operation was performed');
+                $("#successmsg").show().html(/*[[#{message.success.operation}]]*/);
             },
             error: (data) => {
-                alert("ERROR: Could not perform the operation");
+                $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                switch(role) {
+                    case 'user':
+                        $(element).val('admin');
+                        break;
+                    case 'admin':
+                        $(element).val('user');
+                        break;
+                }
             }
         });
     }
@@ -229,7 +238,7 @@
                 .map(user => user.ip ? {...user, status: 'Online'} : {...user, status: 'Offline'});
             drawUsersTable(users);
         }).fail(function (data) {
-            alert("ERROR: Could not fetch data");
+            alert([[#{alert.data.error}]]);
             endLoad();
         });
     }
@@ -242,7 +251,7 @@
             const sensors = data.all;
             drawSensorsTable(sensors);
         }).fail(function (data) {
-            alert("ERROR: Could not fetch data");
+            alert([[#{alert.data.error}]]);
             endLoad();
         });
     }
