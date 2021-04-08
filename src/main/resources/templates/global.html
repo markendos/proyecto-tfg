@@ -146,7 +146,7 @@
             }));
             drawProjectsTable(projects);
         }).fail(function (data) {
-            alert("ERROR: Could not fetch data");
+            alert([[#{alert.data.error}]]);
             endLoad();
         });
     }
