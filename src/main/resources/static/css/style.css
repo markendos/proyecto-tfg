@@ -537,6 +537,10 @@ caption {
     box-shadow: 5px 0px 0px 0px #00ad5f inset;
 }
 
+#dataTable tbody ul {
+    margin: 0;
+}
+
 /***** Sample Modal *****/
 
 #sampleModal .sampleTabContent {
