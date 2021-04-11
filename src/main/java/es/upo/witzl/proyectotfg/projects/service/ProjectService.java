@@ -59,11 +59,6 @@ public class ProjectService implements IProjectService{
     }
 
     @Override
-    public void saveProject(Project project) {
-
-    }
-
-    @Override
     public void assignLabels(Collection<String> labels, Project project) {
         Collection<Label> projectLabels = new ArrayList<>();
         if(labels != null) {
