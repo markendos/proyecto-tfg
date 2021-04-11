@@ -6,7 +6,7 @@ on:
     branches: [ pre ]
 jobs:
   build:
-    name: Test, package
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -17,28 +17,11 @@ jobs:
       #- name: Maven Test
       #  run: mvn -B clean test
       - name: Maven Verify
-        run: mvn -B -Pprod clean verify -DskipTests
-  artifact:
-    name: Publish Artifact 
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - 
-        uses: actions/checkout@v2
-      - 
-        name: Set up JDK
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - 
-        name: Publish artifact on GitHub Packages
-        run: mvn -B -Pprod clean deploy -DskipTests
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}          
+        run: mvn -B -Pprod clean verify -DskipTests   
   docker:
     name: Publish Docker Image
     runs-on: ubuntu-latest
-    needs: [build, artifact]
+    needs: [build]
     steps:
       -
         name: Login to Docker Hub
@@ -59,7 +42,7 @@ jobs:
   automerge:
     name: Automerge
     runs-on: ubuntu-latest
-    needs: [build, artifact, docker]
+    needs: [build, docker]
     steps:      
       - name: Automerge
         uses: "pascalgn/automerge-action@v0.13.1"
