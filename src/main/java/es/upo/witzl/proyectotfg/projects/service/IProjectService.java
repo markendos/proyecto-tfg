@@ -24,8 +24,6 @@ public interface IProjectService {
 
     List<Project> getForeignProjects(User user);
 
-    void saveProject(Project project);
-
     void assignLabels(Collection<String> labels, Project project);
 
     void deleteProject(Project project);
