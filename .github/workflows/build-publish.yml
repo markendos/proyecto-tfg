@@ -14,8 +14,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      #- name: Maven Test
-      #  run: mvn -B clean test
+      - name: Maven Test
+        run: mvn -B -Ptest test
       - name: Maven Verify
         run: mvn -B -Pprod clean verify -DskipTests   
   docker:
