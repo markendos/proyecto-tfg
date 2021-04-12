@@ -112,9 +112,7 @@
         </div>
         <div id="reportChartContainer" class="d-none"></div>
     </div>
-    <!--Plotly Language Config-->
-    <script src="https://cdn.plot.ly/plotly-locale-es-2.0.0-rc.0.js"></script>
-    <script>Plotly.setPlotConfig({locale: lang})</script>
+
     <!--Sample Modal JS Functionalities-->
     <script th:inline="javascript">
         // Global variables to store retrieved sample data
@@ -270,7 +268,7 @@
                         $(row).append(ch);
                         const stats = Object.values(c.statistics);
                         stats.forEach((v) => {
-                            const stat = $(`<td>${isNaN(v) ? v : v.toPrecision(6)}</td>`);
+                            const stat = $(`<td>${isNaN(v) ? v : v.toFixed(4)}</td>`);
                             $(row).append(stat);
                         });
                         $("#statsUniTable tbody").append(row);
@@ -755,7 +753,7 @@
                         row += ch;
                         const stats = Object.values(c.statistics);
                         stats.forEach((v) => {
-                            const stat = `<td class="${classCenter}">${isNaN(v) ? v : v.toPrecision(6)}</td>`;
+                            const stat = `<td class="${classCenter}">${isNaN(v) ? v : v.toFixed(4)}</td>`;
                             row += stat;
                         });
                         statsUniTable += row + '</tr>';

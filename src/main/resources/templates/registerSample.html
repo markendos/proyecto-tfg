@@ -122,7 +122,7 @@
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
-    <div th:replace="fragments/userSidebar :: userSidebar"></div>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
 
     <!--Main Section Container-->
     <main id="content" role="main" class="col pr-0 pl-2">
@@ -716,7 +716,9 @@
         }
         const limit = 200;
         const offset = parseInt(sampledData.length / limit);
-        dataTable.addRows(sampledData.slice(offset * limit))
+        sampledData.slice(offset * limit).forEach((r) => {
+            dataTable.addRow([ sampledData.indexOf(r), ...r ]);
+        });
 
         const options = {
             chart: {
@@ -901,7 +903,7 @@
     function normalizeValue(value, bits) {
         const min = 0;
         const max = Math.pow(2, Number.parseInt(bits));
-        return ((value - min) / (max - min)).toPrecision(6);
+        return ((value - min) / (max - min)).toFixed(4);
     }
 
     function saveOpenSignalsData(date) {
