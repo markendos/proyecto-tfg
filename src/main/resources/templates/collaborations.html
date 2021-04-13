@@ -120,7 +120,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
                     <li class="breadcrumb-item active" aria-current="page"
-                        th:utext="#{user.project.menu.myprojects}"></li>
+                        th:utext="#{user.project.menu.collaboratedprojects}"></li>
                 </ol>
             </nav>
             <div class="btn-toolbar mb-2 mb-md-0">
@@ -155,15 +155,6 @@
         fetchProjects();
     });
 
-    const renderProjectActions = (data, type, row) => {
-        const deleteOpt = `<option class="text-danger" value="delete">${[[#{table.project.option.delete}]]}</option>`;
-        return `<select id="project-${row.id}" class="form-control" onChange="handleProjectAction(this)">
-                    <option value="" disabled selected>${[[#{table.select.option.default}]]}</option>
-                    <option value="labels">${[[#{table.project.option.labels}]]}</option>
-                    ${deleteOpt}
-                </select>`;
-    };
-
     const renderProjectLabels = (data, type, row) => {
         let labels = '';
         if(data.length) {
@@ -179,14 +170,11 @@
     };
 
     const renderSubjectActions = (data, type, row) => {
-        const viewBtn = `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: 'owner'}))}"
+        const viewBtn = `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: 'collaborator'}))}"
                          onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? '' : 'disabled'}
                          data-toggle="tooltip" data-placement="top" title="${[[#{table.column.action.view}]]}">
                          <i class="fas fa-eye"></i></button>`;
-        const registerBtn = `<button class="btn btn-sm btn-primary" onclick="registerSubject(${row.id})"
-                            data-toggle="tooltip" data-placement="top" title="${[[#{table.project.option.subject}]]}">
-                            <i class="fas fa-user-plus"></i></button>`
-        return row.subject ? viewBtn : registerBtn;
+        return row.subject ? viewBtn : 'N/A';
     };
 
     function drawProjectsTable(projects) {
@@ -228,7 +216,6 @@
                     {title: [[#{table.project.column.date}]], data: "startDate"},
                     {title: [[#{table.project.column.samples}]], data: "numSamples"},
                     {title: [[#{table.project.column.labels}]], data: "labels", render: renderProjectLabels},
-                    {title: [[#{table.project.column.actions}]], render: renderProjectActions},
                 ],
                 retrieve: true,
                 language: {
@@ -260,8 +247,8 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "project/all", function (data) {
-            const projects = data.owned;
+        $.get(serverContext + "project/collaborations", function (data) {
+            const projects = data.auth;
             drawProjectsTable(projects);
         }).fail(function (data) {
             alert([[#{alert.data.error}]]);

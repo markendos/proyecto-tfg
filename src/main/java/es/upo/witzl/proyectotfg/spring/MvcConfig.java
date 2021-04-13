@@ -40,6 +40,7 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/").setViewName("redirect:/login");
         registry.addViewController("/badUser");
         registry.addViewController("/changePassword");
+        registry.addViewController("/collaborations");
         registry.addViewController("/console");
         registry.addViewController("/emailError");
         registry.addViewController("/error");

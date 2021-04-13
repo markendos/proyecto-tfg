@@ -82,3 +82,18 @@ function endLoad() {
     $("#dataTable_wrapper").show();
     loadingData = false;
 }
+
+function setActiveMenuOption(role) {
+    let menuOpt;
+    switch (role) {
+        case 'owner':
+            menuOpt = $("#ownedProjectsOpt");
+            break;
+        case 'collaborator':
+            menuOpt = $("#collaboratedProjectsOpt");
+            break;
+    }
+    if (menuOpt) {
+        $(menuOpt).addClass('active');
+    }
+}

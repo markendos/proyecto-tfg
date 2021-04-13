@@ -138,8 +138,11 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
                         <a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
-                    <li class="breadcrumb-item">
+                    <li class="breadcrumb-item" th:if="${role} == 'owner'">
                         <a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a>
+                    </li>
+                    <li class="breadcrumb-item" th:if="${role} == 'collaborator'">
+                        <a th:href="@{/collaborations}" th:utext="#{user.project.menu.collaboratedprojects}"></a>
                     </li>
                     <li class="breadcrumb-item">
                         <a th:href="@{/project/{id}(id=${project.id})}"
@@ -281,6 +284,10 @@
 <!--JS Utilities-->
 <script th:inline="javascript">
     $(document).ready(function () {
+        const role = [[${role}]];
+        if (role) {
+            setActiveMenuOption(role);
+        }
         $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
