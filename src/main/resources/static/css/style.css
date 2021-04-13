@@ -531,6 +531,10 @@ th, td {
     padding-left: 10px;
 }
 
+i.fa-info-circle:hover {
+    cursor: help !important;
+}
+
 /***** DataValue Tables *****/
 #dataTable_wrapper > div:nth-child(2) > div {
     overflow-x: auto;

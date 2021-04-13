@@ -175,6 +175,10 @@
                 <span id="status" class="disconnected my-auto mx-2"
                       th:utext="#{sample.device.status.disconnected}">
                 </span>
+                <div id="bitalinoSchematicContainer" class="d-flex align-items-center mx-4">
+                    <i class="schema-icon fas fa-microchip"></i>
+                    <img id="bitalinoSchematic" alt="bitalino schematic" th:src="@{/resources/images/bitalino_map.png}" />
+                </div>
                 <div class="custom-file w-25 ml-auto">
                     <input type="file" class="custom-file-input" id="sampleFile" accept=".txt">
                     <label class="custom-file-label" for="sampleFile" th:utext="#{sample.file.upload}"
@@ -288,6 +292,12 @@
         if (role) {
             setActiveMenuOption(role);
         }
+        $("#bitalinoSchematicContainer").mouseenter(function () {
+            $("#bitalinoSchematic").show();
+        });
+        $("#bitalinoSchematicContainer").mouseleave(function () {
+            $("#bitalinoSchematic").hide();
+        });
         $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
