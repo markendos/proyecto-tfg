@@ -35,10 +35,7 @@ public class SensorController {
             Optional<Sensor> sensorOptional = sensorService.getSensorById(sensorDto.getId());
             if(sensorOptional.isPresent()) {
                 Sensor sensor = sensorOptional.get();
-                sensor.setName(sensorDto.getName());
-                sensor.setAlias(sensorDto.getAlias());
-                sensor.setDescription(sensorDto.getDescription());
-                sensorService.saveSensor(sensor);
+                sensorService.updateSensor(sensor, sensorDto);
                 message = "updated";
             } else {
                 return ResponseEntity.notFound().build();

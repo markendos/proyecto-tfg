@@ -87,7 +87,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="text" name="id" id="id" value="" hidden>
+                    <input type="text" name="id" id="sensorId" hidden>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                             th:utext="#{label.form.cancel}">
                         cancel
@@ -180,7 +180,7 @@
         $("#name").val(data.name);
         $("#alias").val(data.alias);
         $("#description").val(data.description);
-        $("#id").val(data.id);
+        $("#sensorId").val(data.id);
         $("#sensorModal").modal('show');
     }
 

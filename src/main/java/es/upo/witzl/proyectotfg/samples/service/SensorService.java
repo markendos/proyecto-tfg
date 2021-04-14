@@ -33,6 +33,31 @@ public class SensorService implements ISensorService {
     }
 
     @Override
+    public Sensor updateSensor(Sensor sensor, SensorDto sensorDto) {
+        Optional<Sensor> sensorOptional = sensorRepository.findByAlias(sensorDto.getAlias());
+        Sensor s;
+        if(sensorOptional.isPresent()) {
+            s = sensorOptional.get();
+            if(!s.equals(sensor)) {
+                throw new SensorAlreadyExistsException("There is a sensor registered with that name and/or alias");
+            }
+        }
+        sensorOptional = sensorRepository.findByName(sensorDto.getName());
+        if(sensorOptional.isPresent()) {
+            s = sensorOptional.get();
+            if(!s.equals(sensor)) {
+                throw new SensorAlreadyExistsException("There is a sensor registered with that name and/or alias");
+            }
+        }
+        sensor.setAlias(sensorDto.getAlias());
+        sensor.setName(sensorDto.getName());
+        sensor.setDescription(sensorDto.getDescription());
+
+        return sensorRepository.save(sensor);
+    }
+
+
+    @Override
     public Optional<Sensor> getSensorById(Long id) {
         return sensorRepository.findById(id);
     }

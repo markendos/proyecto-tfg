@@ -64,7 +64,39 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         createUserIfNotFound("user2@test.com", "User2", "u$er2", userRole);
 
         // create initial sensors
-        createSensorIfNotFound("Default", "RAW", "Generic sensor");
+        createSensorIfNotFound("Default Sensor", "RAW", "Generic sensor");
+        createSensorIfNotFound("Electromyography Sensor", "EMG",
+                "Purpose-built sensor for muscle activity measurement.");
+        createSensorIfNotFound("Electroencephalography Sensor", "EEG",
+                "Purpose-built sensor for brain activity measurement");
+        createSensorIfNotFound("Electrocardiography Sensor", "ECG",
+                "Purpose-built sensor to measure the electrical activity of the heart");
+        createSensorIfNotFound("Electrodermal Activity Sensor", "EDA",
+                "Purpose-built sensor to measure the changes in skin conductance resulting from the sympathetic" +
+                        " nervous system activity.");
+        createSensorIfNotFound("Accelerometer Sensor", "ACC",
+                "3-axis accelerometer for motion measurement.");
+        createSensorIfNotFound("Temperature Sensor", "TMP",
+                "Calibrated multi-purpose sensor for basic body and environmental temperature measurement.");
+        createSensorIfNotFound("Electrooculography Sensor", "EOG",
+                "Purpose-built sensor for corneo-retinal standing potential activity measurement.");
+        createSensorIfNotFound("Electrogastrography Sensor", "EGG", "Purpose-built sensor for gastric " +
+                "activity measurement.");
+        createSensorIfNotFound("Respiration Sensor", "PZT",
+                "Easy-to-use sensor for measurement of respiratory cycles, complete with interface cable and " +
+                        "an adjustable elastic fastening strap.");
+        createSensorIfNotFound("FlexiForce Sensor", "FSR",
+                "Ultra-thin and flexible piezoresistive sensor, specifically designed for force and pressure " +
+                        "measurement.");
+        createSensorIfNotFound("Blood Pressure Reader", "BPR",
+                "User-friendly cuff-based wrist blood pressure monitor with plug & play interface for real-time " +
+                        "data recording with BITalino.");
+        createSensorIfNotFound("SpO2 Reader", "OSL",
+                "User-friendly finger clip sensor for SpO2 and heart rate monitoring; works as a standalone " +
+                        "device or connected to BITalino for real-time data recording.");
+        createSensorIfNotFound("Glucose Meter Reader", "GMR",
+                "User-friendly glucose meter; works as a standalone device or connected to BITalino for " +
+                        "real-time data recording, and includes all the accessories to get started.");
 
         alreadySetup = true;
     }

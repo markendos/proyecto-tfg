@@ -107,14 +107,6 @@ public class ProjectServiceIntegrationTest {
     }
 
     @Test
-    public void whenGetOwnedProjectsOfUser_thenOwnedProjectListShouldBeReturned() {
-        Long id = Long.parseLong("-1");
-
-        Optional<Project> foundOpt = projectService.getProjectById(id);
-        assertFalse(foundOpt.isPresent());
-    }
-
-    @Test
     public void whenGetForeignProjectsOfUser_thenForeignProjectListShouldBeReturned() {
         List<Project> foreignProjects = projectService.getForeignProjects(testUser);
 

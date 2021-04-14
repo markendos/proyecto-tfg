@@ -11,6 +11,8 @@ public interface ISensorService {
 
     Sensor registerNewSensor(SensorDto sensorDto) throws SensorAlreadyExistsException;
 
+    Sensor updateSensor(Sensor sensor, SensorDto sensorDto);
+
     Optional<Sensor> getSensorById(Long id);
 
     Optional<Sensor> getSensorByName(String name);

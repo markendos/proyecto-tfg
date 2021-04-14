@@ -805,7 +805,8 @@
                             || (imported?.sensors?.[i] === sensor.alias)) {
                             selected = true;
                         }
-                        let opt = $(`<option value="${sensor.id}" ${selected ? 'selected' : ''}>${sensor.alias}</option>`);
+                        let opt = $(`<option value="${sensor.id}" ${selected ? 'selected' : ''} title="${sensor.name}">
+                                    ${sensor.alias}</option>`);
                         $(sensorSelector).append(opt);
                     });
                     $(col).append(sensorSelector);
