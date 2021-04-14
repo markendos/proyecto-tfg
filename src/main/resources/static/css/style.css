@@ -42,6 +42,10 @@ body {
     margin-left: 1.5rem;
 }
 
+#notificationContainer {
+    width: 100px;
+}
+
 i.notification {
     font-size: larger;
 }
@@ -65,7 +69,6 @@ i.notification {
     border-radius: 5px;
     padding: 1em;
     font-size: 14px;
-    margin-left: -170px;
 }
 
 #notificationsPanel > a:hover{
