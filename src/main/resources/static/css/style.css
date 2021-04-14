@@ -243,6 +243,7 @@ li.userProfile {
     border: none;
     border-radius: 0;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    padding: .5rem 2rem .5rem 1rem;
 }
 
 .navbar-btn {
@@ -568,7 +569,6 @@ caption {
 }
 
 /***** Sample Modal *****/
-
 #sampleModal .sampleTabContent {
     min-height: 60vh;
 }

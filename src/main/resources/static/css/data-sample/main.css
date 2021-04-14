@@ -149,7 +149,7 @@ th, td {
 }
 
 .table100-head th {
-  padding: 18px 0;
+  padding: 1.5% 0;
   border-radius: 5px;
 }
 
@@ -183,7 +183,6 @@ th, td {
 .table100.ver3 th {
   font-size: 15px;
   color: #00ad5f;
-  line-height: 1.7;
   text-transform: uppercase;
   background-color: #343a40;
 }
