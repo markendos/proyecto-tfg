@@ -22,6 +22,7 @@ i.schema-icon:hover {
 #bitalinoSchematic {
   position: absolute;
   overflow: auto;
+  width: 50%;
   max-width: 450px;
   z-index: 9;
   display: flex;
@@ -33,6 +34,7 @@ i.schema-icon:hover {
   align-self: end;
   margin: 40px;
   background-color: white;
+  margin-left: -15%;
 }
 
 .disconnected {

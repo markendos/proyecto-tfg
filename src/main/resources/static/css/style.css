@@ -28,6 +28,16 @@ body {
     max-height: 50px;
 }
 
+#logo-link {
+    margin: -1rem 0;
+}
+
+#nav-logo {
+    max-width: 250px;
+    max-height: 50px;
+    padding: 0.3rem;
+}
+
 #topnav li.nav-item {
     margin-left: 1.5rem;
 }
@@ -55,6 +65,7 @@ i.notification {
     border-radius: 5px;
     padding: 1em;
     font-size: 14px;
+    margin-left: -170px;
 }
 
 #notificationsPanel > a:hover{
