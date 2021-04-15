@@ -6,6 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Copy docker-comopse
+      uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
