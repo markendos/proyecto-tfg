@@ -63,7 +63,7 @@ jobs:
           deployment_mode: docker-compose
           copy_stack_file: true
           deploy_path: ./web-app/proyecto-tfg
-          stack_file_name: docker-compose.yml
+          stack_file_name: docker-compose.yaml
           args: up -d
           docker_prune: 'false'
           pull_images_first: 'true'
