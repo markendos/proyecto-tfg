@@ -12,7 +12,7 @@ jobs:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
-        source: "./docker-compose.yml"
+        source: "docker-compose.yml"
         target: "/home/mwitzl/web-app/proyecto-tfg-deploy/"    
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
