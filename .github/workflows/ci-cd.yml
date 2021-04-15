@@ -49,3 +49,21 @@ jobs:
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           MERGE_LABELS: ""
+  deploy:
+    name: Docker Deploy
+    runs-on: ubuntu-latest
+    needs: [build, docker, automerge]
+    steps:
+      - name: Deploy to Docker Host
+        uses: wshihadeh/docker-deployment-action@v1
+        with:
+          remote_docker_host: ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}
+          ssh_private_key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+          ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
+          deployment_mode: docker-compose
+          copy_stack_file: true
+          deploy_path: ./web-app/proyecto-tfg
+          stack_file_name: docker-compose.yaml
+          args: up -d
+          docker_prune: 'false'
+          pull_images_first: 'true'
