@@ -59,9 +59,9 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         final Role userRole = createRoleIfNotFound("ROLE_USER", userPrivileges);
 
         // create initial users
-        createUserIfNotFound("admin@test.com", "Admin", "admin", adminRole);
-        createUserIfNotFound("user1@test.com", "User1", "u$er1", userRole);
-        createUserIfNotFound("user2@test.com", "User2", "u$er2", userRole);
+        createUserIfNotFound("admin@mg.tfg-mwd.me", "Admin", "qE9P)<r-mtFz!QQ4", adminRole);
+        createUserIfNotFound("user1@mg.tfg-mwd.me", "User1", ":F(7t@Q=J&Sng8=8", userRole);
+        createUserIfNotFound("user2@mg.tfg-mwd.me", "User2", "BnW[CVh%T<gk%8gK", userRole);
 
         // create initial sensors
         createSensorIfNotFound("Default Sensor", "RAW", "Generic sensor");
