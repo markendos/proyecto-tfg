@@ -58,7 +58,7 @@
                     <div id="notificationsPanel" class="row" style="display: none"></div>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/logout}" th:inline="text" onclick="signOut()">
+                    <a id="logoutLink" class="nav-link" th:href="@{/logout}" th:inline="text" onclick="signOut()">
                         <i class="fas fa-sign-out-alt"></i>
                         [[#{label.pages.logout}]]
                     </a>
