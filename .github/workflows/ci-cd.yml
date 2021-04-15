@@ -55,6 +55,7 @@ jobs:
     needs: [build, docker, automerge]
     steps:
     - uses: actions/checkout@v2
+    
     - name: Copy latest docker-compose file to remote server
       uses: garygrossgarten/github-action-scp@release
       with:
@@ -63,6 +64,15 @@ jobs:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         privateKey : ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        
+    - name: Copy latest net configuration script to remote server
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        local: scripts/net-config.sh
+        remote: web-app/proyecto-tfg-deploy/net-config.sh
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        privateKey : ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}        
     - name: Pull latest docker images and restart services
       uses: appleboy/ssh-action@master
       with:
@@ -73,5 +83,7 @@ jobs:
             cd web-app/proyecto-tfg-deploy
             docker-compose pull
             docker-compose up -d
+            chmod 774 net-config.sh
+            ./net-config.sh
             exit
 
