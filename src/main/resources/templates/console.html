@@ -2,6 +2,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/png" th:href="@{/resources/images/favicon.png}"/>
     <title>Console</title>
     <link rel="stylesheet" href="/resources/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/resources/css/style.css"/>
@@ -85,7 +87,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="text" name="id" id="id" value="" hidden>
+                    <input type="text" name="id" id="sensorId" hidden>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                             th:utext="#{label.form.cancel}">
                         cancel
@@ -99,10 +101,10 @@
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
-    <div th:replace="fragments/adminSidebar :: adminSidebar"></div>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
 
     <!--Main Section Container-->
-    <main id="content" role="main" class="col pr-0 pl-2">
+    <main id="content" role="main" class="col px-3">
         <div class="container-fluid px-0 d-flex">
             <button type="button" id="sidebarCollapse" class="btn btn-light mt-2">
                 <i class="fas fa-align-left"></i>
@@ -178,7 +180,7 @@
         $("#name").val(data.name);
         $("#alias").val(data.alias);
         $("#description").val(data.description);
-        $("#id").val(data.id);
+        $("#sensorId").val(data.id);
         $("#sensorModal").modal('show');
     }
 
@@ -268,7 +270,7 @@
             let datatable = new $.fn.dataTable.Api('#dataTable');
             datatable.clear();
             datatable.rows.add(sensors);
-            datatable.draw();
+            datatable.columns.adjust().draw();
         }
         //ELSE, create datatable
         else {
@@ -312,7 +314,7 @@
             let datatable = new $.fn.dataTable.Api('#dataTable');
             datatable.clear();
             datatable.rows.add(users);
-            datatable.draw();
+            datatable.columns.adjust().draw();
         }
         //ELSE, create datatable
         else {

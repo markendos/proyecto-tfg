@@ -2,11 +2,9 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" th:href="@{/resources/images/favicon.png}"/>
-    <title>Global</title>
+    <title>Home</title>
 
     <!-- Bootstrap4 CSS -->
     <link rel="stylesheet" type="text/css" href="/resources/css/bootstrap.min.css"/>
@@ -56,37 +54,55 @@
 <div id="successmsg" class="alert alert-success" style="display:none"></div>
 
 <!-- Project Registration Modal Form -->
-<div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
+<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="requestModalLabel" th:utext="#{label.pages.title.request.send}">Modal</h5>
+                <h5 class="modal-title" id="projectModalLabel" th:utext="#{label.pages.title.projects.create}">Modal
+                    title</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="#" method="POST" enctype="utf8" id="requestForm">
+            <form action="#" method="POST" enctype="utf8" id="projectForm">
                 <div class="modal-body">
-                    <div class="form-group row align-items-start">
-                        <div id="requestMessageError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="requestMessage" class="col-sm-3" th:utext="#{label.request.message}">message</label>
+                    <div class="form-group row">
+                        <div id="nameError" class="text-danger row col offset-3" style="display:none"></div>
+                        <label for="name" class="col-sm-3" th:utext="#{label.project.name}">name</label>
                         <div class="col-sm-9">
-                            <textarea id="requestMessage" class="form-control" name="requestMessage" rows="5"></textarea>
+                            <input id="name" class="form-control" name="name" type="text" value="" required/>
                         </div>
+                    </div>
+                    <div class="form-group row">
+                        <div id="descriptionError" class="text-danger row col offset-3" style="display:none"></div>
+                        <label for="description" class="col-sm-3 align-self-start"
+                               th:utext="#{label.project.description}">
+                            description
+                        </label>
+                        <div class="col-sm-9">
+                                <textarea id="description" maxlength="255" class="form-control" name="description"
+                                          rows="6" required></textarea>
+                        </div>
+                        <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="text" id="projectId" name="projectId" value="" hidden>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"
                             th:utext="#{label.form.cancel}">
                         cancel
                     </button>
-                    <button class="btn btn-primary" type="submit" th:utext="#{label.form.send}"></button>
+                    <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<!-- Project Labels Modal Form -->
+<div th:replace="fragments/labelsModal :: labelsModal"></div>
+
+<!-- Project Subject Modal Form -->
+<div th:replace="fragments/subjectModal :: subjectModal"></div>
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
@@ -106,9 +122,16 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
                     <li class="breadcrumb-item active" aria-current="page"
-                        th:utext="#{user.project.menu.globalprojects}"></li>
+                        th:utext="#{user.project.menu.collaboratedprojects}"></li>
                 </ol>
             </nav>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#projectModal"
+                        onclick="clearForm()">
+                    <span th:utext="#{label.pages.button.projects.add}"></span>
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </div>
         </div>
         <section>
             <div id="tableSpinner" class="custom-spinner spinner-border" role="status" style="display: none">
@@ -129,83 +152,32 @@
 
 <!--DataTables JS Functionalities-->
 <script th:inline="javascript">
-    let langUrl = '';
-
     $(document).ready(() => {
         startLoad();
         fetchProjects();
-        $('#requestForm').submit(function (event) {
-            sendCollaborationRequest(event);
-        });
     });
-
-    function fetchProjects() {
-        if (!loadingData) {
-            startLoad();
-        }
-        $.get(serverContext + "project/foreign", function (data) {
-            let projects = data.all.map(p => ({
-                ...p,
-                requested: data.requested.find((project) => (project.id === p.id) && project) ? true : false,
-            }));
-            drawProjectsTable(projects);
-        }).fail(function (data) {
-            alert([[#{alert.data.error}]]);
-            endLoad();
-        });
-    }
 
     const renderProjectLabels = (data, type, row) => {
         let labels = '';
-        for (let i = 0; i < data.length; i++) {
-            labels += `<span class="badge badge-pill badge-${getRandomColor()}">${data[i].name}</span>&nbsp;`;
+        if(data.length) {
+            labels += '<ul class="list-inline">';
+            for (let i = 0; i < data.length; i++) {
+                labels += `<li class="my-2 list-inline-item badge badge-pill badge-${getRandomColor()}">${data[i].name}</li>`;
+            }
+            labels += '</ul>';
+        } else {
+            labels = `<span class="text-center d-block">-</span>`;
         }
         return labels;
     };
 
-    const renderProjectActions = (data, type, row) => {
-        return `<span data-toggle="tooltip" data-placement="left"
-                title="${row.requested ? [[#{table.project.button.requested.tooltip}]]
-                : [[#{table.project.button.collaboration.tooltip}]]}">
-                <button id="project-${row.id}" type="button" class="btn btn-warning btn-sm" onclick="handleProjectAction(this)"
-                ${row.requested ? 'disabled' : ''}>
-                ${[[#{table.project.button.collaboration}]]}
-                <i class="fas fa-hands-helping"></i></button></span>`;
+    const renderSubjectActions = (data, type, row) => {
+        const viewBtn = `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: 'collaborator'}))}"
+                         onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? '' : 'disabled'}
+                         data-toggle="tooltip" data-placement="top" title="${[[#{table.column.action.view}]]}">
+                         <i class="fas fa-eye"></i></button>`;
+        return row.subject ? viewBtn : 'N/A';
     };
-
-    function handleProjectAction(element) {
-        const id = element.id.substring(element.id.indexOf('-') + 1);
-        $("#projectId").val(id);
-        $("#requestModal").modal('show');
-    }
-
-    function sendCollaborationRequest(event) {
-        event.preventDefault();
-        $(".alert").html("").hide();
-        $(".error-list").html("");
-        $('#requestModal').modal('hide');
-        $('#requestModal').one('hidden.bs.modal', (e) => {
-            const formData = $('#requestForm').serialize();
-            $.post(serverContext + "collaboration/request", formData, function (data) {
-                fetchProjects();
-                $("#successmsg").show().html(/*[[#{message.request.success}]]*/);
-            }).fail(function (data) {
-                if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                    $("#errormsg").show().append(data.responseJSON.message);
-                } else {
-                    $('#requestModal').modal('show');
-                    const errors = $.parseJSON(data.responseJSON.message);
-                    $.each(errors, function (index, item) {
-                        if (item.field) {
-                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                        } else {
-                            $("#globalError").show().append(item.defaultMessage + "<br/>");
-                        }
-                    });
-                }
-            });
-        });
-    }
 
     function drawProjectsTable(projects) {
         if (lang && lang === 'es') {
@@ -227,20 +199,27 @@
                 drawCallback: () => {
                     $('[data-toggle="tooltip"]').tooltip();
                     endLoad();
+                    const table = $('#dataTable').DataTable();
+                    $("#dataTable button, #dataTable select").click(function(event){
+                        event.stopPropagation();
+                    });
+                    $('#dataTable tbody tr').off().click((e) => {
+                        const data = table.row(e.currentTarget).data();
+                        goToProject(data.id);
+                    });
                 },
                 data: projects,
-                columnDefs: [
-                ],
+                columnDefs: [],
                 columns: [
                     {title: "#Id", data: "id"},
                     {title: [[#{table.project.column.name}]], data: "name"},
                     {title: [[#{table.project.column.description}]], data: "description"},
+                    {title: [[#{table.project.column.subject}]], data: "subject", render: renderSubjectActions},
                     {title: [[#{table.project.column.date}]], data: "startDate"},
                     {title: [[#{table.project.column.samples}]], data: "numSamples"},
-                    {title: [[#{table.project.column.role.owner}]], data: "user.username"},
                     {title: [[#{table.project.column.labels}]], data: "labels", render: renderProjectLabels},
-                    {title: [[#{table.project.column.actions}]], render: renderProjectActions},
                 ],
+                retrieve: true,
                 language: {
                     url: langUrl
                 },
@@ -249,4 +228,95 @@
         }
     }
 </script>
+
+<!--Project JS Functionalities-->
+<script th:inline="javascript">
+    $(document).ready(function () {
+        $('#projectForm').submit(function (event) {
+            saveProject(event);
+        });
+    });
+
+    function goToProject(projectId) {
+        window.location.href = serverContext + 'project/' + projectId;
+    }
+
+    function clearForm() {
+        $("#projectForm")[0].reset();
+    }
+
+    function fetchProjects() {
+        if (!loadingData) {
+            startLoad();
+        }
+        $.get(serverContext + "project/collaborations", function (data) {
+            const projects = data.auth;
+            drawProjectsTable(projects);
+        }).fail(function (data) {
+            alert([[#{alert.data.error}]]);
+            endLoad();
+        });
+    }
+
+    function handleProjectAction(element) {
+        const selectedOption = element.options[element.selectedIndex].value;
+        const id = element.id.substring(element.id.indexOf('-') + 1);
+        switch (selectedOption) {
+            case 'labels':
+                addOrRemoveLabels(id);
+                break;
+            case 'delete':
+                deleteProject(id);
+                break;
+        }
+        $(element).prop('selectedIndex', 0);
+    }
+
+    function deleteProject(projectId) {
+        if (confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
+            $.ajax({
+                type: 'DELETE',
+                url: serverContext + 'project/delete/' + projectId,
+                success: (data) => {
+                    $("#successmsg").show().html(/*[[#{message.project.success.delete}]]*/);
+                    fetchProjects();
+                },
+                error: (data) => {
+                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
+                }
+            });
+        }
+    }
+
+    function saveProject(event) {
+        event.preventDefault();
+        $(".alert").html("").hide();
+        $(".error-list").html("");
+        $('#projectModal').modal('hide');
+        $('#projectModal').one('hidden.bs.modal', (e) => {
+            const formData = $('#projectForm').serialize();
+            $.post(serverContext + "project/add", formData, function (data) {
+                fetchProjects();
+                $("#successmsg").show().html(/*[[#{message.project.success.create}]]*/);
+                addOrRemoveLabels(data.new.id);
+            }).fail(function (data) {
+                if (data.responseJSON.error.indexOf("InternalError") > -1) {
+                    $("#errormsg").show().append(data.responseJSON.message);
+                } else {
+                    $('#projectModal').modal('show');
+                    const errors = $.parseJSON(data.responseJSON.message);
+                    $.each(errors, function (index, item) {
+                        if (item.field) {
+                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
+                        } else {
+                            $("#globalError").show().append(item.defaultMessage + "<br/>");
+                        }
+                    });
+                }
+            });
+        });
+    }
+</script>
+
 </body>
+</html>

@@ -79,7 +79,6 @@ public class ProjectController {
             SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
             User user = userOptional.get();
             List<Project> ownedProjects = projectService.getOwnedProjects(user);
-            List<Project> authorizedProjects = projectService.getProjectsApproved(user);
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             HashMap aux = new HashMap();
@@ -87,6 +86,25 @@ public class ProjectController {
             if(ownedProjects != null) {
                 aux.put("owned", ownedProjects);
             }
+
+            return ResponseEntity.ok(mapper.writeValueAsString(aux));
+        }
+
+        return ResponseEntity.badRequest().build();
+    }
+
+    @GetMapping(value = "/project/collaborations", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity getCollaboratedProjects(final Authentication authentication) throws JsonProcessingException {
+        MyUserPrincipal principal = (MyUserPrincipal) authentication.getPrincipal();
+        Optional<User> userOptional = userService.getUserByEmail(principal.getEmail());
+
+        if(userOptional.isPresent()) {
+            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+            User user = userOptional.get();
+            List<Project> authorizedProjects = projectService.getProjectsApproved(user);
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setDateFormat(df);
+            HashMap aux = new HashMap();
 
             if(authorizedProjects != null) {
                 aux.put("auth", authorizedProjects);

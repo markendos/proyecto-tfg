@@ -2,6 +2,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/png" th:href="@{/resources/images/favicon.png}"/>
     <title>Home</title>
 
     <!-- Bootstrap4 CSS -->
@@ -104,10 +106,10 @@
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
-    <div th:replace="fragments/userSidebar :: userSidebar"></div>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
 
     <!--Main Section Container-->
-    <main id="content" role="main" class="col pr-0 pl-2">
+    <main id="content" role="main" class="col px-3">
         <div class="container-fluid px-0 d-flex">
             <button type="button" id="sidebarCollapse" class="btn btn-light mt-2">
                 <i class="fas fa-align-left"></i>
@@ -160,7 +162,7 @@
         return `<select id="project-${row.id}" class="form-control" onChange="handleProjectAction(this)">
                     <option value="" disabled selected>${[[#{table.select.option.default}]]}</option>
                     <option value="labels">${[[#{table.project.option.labels}]]}</option>
-                    ${row.role === 'owner' ? deleteOpt : ''}
+                    ${deleteOpt}
                 </select>`;
     };
 
@@ -178,21 +180,14 @@
         return labels;
     };
 
-    const renderProjectRole = (data, type, row) => {
-        const role = data === 'owner' ? /*[[#{table.project.column.role.owner}]]*/
-            : /*[[#{table.project.column.role.collaborator}]]*/;
-        return `<span>${role} ${data === 'owner' ? "<i class='fas fa-lock-open'></i>" : "<i class='fas fa-lock'></i>"}
-                </span>`;
-    };
-
     const renderSubjectActions = (data, type, row) => {
-        const viewBtn = `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: row.role}))}"
+        const viewBtn = `<button id="${utf8_to_b64(JSON.stringify({subject: {...data}, role: 'owner'}))}"
                          onclick="showSubjectForm(this)"class="btn btn-info btn-sm" ${row.subject ? '' : 'disabled'}
                          data-toggle="tooltip" data-placement="top" title="${[[#{table.column.action.view}]]}">
                          <i class="fas fa-eye"></i></button>`;
         const registerBtn = `<button class="btn btn-sm btn-primary" onclick="registerSubject(${row.id})"
-                            data-toggle="tooltip" data-placement="top" title="${[[#{table.project.option.subject}]]}"
-                            ${row.role !== 'owner' ? 'disabled' : ''}><i class="fas fa-user-plus"></i></button>`
+                            data-toggle="tooltip" data-placement="top" title="${[[#{table.project.option.subject}]]}">
+                            <i class="fas fa-user-plus"></i></button>`
         return row.subject ? viewBtn : registerBtn;
     };
 
@@ -208,7 +203,7 @@
             let datatable = new $.fn.dataTable.Api('#dataTable');
             datatable.clear();
             datatable.rows.add(projects);
-            datatable.draw();
+            datatable.columns.adjust().draw();
         }
         //ELSE, create datatable
         else {
@@ -235,7 +230,6 @@
                     {title: [[#{table.project.column.date}]], data: "startDate"},
                     {title: [[#{table.project.column.samples}]], data: "numSamples"},
                     {title: [[#{table.project.column.labels}]], data: "labels", render: renderProjectLabels},
-                    {title: [[#{table.project.column.role}]], data: "role", render: renderProjectRole},
                     {title: [[#{table.project.column.actions}]], render: renderProjectActions},
                 ],
                 retrieve: true,
@@ -269,9 +263,7 @@
             startLoad();
         }
         $.get(serverContext + "project/all", function (data) {
-            let owned = data.owned.map(p => true ? {...p, role: 'owner'} : {...p});
-            let auth = data.auth.map(p => true ? {...p, role: 'collaborator'} : {...p});
-            const projects = [...owned, ...auth];
+            const projects = data.owned;
             drawProjectsTable(projects);
         }).fail(function (data) {
             alert([[#{alert.data.error}]]);

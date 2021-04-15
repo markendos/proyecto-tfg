@@ -202,6 +202,7 @@ public class RequestController {
     }
 
     private String getAppUrl(HttpServletRequest request) {
-        return "https://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        return env.getProperty("web.protocol") + "://" + request.getServerName() + ":" + request.getServerPort() +
+                request.getContextPath();
     }
 }

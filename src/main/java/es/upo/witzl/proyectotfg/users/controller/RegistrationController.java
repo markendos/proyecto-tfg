@@ -242,7 +242,8 @@ public class RegistrationController {
     }
 
     private String getAppUrl(HttpServletRequest request) {
-        return "https://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        return env.getProperty("web.protocol") + "://" + request.getServerName() + ":" + request.getServerPort() +
+                request.getContextPath();
     }
 
     private String decodeBase64(String encoded) {
