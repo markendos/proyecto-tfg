@@ -13,7 +13,7 @@ jobs:
         remote: web-app/proyecto-tfg-deply/docker-compose
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
-        password: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        privateKey : ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
       with:
