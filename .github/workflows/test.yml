@@ -10,7 +10,7 @@ jobs:
       with:
         local: docker-compose.yml
         remote: web-app/proyecto-tfg-deploy/docker-compose.yml
-        host: ${{ secrets.REMOTE_HOSTT }}
+        host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         privateKey : ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}    
     - name: executing remote ssh commands using password
