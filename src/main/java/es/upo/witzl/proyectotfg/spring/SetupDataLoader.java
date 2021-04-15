@@ -62,7 +62,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         createUserIfNotFound("admin@mg.tfg-mwd.me", "Admin", "qE9P)<r-mtFz!QQ4", adminRole);
         createUserIfNotFound("user1@mg.tfg-mwd.me", "User1", ":F(7t@Q=J&Sng8=8", userRole);
         createUserIfNotFound("user2@mg.tfg-mwd.me", "User2", "BnW[CVh%T<gk%8gK", userRole);
-        createUserIfNotFound("admin@test.test", "Test Admin", "admin", userRole);
+        createUserIfNotFound("admin@test.test", "Test Admin", "admin", adminRole);
         createUserIfNotFound("user@test.test", "Test User", "user", userRole);
 
         // create initial sensors
