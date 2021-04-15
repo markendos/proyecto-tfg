@@ -6,13 +6,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Copy docker-comopse
-      uses: garygrossgarten/github-action-scp@release
       with:
-        local: docker-compose.yml
-        remote: web-app/proyecto-tfg-deploy/docker-compose.yml
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
-        privateKey : ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}    
+        key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+        source: "docker-compose.yml"
+        target: "web-app/proyecto-tfg-deploy/"    
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@master
       with:
