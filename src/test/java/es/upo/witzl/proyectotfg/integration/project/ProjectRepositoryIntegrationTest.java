@@ -2,7 +2,7 @@ package es.upo.witzl.proyectotfg.integration.project;
 
 import es.upo.witzl.proyectotfg.projects.model.Project;
 import es.upo.witzl.proyectotfg.projects.repository.ProjectRepository;
-import es.upo.witzl.proyectotfg.spring.PersistenceJPAConfig;
+import es.upo.witzl.proyectotfg.configuration.PersistenceJPAConfig;
 import es.upo.witzl.proyectotfg.users.model.User;
 import es.upo.witzl.proyectotfg.users.repository.PrivilegeRepository;
 import es.upo.witzl.proyectotfg.users.repository.RoleRepository;

@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.spring;
+package es.upo.witzl.proyectotfg.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

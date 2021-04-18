@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.spring;
+package es.upo.witzl.proyectotfg.configuration;
 
 import es.upo.witzl.proyectotfg.users.security.ActiveUserStore;
 import org.springframework.context.annotation.Bean;

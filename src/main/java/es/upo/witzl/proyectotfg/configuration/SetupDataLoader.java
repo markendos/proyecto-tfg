@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.spring;
+package es.upo.witzl.proyectotfg.configuration;
 
 import es.upo.witzl.proyectotfg.samples.model.Sensor;
 import es.upo.witzl.proyectotfg.samples.repository.SensorRepository;

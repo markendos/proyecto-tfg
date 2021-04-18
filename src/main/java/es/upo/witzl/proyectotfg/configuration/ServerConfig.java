@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.spring;
+package es.upo.witzl.proyectotfg.configuration;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.connector.Connector;
