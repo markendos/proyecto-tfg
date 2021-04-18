@@ -1,6 +1,6 @@
 package es.upo.witzl.proyectotfg.integration.user;
 
-import es.upo.witzl.proyectotfg.spring.PersistenceJPAConfig;
+import es.upo.witzl.proyectotfg.configuration.PersistenceJPAConfig;
 import es.upo.witzl.proyectotfg.users.model.Privilege;
 import es.upo.witzl.proyectotfg.users.model.Role;
 import es.upo.witzl.proyectotfg.users.model.User;

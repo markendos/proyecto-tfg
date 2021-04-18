@@ -734,7 +734,7 @@
                 dataTable.addColumn('number', 'A' + (i + 1));
             }
         }
-        const limit = 200;
+        const limit = 1000;
         const offset = parseInt(sampledData.length / limit);
         sampledData.slice(offset * limit).forEach((r) => {
             dataTable.addRow([ sampledData.indexOf(r), ...r ]);

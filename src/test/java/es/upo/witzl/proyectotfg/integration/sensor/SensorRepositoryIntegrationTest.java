@@ -2,7 +2,7 @@ package es.upo.witzl.proyectotfg.integration.sensor;
 
 import es.upo.witzl.proyectotfg.samples.model.Sensor;
 import es.upo.witzl.proyectotfg.samples.repository.SensorRepository;
-import es.upo.witzl.proyectotfg.spring.PersistenceJPAConfig;
+import es.upo.witzl.proyectotfg.configuration.PersistenceJPAConfig;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
