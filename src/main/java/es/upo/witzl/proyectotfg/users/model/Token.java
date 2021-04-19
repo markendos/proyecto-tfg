@@ -13,7 +13,7 @@ public abstract class Token {
     @Column(name = "user_id")
     private String id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     protected String token;
 
     @OneToOne
