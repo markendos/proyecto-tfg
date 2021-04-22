@@ -21,8 +21,6 @@ public interface ISensorService {
 
     List<Sensor> getSensors();
 
-    void saveSensor(Sensor sensor);
-
     boolean nameExists(String name);
 
     boolean aliasExists(String alias);

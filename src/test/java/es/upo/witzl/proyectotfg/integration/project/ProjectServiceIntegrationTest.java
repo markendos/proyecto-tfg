@@ -52,12 +52,14 @@ public class ProjectServiceIntegrationTest {
         User user1 = new User();
         user1.setEmail("testuser1@test.com");
         user1.setUsername("testuser1");
+        user1.setPassword("testpassword1");
 
         testUser = user1;
 
         User user2 = new User();
         user2.setEmail("testuser2@test.com");
         user2.setUsername("testuser2");
+        user2.setPassword("testpassword2");
 
         Project project1 = new Project();
         project1.setId(Long.parseLong("1"));

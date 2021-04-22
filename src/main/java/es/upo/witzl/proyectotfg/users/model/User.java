@@ -18,7 +18,7 @@ public class User{
     @Column(unique = true, nullable = false, length = 50)
     private String username;
 
-    @Column(length = 60)
+    @Column(length = 60, nullable = false)
     private String password;
 
     private boolean enabled;
