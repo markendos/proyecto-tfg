@@ -52,6 +52,7 @@ public class ProjectRepositoryIntegrationTest {
         User user = new User();
         user.setEmail("testuser@test.com");
         user.setUsername("testuser");
+        user.setPassword("testpassword");
 
         Project project = new Project();
         project.setName("project_name");

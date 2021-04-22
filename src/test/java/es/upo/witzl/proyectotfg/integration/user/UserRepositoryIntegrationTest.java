@@ -60,6 +60,7 @@ public class UserRepositoryIntegrationTest {
         User user = new User();
         user.setEmail("testuser@test.com");
         user.setUsername("testuser");
+        user.setPassword("testpassword");
         user.setRole(userRole);
 
         userRepository.save(user);
