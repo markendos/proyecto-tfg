@@ -78,11 +78,6 @@ public class SensorService implements ISensorService {
     }
 
     @Override
-    public void saveSensor(final Sensor sensor) {
-        sensorRepository.save(sensor);
-    }
-
-    @Override
     public boolean nameExists(final String name) {
         return sensorRepository.findByName(name).isPresent();
     }

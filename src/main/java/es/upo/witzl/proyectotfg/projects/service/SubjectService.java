@@ -77,7 +77,7 @@ public class SubjectService implements ISubjectService {
         return diff;
     }
 
-    public static Calendar getCalendar(Date date) {
+    private Calendar getCalendar(Date date) {
         Calendar cal = Calendar.getInstance(Locale.getDefault());
         cal.setTime(date);
         return cal;

@@ -1,5 +1,7 @@
 package es.upo.witzl.proyectotfg.configuration;
 
+import es.upo.witzl.proyectotfg.projects.model.Project;
+import es.upo.witzl.proyectotfg.projects.repository.ProjectRepository;
 import es.upo.witzl.proyectotfg.samples.model.Sensor;
 import es.upo.witzl.proyectotfg.samples.repository.SensorRepository;
 import es.upo.witzl.proyectotfg.users.model.Privilege;
@@ -38,6 +40,9 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
     @Autowired
     private SensorRepository sensorRepository;
 
+    @Autowired
+    private ProjectRepository projectRepository;
+
     // API
 
     @Override
@@ -62,8 +67,11 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         createUserIfNotFound("admin@mg.tfg-mwd.me", "Admin", "qE9P)<r-mtFz!QQ4", adminRole);
         createUserIfNotFound("user1@mg.tfg-mwd.me", "User1", ":F(7t@Q=J&Sng8=8", userRole);
         createUserIfNotFound("user2@mg.tfg-mwd.me", "User2", "BnW[CVh%T<gk%8gK", userRole);
-        createUserIfNotFound("admin@test.test", "Test Admin", "admin", adminRole);
-        createUserIfNotFound("user@test.test", "Test User", "user", userRole);
+
+        // create test data
+        createUserIfNotFound("admin@test.test", "Test Admin", "pDkD2SsjtUgq7RMk", adminRole);
+        User testUser = createUserIfNotFound("user@test.test", "Test User", "5QbPsdkz65nfXWVe", userRole);
+        createProjectIfNotFound("test name", "test description", testUser);
 
         // create initial sensors
         createSensorIfNotFound("Default Sensor", "RAW", "Generic sensor");
@@ -137,6 +145,23 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         user.setRole(role);
         user = userRepository.save(user);
         return user;
+    }
+
+    @Transactional
+    Project createProjectIfNotFound(final String name, final String description, final User user) {
+        Project project;
+        if (user.getOwnedProjects() == null || user.getOwnedProjects().isEmpty()) {
+            project = new Project();
+            project.setName(name);
+            project.setDescription(description);
+            project.setStartDate(new Date());
+            project.setUser(user);
+        } else {
+            List<Project> projects = (List)user.getOwnedProjects();
+            project = projects.get(0);
+        }
+        project = projectRepository.save(project);
+        return project;
     }
 
     @Transactional
