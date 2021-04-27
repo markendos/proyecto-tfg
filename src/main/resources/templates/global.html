@@ -55,7 +55,7 @@
 <div id="errormsg" class="alert alert-danger" style="display:none"></div>
 <div id="successmsg" class="alert alert-success" style="display:none"></div>
 
-<!-- Project Registration Modal Form -->
+<!-- Project Collaboration Request Modal Form -->
 <div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -175,6 +175,7 @@
 
     function handleProjectAction(element) {
         const id = element.id.substring(element.id.indexOf('-') + 1);
+        $("#requestForm")[0].reset();
         $("#projectId").val(id);
         $("#requestModal").modal('show');
     }
