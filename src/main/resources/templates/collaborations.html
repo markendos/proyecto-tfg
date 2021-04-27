@@ -53,51 +53,6 @@
 <div id="errormsg" class="alert alert-danger" style="display:none"></div>
 <div id="successmsg" class="alert alert-success" style="display:none"></div>
 
-<!-- Project Registration Modal Form -->
-<div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="projectModalLabel" th:utext="#{label.pages.title.projects.create}">Modal
-                    title</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="#" method="POST" enctype="utf8" id="projectForm">
-                <div class="modal-body">
-                    <div class="form-group row">
-                        <div id="nameError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="name" class="col-sm-3" th:utext="#{label.project.name}">name</label>
-                        <div class="col-sm-9">
-                            <input id="name" class="form-control" name="name" type="text" value="" required/>
-                        </div>
-                    </div>
-                    <div class="form-group row">
-                        <div id="descriptionError" class="text-danger row col offset-3" style="display:none"></div>
-                        <label for="description" class="col-sm-3 align-self-start"
-                               th:utext="#{label.project.description}">
-                            description
-                        </label>
-                        <div class="col-sm-9">
-                                <textarea id="description" maxlength="255" class="form-control" name="description"
-                                          rows="6" required></textarea>
-                        </div>
-                        <div id="globalError" class="text-danger row col p-4" style="display:none"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                            th:utext="#{label.form.cancel}">
-                        cancel
-                    </button>
-                    <button class="btn btn-primary" type="submit" th:utext="#{label.form.save}"></button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <!-- Project Labels Modal Form -->
 <div th:replace="fragments/labelsModal :: labelsModal"></div>
 
@@ -125,13 +80,6 @@
                         th:utext="#{user.project.menu.collaboratedprojects}"></li>
                 </ol>
             </nav>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#projectModal"
-                        onclick="clearForm()">
-                    <span th:utext="#{label.pages.button.projects.add}"></span>
-                    <i class="fas fa-plus-circle"></i>
-                </button>
-            </div>
         </div>
         <section>
             <div id="tableSpinner" class="custom-spinner spinner-border" role="status" style="display: none">
@@ -255,65 +203,6 @@
         }).fail(function (data) {
             alert([[#{alert.data.error}]]);
             endLoad();
-        });
-    }
-
-    function handleProjectAction(element) {
-        const selectedOption = element.options[element.selectedIndex].value;
-        const id = element.id.substring(element.id.indexOf('-') + 1);
-        switch (selectedOption) {
-            case 'labels':
-                addOrRemoveLabels(id);
-                break;
-            case 'delete':
-                deleteProject(id);
-                break;
-        }
-        $(element).prop('selectedIndex', 0);
-    }
-
-    function deleteProject(projectId) {
-        if (confirm(htmlDecode(/*[[#{message.confirm.project.delete}]]*/))) {
-            $.ajax({
-                type: 'DELETE',
-                url: serverContext + 'project/delete/' + projectId,
-                success: (data) => {
-                    $("#successmsg").show().html(/*[[#{message.project.success.delete}]]*/);
-                    fetchProjects();
-                },
-                error: (data) => {
-                    $("#errormsg").show().html(/*[[#{message.error.operation}]]*/);
-                }
-            });
-        }
-    }
-
-    function saveProject(event) {
-        event.preventDefault();
-        $(".alert").html("").hide();
-        $(".error-list").html("");
-        $('#projectModal').modal('hide');
-        $('#projectModal').one('hidden.bs.modal', (e) => {
-            const formData = $('#projectForm').serialize();
-            $.post(serverContext + "project/add", formData, function (data) {
-                fetchProjects();
-                $("#successmsg").show().html(/*[[#{message.project.success.create}]]*/);
-                addOrRemoveLabels(data.new.id);
-            }).fail(function (data) {
-                if (data.responseJSON.error.indexOf("InternalError") > -1) {
-                    $("#errormsg").show().append(data.responseJSON.message);
-                } else {
-                    $('#projectModal').modal('show');
-                    const errors = $.parseJSON(data.responseJSON.message);
-                    $.each(errors, function (index, item) {
-                        if (item.field) {
-                            $("#" + item.field + "Error").show().append(item.defaultMessage + "<br/>");
-                        } else {
-                            $("#globalError").show().append(item.defaultMessage + "<br/>");
-                        }
-                    });
-                }
-            });
         });
     }
 </script>

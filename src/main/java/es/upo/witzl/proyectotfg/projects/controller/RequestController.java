@@ -175,20 +175,21 @@ public class RequestController {
     private SimpleMailMessage constructCollaborationResponseEmail(final String contextPath, final Locale locale,
                                                                  final CollaborationRequest cr) {
         final Project project = cr.getProject();
-        final String url = contextPath + "/home";
+        final String url = contextPath + "/collaborations";
         String status = "";
+        String message2 = "";
         if(cr.getRequestStatus().equals("approved")) {
             status = messages.getMessage("message.request.status.approved", null, locale);
+            message2 += "\r\n\n" + HtmlEscape.unescapeHtml(messages.getMessage("message.collaborationResponse.email.message2",
+                    null, locale)) + "\r\n" + url;
         } else if (cr.getRequestStatus().equals("denied")) {
             status = messages.getMessage("message.request.status.denied", null, locale);
         }
         final String message1 = HtmlEscape.unescapeHtml(messages.getMessage("message.collaborationResponse.email.message1",
                 Arrays.asList(project.getName(), project.getId(), status).toArray(), locale));
-        final String message2 = HtmlEscape.unescapeHtml(messages.getMessage("message.collaborationResponse.email.message2",
-                null, locale));
         final String subject = HtmlEscape.unescapeHtml(messages.getMessage("message.collaborationResponse.email.subject",
                 null, locale));
-        final String body = message1 + "\r\n\n" + message2 + "\r\n" + url;
+        final String body = message1 + message2;
         return constructEmail(subject, body, cr.getCollaborator());
     }
 
