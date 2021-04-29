@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.spring;
+package es.upo.witzl.proyectotfg.configuration;
 
 import es.upo.witzl.proyectotfg.users.security.LoginPageInterceptor;
 import es.upo.witzl.proyectotfg.users.validation.EmailValidator;
@@ -40,6 +40,7 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/").setViewName("redirect:/login");
         registry.addViewController("/badUser");
         registry.addViewController("/changePassword");
+        registry.addViewController("/collaborations");
         registry.addViewController("/console");
         registry.addViewController("/emailError");
         registry.addViewController("/error");
@@ -54,7 +55,6 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/signUp");
         registry.addViewController("/successRegister");
         registry.addViewController("/updatePassword");
-        registry.addViewController("/users");
     }
 
     @Override

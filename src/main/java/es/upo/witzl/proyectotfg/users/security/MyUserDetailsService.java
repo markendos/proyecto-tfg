@@ -24,11 +24,13 @@ public class MyUserDetailsService implements UserDetailsService {
     private MessageSource messages;
 
     @Override
-    public UserDetails loadUserByUsername(final String email) throws UsernameNotFoundException {
+    public MyUserPrincipal loadUserByUsername(final String email) throws UsernameNotFoundException {
         try {
             final User user = userRepository.findByEmail(email);
             if (user == null) {
-                throw new UsernameNotFoundException(messages.getMessage("auth.message.invalidUser", null, Locale.getDefault()) + email);
+                throw new UsernameNotFoundException(messages.getMessage("auth.message.invalidUser",
+                        null,
+                        Locale.getDefault()) + email);
             }
             return new MyUserPrincipal(user);
         } catch (final Exception e) {

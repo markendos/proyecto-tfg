@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.spring;
+package es.upo.witzl.proyectotfg.configuration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

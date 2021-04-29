@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.util;
+package es.upo.witzl.proyectotfg.configuration.util;
 
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;

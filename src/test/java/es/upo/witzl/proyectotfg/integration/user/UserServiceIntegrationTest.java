@@ -24,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static org.junit.Assert.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 public class UserServiceIntegrationTest {
@@ -74,16 +74,19 @@ public class UserServiceIntegrationTest {
         User user1 = new User();
         user1.setEmail("testuser1@test.com");
         user1.setUsername("testuser1");
+        user1.setPassword("testpassword1");
         user1.setRole(userRole);
 
         User user2 = new User();
         user2.setEmail("testuser2@test.com");
         user2.setUsername("testuser2");
+        user2.setPassword("testpassword2");
         user2.setRole(userRole);
 
         User user3 = new User();
         user3.setEmail("testuser3@test.com");
         user3.setUsername("testuser3");
+        user3.setPassword("testpassword3");
         user3.setRole(userRole);
 
         List<User> allUsers = Arrays.asList(user1, user2);
@@ -133,10 +136,12 @@ public class UserServiceIntegrationTest {
         User user1 = new User();
         user1.setEmail("testuser1@test.com");
         user1.setUsername("testuser1");
+        user1.setPassword("testpassword1");
 
         User user2 = new User();
         user2.setEmail("testuser2@test.com");
         user2.setUsername("testuser2");
+        user2.setPassword("testpassword2");
 
         List<User> allUsers = userService.getUsers();
         verifyFindAllUsersIsCalledOnce();
@@ -148,6 +153,7 @@ public class UserServiceIntegrationTest {
         UserDto userDto = new UserDto();
         userDto.setEmail("testuser3@test.com");
         userDto.setUsername("testuser3");
+        userDto.setPassword("testpassword3");
         User newUser = userService.registerNewUserAccount(userDto);
         assertEquals("testuser3@test.com", newUser.getEmail());
         assertEquals("testuser3", newUser.getUsername());
@@ -158,6 +164,7 @@ public class UserServiceIntegrationTest {
         UserDto userDto = new UserDto();
         userDto.setEmail("testuser1@test.com");
         userDto.setUsername("testuserx");
+        userDto.setPassword("testpasswordx");
         userService.registerNewUserAccount(userDto);
     }
 
@@ -166,6 +173,7 @@ public class UserServiceIntegrationTest {
         UserDto userDto = new UserDto();
         userDto.setEmail("testuserx@test.com");
         userDto.setUsername("testuser1");
+        userDto.setPassword("testpassword1");
         userService.registerNewUserAccount(userDto);
     }
 

@@ -1,9 +1,9 @@
-package es.upo.witzl.proyectotfg.error;
+package es.upo.witzl.proyectotfg.configuration.error;
 
 import es.upo.witzl.proyectotfg.projects.error.SubjectAlreadyExistsException;
 import es.upo.witzl.proyectotfg.samples.error.SensorAlreadyExistsException;
 import es.upo.witzl.proyectotfg.users.error.*;
-import es.upo.witzl.proyectotfg.util.GenericResponse;
+import es.upo.witzl.proyectotfg.configuration.util.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;

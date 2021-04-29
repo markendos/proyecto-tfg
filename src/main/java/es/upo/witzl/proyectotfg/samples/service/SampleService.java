@@ -88,7 +88,7 @@ public class SampleService implements ISampleService {
     }
 
     @Override
-    public Collection<Collection<Integer>> getSampleValues(DataSample sample) {
+    public List<List<Integer>> getSampleValues(DataSample sample) {
         List allValues = new ArrayList();
 
         for(DataChannel dc : sample.getDataChannels()) {

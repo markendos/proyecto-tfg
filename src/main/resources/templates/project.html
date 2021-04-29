@@ -2,6 +2,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/png" th:href="@{/resources/images/favicon.png}"/>
     <title th:inline="text">Project #[[${project.id}]]</title>
 
     <!-- Bootstrap4 CSS -->
@@ -76,25 +78,33 @@
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
-    <div th:replace="fragments/userSidebar :: userSidebar"></div>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
 
     <!--Main Section Container-->
-    <main id="content" role="main" class="col pr-0 pl-2">
+    <main id="content" role="main" class="col px-3">
         <div class="container-fluid px-0 d-flex">
             <button type="button" id="sidebarCollapse" class="btn btn-light mt-2">
                 <i class="fas fa-align-left"></i>
             </button>
             <!--Language Selector-->
             <div th:replace="fragments/languageSelector :: languageSelector"></div>
+            <!--Plotly Language Config-->
+            <script src="https://cdn.plot.ly/plotly-locale-es-2.0.0-rc.0.js"></script>
+            <script>Plotly.setPlotConfig({locale: lang})</script>
         </div>
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
-                    <li class="breadcrumb-item"><a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a>
+                    <li class="breadcrumb-item" th:if="${role} == 'owner'">
+                        <a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a>
+                    </li>
+                    <li class="breadcrumb-item" th:if="${role} == 'collaborator'">
+                        <a th:href="@{/collaborations}" th:utext="#{user.project.menu.collaboratedprojects}"></a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page"
-                        th:utext="#{user.project.menu.project(${project.id})}"></li>
+                        th:utext="#{user.project.menu.project(${project.id})}">
+                    </li>
                 </ol>
             </nav>
             <h3 id="projectTitle" class="my-0" data-toggle="tooltip" data-placement="top"
@@ -125,7 +135,7 @@
                         <i class="fas fa-eye"></i>
                         [[#{label.pages.title.project.subject}]]
                     </button>
-                    <button th:unless="${project.subject} != null" class="p-0 btn btn-link text-left"
+                    <button th:unless="${project.subject} != null or ${role} != 'owner'" class="p-0 btn btn-link text-left"
                             th:inline="text"
                             th:onclick="registerSubject([[${project.id}]])">
                         <i class="fas fa-user-plus"></i>
@@ -198,6 +208,14 @@
     $(document).ready(function () {
         startLoad();
         fetchSamples();
+
+        const role = [[${role}]];
+        if (role) {
+            const role = [[${role}]];
+            if (role) {
+                setActiveMenuOption(role);
+            }
+        }
 
         $("#labelsBtn").attr("title", htmlDecode([[#{label.pages.title.project.labels}]]));
         $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
@@ -387,7 +405,7 @@
             let datatable = new $.fn.dataTable.Api('#dataTable');
             datatable.clear();
             datatable.rows.add(samples);
-            datatable.draw();
+            datatable.columns.adjust().draw();
         }
         //ELSE, create datatable
         else {

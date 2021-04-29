@@ -6,6 +6,7 @@ import es.upo.witzl.proyectotfg.samples.dto.SampleValuesDto;
 import es.upo.witzl.proyectotfg.samples.model.DataSample;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface ISampleService {
@@ -14,7 +15,7 @@ public interface ISampleService {
 
     Optional<DataSample> getSampleById(Long id);
 
-    Collection<Collection<Integer>> getSampleValues(DataSample sample);
+    List<List<Integer>> getSampleValues(DataSample sample);
 
     DataSample getStatistics(DataSample sample);
 

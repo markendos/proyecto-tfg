@@ -2,6 +2,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/png" th:href="@{/resources/images/favicon.png}"/>
     <title>Sample-Register</title>
 
     <!-- Bootstrap4 CSS -->
@@ -122,10 +124,10 @@
 
 <div class="container-fluid row w-100 pr-0">
     <!-- Sidebar  -->
-    <div th:replace="fragments/userSidebar :: userSidebar"></div>
+    <div th:replace="fragments/sidebar :: sidebar"></div>
 
     <!--Main Section Container-->
-    <main id="content" role="main" class="col pr-0 pl-2">
+    <main id="content" role="main" class="col px-3">
         <div class="container-fluid px-0 d-flex">
             <button type="button" id="sidebarCollapse" class="btn btn-light mt-2">
                 <i class="fas fa-align-left"></i>
@@ -138,8 +140,11 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
                         <a th:href="@{/home}" th:utext="#{label.nav.home}">Home</a></li>
-                    <li class="breadcrumb-item">
+                    <li class="breadcrumb-item" th:if="${role} == 'owner'">
                         <a th:href="@{/home}" th:utext="#{user.project.menu.myprojects}"></a>
+                    </li>
+                    <li class="breadcrumb-item" th:if="${role} == 'collaborator'">
+                        <a th:href="@{/collaborations}" th:utext="#{user.project.menu.collaboratedprojects}"></a>
                     </li>
                     <li class="breadcrumb-item">
                         <a th:href="@{/project/{id}(id=${project.id})}"
@@ -172,6 +177,10 @@
                 <span id="status" class="disconnected my-auto mx-2"
                       th:utext="#{sample.device.status.disconnected}">
                 </span>
+                <div id="bitalinoSchematicContainer" class="d-flex align-items-center mx-4">
+                    <i class="schema-icon fas fa-microchip"></i>
+                    <img id="bitalinoSchematic" alt="bitalino schematic" th:src="@{/resources/images/bitalino_map.png}" />
+                </div>
                 <div class="custom-file w-25 ml-auto">
                     <input type="file" class="custom-file-input" id="sampleFile" accept=".txt">
                     <label class="custom-file-label" for="sampleFile" th:utext="#{sample.file.upload}"
@@ -281,6 +290,16 @@
 <!--JS Utilities-->
 <script th:inline="javascript">
     $(document).ready(function () {
+        const role = [[${role}]];
+        if (role) {
+            setActiveMenuOption(role);
+        }
+        $("#bitalinoSchematicContainer").mouseenter(function () {
+            $("#bitalinoSchematic").show();
+        });
+        $("#bitalinoSchematicContainer").mouseleave(function () {
+            $("#bitalinoSchematic").hide();
+        });
         $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
@@ -341,6 +360,7 @@
         sampledFrames = [];
         let imported = {sensors: undefined, labels: undefined, resolutions: undefined, comments: undefined};
         $("#linechart").empty();
+        $("#linechart").html([[#{sample.plot.tip}]]);
         $("#saveDataBtn").attr("disabled", true);
         $("#sampling-progress").attr("aria-valuenow", 0);
         $("#sampling-progress").css("width", 0 + "%");
@@ -714,9 +734,11 @@
                 dataTable.addColumn('number', 'A' + (i + 1));
             }
         }
-        const limit = 200;
+        const limit = 1000;
         const offset = parseInt(sampledData.length / limit);
-        dataTable.addRows(sampledData.slice(offset * limit))
+        sampledData.slice(offset * limit).forEach((r) => {
+            dataTable.addRow([ sampledData.indexOf(r), ...r ]);
+        });
 
         const options = {
             chart: {
@@ -783,7 +805,8 @@
                             || (imported?.sensors?.[i] === sensor.alias)) {
                             selected = true;
                         }
-                        let opt = $(`<option value="${sensor.id}" ${selected ? 'selected' : ''}>${sensor.alias}</option>`);
+                        let opt = $(`<option value="${sensor.id}" ${selected ? 'selected' : ''} title="${sensor.name}">
+                                    ${sensor.alias}</option>`);
                         $(sensorSelector).append(opt);
                     });
                     $(col).append(sensorSelector);
@@ -901,7 +924,7 @@
     function normalizeValue(value, bits) {
         const min = 0;
         const max = Math.pow(2, Number.parseInt(bits));
-        return ((value - min) / (max - min)).toPrecision(6);
+        return ((value - min) / (max - min)).toFixed(4);
     }
 
     function saveOpenSignalsData(date) {

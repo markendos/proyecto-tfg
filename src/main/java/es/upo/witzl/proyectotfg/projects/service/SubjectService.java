@@ -59,9 +59,10 @@ public class SubjectService implements ISubjectService {
         float bmi = subject.getBmi();
         float bmi2 = bmi * bmi;
         int age = getDiffYears(subject.getBirthDate(), new Date());
-        int gender = subject.getGender() == "m" ? 1 : 0;
+        int gender = subject.getGender().equals("m") ? 1 : 0;
         double result = (-44.988 + (0.503 * age) + (10.689 * gender) + (3.172 * bmi) - (0.026 * bmi2) +
                 (0.181 * bmi * gender) - (0.02 * bmi * age) - (0.005 * bmi2 * gender) + (0.00021 * bmi2 * age));
+
         return Float.valueOf((float) result);
 
     }
@@ -76,7 +77,7 @@ public class SubjectService implements ISubjectService {
         return diff;
     }
 
-    public static Calendar getCalendar(Date date) {
+    private Calendar getCalendar(Date date) {
         Calendar cal = Calendar.getInstance(Locale.getDefault());
         cal.setTime(date);
         return cal;

@@ -28,13 +28,24 @@ body {
     max-height: 50px;
 }
 
+#logo-link {
+    margin: -1rem 0;
+}
+
+#nav-logo {
+    max-width: 250px;
+    max-height: 50px;
+    padding: 0.3rem;
+}
+
 #topnav li.nav-item {
     margin-left: 1.5rem;
 }
 
-i.userIcon {
-    font-size: larger;
+#notificationContainer {
+    width: 100px;
 }
+
 i.notification {
     font-size: larger;
 }
@@ -223,11 +234,16 @@ a:focus {
     transition: all 0.3s;
 }
 
+li.userProfile {
+    margin-top: auto;
+}
+
 .navbar {
     background: #fff;
     border: none;
     border-radius: 0;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    padding: .5rem 2rem .5rem 1rem;
 }
 
 .navbar-btn {
@@ -266,8 +282,8 @@ a:focus {
 }
 
 #sidebar.active {
-    min-width: 80px;
-    max-width: 80px;
+    min-width: 110px;
+    max-width: 110px;
     text-align: center;
 }
 
@@ -284,6 +300,13 @@ a:focus {
 
 #sidebar.active .sidebar-header strong {
     display: block;
+}
+
+#sidebar ul {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
 }
 
 #sidebar ul li a {
@@ -398,7 +421,7 @@ a.article:hover {
 }
 
 #content.fixedMenu {
-    padding-left: 90px !important;
+    padding-left: 120px !important;
 }
 
 button, a.btn {
@@ -523,6 +546,10 @@ th, td {
     padding-left: 10px;
 }
 
+i.fa-info-circle:hover {
+    cursor: help !important;
+}
+
 /***** DataValue Tables *****/
 #dataTable_wrapper > div:nth-child(2) > div {
     overflow-x: auto;
@@ -542,7 +569,6 @@ caption {
 }
 
 /***** Sample Modal *****/
-
 #sampleModal .sampleTabContent {
     min-height: 60vh;
 }

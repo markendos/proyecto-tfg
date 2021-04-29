@@ -34,7 +34,7 @@ public class UserController {
     SessionUtils sessionUtils;
 
     @GetMapping(value = "/admin/user/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getLoggedUsers() throws JsonProcessingException {
+    public ResponseEntity<String> getAllUsers() throws JsonProcessingException {
         List<User> allUsers = userService.getUsers();
         List<LoggedUser> active = ActiveUserStore.getInstance().getUsers();
 

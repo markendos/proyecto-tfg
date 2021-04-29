@@ -1,6 +1,6 @@
 package es.upo.witzl.proyectotfg.integration.user;
 
-import es.upo.witzl.proyectotfg.spring.PersistenceJPAConfig;
+import es.upo.witzl.proyectotfg.configuration.PersistenceJPAConfig;
 import es.upo.witzl.proyectotfg.users.model.Privilege;
 import es.upo.witzl.proyectotfg.users.model.Role;
 import es.upo.witzl.proyectotfg.users.model.User;
@@ -60,6 +60,7 @@ public class UserRepositoryIntegrationTest {
         User user = new User();
         user.setEmail("testuser@test.com");
         user.setUsername("testuser");
+        user.setPassword("testpassword");
         user.setRole(userRole);
 
         userRepository.save(user);

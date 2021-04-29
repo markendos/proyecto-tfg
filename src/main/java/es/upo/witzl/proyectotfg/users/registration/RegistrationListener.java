@@ -1,4 +1,4 @@
-package es.upo.witzl.proyectotfg.users.registration.listener;
+package es.upo.witzl.proyectotfg.users.registration;
 
 import es.upo.witzl.proyectotfg.users.model.User;
 import es.upo.witzl.proyectotfg.users.registration.OnRegistrationCompleteEvent;

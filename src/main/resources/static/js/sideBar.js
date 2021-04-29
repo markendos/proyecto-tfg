@@ -1,34 +1,26 @@
 const minSize = 576;
+const maxSize = 768;
 $(document).ready(() => {
     window.addEventListener('resize', reportWindowSize);
 
-    if(window.innerWidth < minSize) {
-        $('#sidebar').hide();
-    }
-
     $('#sidebarCollapse').on('click', function () {
-        const isCollapsed = $('#sidebar').hasClass('active');
-        $('#sidebar').toggleClass('active');
-        if(window.innerWidth < minSize && !isCollapsed) {
-            $('#content').addClass('fixedMenu');
-            $('#sidebar').addClass('fixed');
-            $('#sidebar').show();
-        } else if (window.innerWidth < minSize) {
-            $('#sidebar').hide();
-            $('#content').removeClass('fixedMenu');
-            $('#sidebar').removeClass('fixed');
+        const isCollapsed = $('#sidebar').hasClass('collapsed');
+        $('#sidebar').toggleClass('collapsed');
+        if(isCollapsed) {
+            $('#sidebar').show(500);
+        } else {
+            $('#sidebar').hide(500);
         }
     });
 });
 
 function reportWindowSize() {
-    const isCollapsed = $('#sidebar').hasClass('active');
+    const isCollapsed = $('#sidebar').hasClass('collapsed');
     if(window.innerWidth < minSize && !isCollapsed) {
-        $('#content').addClass('fixedMenu');
-        $('#sidebar').addClass('active fixed');
-        $('#sidebar').show();
-    } else if(window.innerWidth >= minSize) {
-        $('#sidebar').removeClass('active fixed');
-        $('#content').removeClass('fixedMenu');
+        $('#sidebar').addClass('collapsed');
+        $('#sidebar').hide(500);
+    } else if(window.innerWidth >= maxSize) {
+        $('#sidebar').removeClass('collapsed');
+        $('#sidebar').show(500);
     }
 }

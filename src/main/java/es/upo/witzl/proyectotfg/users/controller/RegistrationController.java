@@ -9,7 +9,7 @@ import es.upo.witzl.proyectotfg.users.model.VerificationToken;
 import es.upo.witzl.proyectotfg.users.registration.OnRegistrationCompleteEvent;
 import es.upo.witzl.proyectotfg.users.security.MyUserPrincipal;
 import es.upo.witzl.proyectotfg.users.service.IUserService;
-import es.upo.witzl.proyectotfg.util.GenericResponse;
+import es.upo.witzl.proyectotfg.configuration.util.GenericResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
@@ -242,7 +242,8 @@ public class RegistrationController {
     }
 
     private String getAppUrl(HttpServletRequest request) {
-        return "https://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+        return env.getProperty("web.protocol") + "://" + request.getServerName() + ":" + request.getServerPort() +
+                request.getContextPath();
     }
 
     private String decodeBase64(String encoded) {
