@@ -122,7 +122,7 @@
         let normalized = false;
         let correlationMatrix = undefined;
         const limit = 200; // table rows to render at once
-        $(document).ready(function () {
+        $(document).ready(() => {
             $("#normalizeSwitch").change(() => toggleDataNormalization());
             $(".tabLoader").hide();
         });
@@ -364,7 +364,7 @@
                 $("#sampleId").val(sampleId);
                 $("#sampleModal").modal('show');
 
-                $('#sampleModal .modal-body').scroll(function () {
+                $('#sampleModal .modal-body').scroll(() => {
                     if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
                         const offset = $('#sampleTable tbody').children().toArray().length;
                         addRows(offset);

@@ -2,14 +2,12 @@ package es.upo.witzl.proyectotfg.samples.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import es.upo.witzl.proyectotfg.projects.dto.ProjectDto;
 import es.upo.witzl.proyectotfg.projects.model.Project;
 import es.upo.witzl.proyectotfg.projects.service.ICollaborationRequestService;
 import es.upo.witzl.proyectotfg.projects.service.IProjectService;
 import es.upo.witzl.proyectotfg.samples.dto.DataSampleDto;
 import es.upo.witzl.proyectotfg.samples.dto.SampleValuesDto;
 import es.upo.witzl.proyectotfg.samples.model.DataSample;
-import es.upo.witzl.proyectotfg.samples.model.DataValue;
 import es.upo.witzl.proyectotfg.samples.model.Sensor;
 import es.upo.witzl.proyectotfg.samples.service.ISampleService;
 import es.upo.witzl.proyectotfg.samples.service.ISensorService;
@@ -17,11 +15,9 @@ import es.upo.witzl.proyectotfg.users.model.User;
 import es.upo.witzl.proyectotfg.users.security.MyUserPrincipal;
 import es.upo.witzl.proyectotfg.users.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -32,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@RestController
 public class SampleController {
 
     @Autowired

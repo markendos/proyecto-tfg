@@ -4,13 +4,13 @@
         function signOut() {
             const auth2 = gapi.auth2.getAuthInstance();
             if (auth2) {
-                auth2.signOut().then(function () {
+                auth2.signOut().then(() => {
                 });
             }
         }
 
         function onLoad() {
-            gapi.load('auth2', function () {
+            gapi.load('auth2', () => {
                 gapi.auth2.init();
             });
         }
@@ -122,14 +122,14 @@
     </div>
 
     <script sec:authorize="hasRole('USER')" th:inline="javascript">
-        $(document).ready(function () {
+        $(document).ready(() => {
             fetchCollaborationRequests();
             $("body").append($("#notificationModal"));
 
             $("#notifications, #notificationsPanel").click(function (e) {
                 e.stopPropagation(); // stops click event from reaching document
             });
-            $(document).click(function () {
+            $(document).click(() => {
                 $("#notificationsPanel").hide(); // click came from somewhere else
             });
             setInterval(fetchCollaborationRequests, 30000); // check for new collaboration requests periodically

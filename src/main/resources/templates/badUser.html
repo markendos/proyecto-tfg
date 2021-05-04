@@ -40,10 +40,10 @@
                 function resendToken() {
                     const token = [[${token}]];
                     showSpinner();
-                    $.get(serverContext + "user/resendRegistrationToken?token=" + token, function (data) {
+                    $.get(serverContext + "user/resendRegistrationToken?token=" + token, (data) => {
                         window.location.href = serverContext + "login?message=" + data.message;
                     })
-                        .fail(function (data) {
+                        .fail((data) => {
                             if (data.responseJSON.error.indexOf("MailError") > -1) {
                                 window.location.href = serverContext + "emailError";
                             } else {

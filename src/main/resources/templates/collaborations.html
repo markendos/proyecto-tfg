@@ -179,7 +179,7 @@
 
 <!--Project JS Functionalities-->
 <script th:inline="javascript">
-    $(document).ready(function () {
+    $(document).ready(() => {
         $('#projectForm').submit(function (event) {
             saveProject(event);
         });
@@ -197,10 +197,10 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "project/collaborations", function (data) {
+        $.get(serverContext + "project/collaborations", (data) => {
             const projects = data.auth;
             drawProjectsTable(projects);
-        }).fail(function (data) {
+        }).fail((data) => {
             alert([[#{alert.data.error}]]);
             endLoad();
         });
