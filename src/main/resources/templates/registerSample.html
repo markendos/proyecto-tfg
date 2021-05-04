@@ -898,12 +898,13 @@
 
         for (let i = 1; i < sampledFrames.length; i++) {
             date = new Date(date.getTime() + timeIncrement);
-            let month = (date.getMonth() + 1).toString().padStart(2, 0);
-            let day = date.getDate().toString().padStart(2, 0);
-            let hours = date.getHours().toString().padStart(2, 0);
-            let minutes = date.getMinutes().toString().padStart(2, 0);
-            let seconds = date.getSeconds().toString().padStart(2, 0);
-            csv += `${i},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${date.getMilliseconds()}"`;
+            let month = (date.getMonth() + 1).toString().padStart(2, '0');
+            let day = date.getDate().toString().padStart(2, '0');
+            let hours = date.getHours().toString().padStart(2, '0');
+            let minutes = date.getMinutes().toString().padStart(2, '0');
+            let seconds = date.getSeconds().toString().padStart(2, '0');
+            let millis = date.getMilliseconds().toString().padStart(3,'0');
+            csv += `${i},"${date.getFullYear()}-${month}-${day} ${hours}:${minutes}:${seconds}.${millis}"`;
             for (let j = 0; j < sampledFrames[i].analog.length; j++) {
                 if ($(checks[j]).is(":checked")) {
                     csv += "," + sampledFrames[i].analog[j];
