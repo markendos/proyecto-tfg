@@ -17,15 +17,15 @@ public class ChannelStatistics {
     @JoinColumn(name = "sample_id")
     private DataChannel dataChannel;
 
+    private Double min;
+
+    private Double max;
+
     private Double mean;
 
     private Double stdDev;
 
     private Double median;
-
-    private Double kurtosis;
-
-    private Double skewness;
 
     @Column(length = 60)
     private String distribution;
@@ -73,20 +73,20 @@ public class ChannelStatistics {
         this.median = median;
     }
 
-    public Double getKurtosis() {
-        return kurtosis;
+    public Double getMin() {
+        return min;
     }
 
-    public void setKurtosis(Double kurtosis) {
-        this.kurtosis = kurtosis;
+    public void setMin(Double kurtosis) {
+        this.min = kurtosis;
     }
 
-    public Double getSkewness() {
-        return skewness;
+    public Double getMax() {
+        return max;
     }
 
-    public void setSkewness(Double skewness) {
-        this.skewness = skewness;
+    public void setMax(Double skewness) {
+        this.max = skewness;
     }
 
     public String getDistribution() {

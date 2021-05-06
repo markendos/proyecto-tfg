@@ -310,7 +310,7 @@
             }
         });
 
-        $("th.channel").click(() => {
+        $("th.channel").click(function() {
             $(this).fadeOut(100).toggleClass("channel").fadeIn(100);
 
             if (sampling) {
