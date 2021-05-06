@@ -143,13 +143,13 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "project/foreign", function (data) {
+        $.get(serverContext + "project/foreign", (data) => {
             let projects = data.all.map(p => ({
                 ...p,
                 requested: data.requested.find((project) => (project.id === p.id) && project) ? true : false,
             }));
             drawProjectsTable(projects);
-        }).fail(function (data) {
+        }).fail((data) => {
             alert([[#{alert.data.error}]]);
             endLoad();
         });
@@ -187,10 +187,10 @@
         $('#requestModal').modal('hide');
         $('#requestModal').one('hidden.bs.modal', (e) => {
             const formData = $('#requestForm').serialize();
-            $.post(serverContext + "collaboration/request", formData, function (data) {
+            $.post(serverContext + "collaboration/request", formData, (data) => {
                 fetchProjects();
                 $("#successmsg").show().html(/*[[#{message.request.success}]]*/);
-            }).fail(function (data) {
+            }).fail((data) => {
                 if (data.responseJSON.error.indexOf("InternalError") > -1) {
                     $("#errormsg").show().append(data.responseJSON.message);
                 } else {

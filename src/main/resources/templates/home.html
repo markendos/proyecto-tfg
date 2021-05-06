@@ -244,7 +244,7 @@
 
 <!--Project JS Functionalities-->
 <script th:inline="javascript">
-    $(document).ready(function () {
+    $(document).ready(() => {
         $('#projectForm').submit(function (event) {
             saveProject(event);
         });
@@ -262,10 +262,10 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "project/all", function (data) {
+        $.get(serverContext + "project/all", (data) => {
             const projects = data.owned;
             drawProjectsTable(projects);
-        }).fail(function (data) {
+        }).fail((data) => {
             alert([[#{alert.data.error}]]);
             endLoad();
         });
@@ -308,11 +308,11 @@
         $('#projectModal').modal('hide');
         $('#projectModal').one('hidden.bs.modal', (e) => {
             const formData = $('#projectForm').serialize();
-            $.post(serverContext + "project/add", formData, function (data) {
+            $.post(serverContext + "project/add", formData, (data) => {
                 fetchProjects();
                 $("#successmsg").show().html(/*[[#{message.project.success.create}]]*/);
                 addOrRemoveLabels(data.new.id);
-            }).fail(function (data) {
+            }).fail((data) => {
                 if (data.responseJSON.error.indexOf("InternalError") > -1) {
                     $("#errormsg").show().append(data.responseJSON.message);
                 } else {

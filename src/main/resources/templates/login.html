@@ -90,7 +90,7 @@
 
 <script th:inline="javascript">
     function init() {
-        gapi.load('auth2', function () {
+        gapi.load('auth2', () => {
             const auth2 = gapi.auth2.init({
                 client_id: [[${@environment.getProperty('spring.security.oauth2.client.registration.google.client-id')}]]
             });
@@ -104,7 +104,7 @@
                     const idToken = googleUser.getAuthResponse().id_token;
                     const email = googleUser.getBasicProfile().getEmail();
                     const auth2 = gapi.auth2.getAuthInstance();
-                    $.post(serverContext + "oauth_login", {idtoken: idToken}, function (data) {
+                    $.post(serverContext + "oauth_login", {idtoken: idToken}, (data) => {
 
                         if (data.message != "success") {
                             window.location.href = serverContext + "login?error=" + data.message;
@@ -113,7 +113,7 @@
                             window.reload();
                         }
                     })
-                        .fail(function (data) {
+                        .fail((data) => {
                             if (data.responseJSON.error.indexOf("InternalError") > -1) {
                                 window.location.href = serverContext + "login?message=" + data.responseJSON.message;
                             }

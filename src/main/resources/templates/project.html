@@ -205,7 +205,7 @@
     const encoded = utf8_to_b64(JSON.stringify(/*[[${project}]]*/));
     $("#userBtn").attr("id", encoded);
 
-    $(document).ready(function () {
+    $(document).ready(() => {
         startLoad();
         fetchSamples();
 
@@ -221,10 +221,10 @@
         $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
-        $("#collaboratorTitle").mouseenter(function () {
+        $("#collaboratorTitle").mouseenter(() => {
             $("#collaborators").show();
         });
-        $("#collaboratorTitle").mouseleave(function () {
+        $("#collaboratorTitle").mouseleave(() => {
             $("#collaborators").hide();
         });
         const tags = $(".tag").toArray();
@@ -264,10 +264,10 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + `samples/all?projectId=${[[${project.id}]]}`, function (data) {
+        $.get(serverContext + `samples/all?projectId=${[[${project.id}]]}`, (data) => {
             const samples = data.all;
             drawSamplesTable(samples);
-        }).fail(function (data) {
+        }).fail((data) => {
             alert([[#{alert.data.error}]]);
             endLoad();
         });

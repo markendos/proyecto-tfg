@@ -97,7 +97,7 @@
     </div>
     <!--Subject JS Functionalities-->
     <script th:inline="javascript">
-        $(document).ready(function () {
+        $(document).ready(() => {
             $('#subjectForm').submit(function (event) {
                 saveProjectSubject(event);
             });
@@ -119,14 +119,14 @@
             $('#subjectModal').modal('hide');
             $('#subjectModal').one('hidden.bs.modal', (e) => {
                 const formData = $('#subjectForm').serialize();
-                $.post(serverContext + "subject/add", formData, function (data) {
+                $.post(serverContext + "subject/add", formData, (data) => {
                     if(window.location.pathname.includes('/home')) {
                         $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
                         fetchProjects();
                     } else if(window.location.pathname.includes('/project')) {
                         window.location.assign(window.location.pathname + '?message=message.project.success.update');
                     }
-                }).fail(function (data) {
+                }).fail((data) => {
                     if (data.responseJSON) {
                         if (data.responseJSON.error.indexOf("InternalError") > -1) {
                             $("#errormsg").show().append(data.responseJSON.message);
@@ -209,7 +209,7 @@
                 $("#subjectForm input, #subjectForm button[type='submit']").attr("disabled", false);
             } else {
                 const status = $("#subjectForm input").attr("disabled");
-                $("#subjectForm").change(function () {
+                $("#subjectForm").change(() => {
                     $("#subjectForm button[type='submit']").attr("disabled", false);
                 });
                 $("#subjectForm :not(input[type='range'])").attr("disabled", !status);

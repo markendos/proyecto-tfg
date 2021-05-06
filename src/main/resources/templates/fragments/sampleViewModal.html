@@ -122,7 +122,7 @@
         let normalized = false;
         let correlationMatrix = undefined;
         const limit = 200; // table rows to render at once
-        $(document).ready(function () {
+        $(document).ready(() => {
             $("#normalizeSwitch").change(() => toggleDataNormalization());
             $(".tabLoader").hide();
         });
@@ -149,6 +149,7 @@
             $("#sampleTable thead").empty();
             $("#sampleTable tbody").empty();
             $("#chartContent").empty();
+            $("#plots").empty();
             renderSampleData(selectedSampleData.id);
             const currentViewId = $("#sampleNav .nav-link.active").closest("li.nav-item").attr("id");
             switch (currentViewId) {
@@ -364,7 +365,7 @@
                 $("#sampleId").val(sampleId);
                 $("#sampleModal").modal('show');
 
-                $('#sampleModal .modal-body').scroll(function () {
+                $('#sampleModal .modal-body').scroll(() => {
                     if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
                         const offset = $('#sampleTable tbody').children().toArray().length;
                         addRows(offset);
@@ -555,13 +556,16 @@
 
         async function plotChannels() {
             if (selectedSampleData && selectedSampleValues) {
-                if (!selectedSampleValuesNorm) {
-                    normalizeValues();
+                if(normalized) {
+                    if(!selectedSampleValuesNorm) {
+                        normalizeValues();
+                    }
                 }
                 const data = [];
                 selectedSampleData.dataChannels?.forEach((c, i) => {
+                    const series = normalized ? selectedSampleValuesNorm[i] : selectedSampleValues[i];
                     const trace = {
-                        y: selectedSampleValuesNorm[i],
+                        y: series,
                         type: 'box',
                         name: c.channelName,
                         boxpoints: 'suspectedoutliers',
@@ -601,7 +605,8 @@
 
         async function channelToChart(index) {
             const val = {x: [], y: []};
-            selectedSampleValuesNorm[index].forEach((v, i) => {
+            const series = normalized ? selectedSampleValuesNorm : selectedSampleValues;
+            series[index].forEach((v, i) => {
                 val.x.push(i);
                 val.y.push(v);
             });
@@ -636,9 +641,6 @@
 
         async function generateReport() {
             if (selectedSampleData && selectedSampleValues) {
-                if(!selectedSampleValuesNorm) {
-                    normalizeValues();
-                }
                 if (!selectedSampleData.statsGenerated) {
                     generateStatistics(selectedSampleData.id, true);
                 } else {
@@ -703,6 +705,7 @@
                     content += `<span class="d-flex">${[[#{table.sample.tooltip.device.model}]]} ${selectedSampleData.deviceModel}</span>`;
                     content += `<span class="d-flex">${[[#{table.sample.tooltip.device.firmware}]]} ${selectedSampleData.deviceFirmware}</span></p><hr/>`;
 
+                    content += `<div class=${project.subject ? 'break-after' : ''}></div>`;
                     // Channel info
                     for (const c of selectedSampleData.dataChannels) {
                         let i = selectedSampleData.dataChannels.indexOf(c);
@@ -724,17 +727,20 @@
                                     content += `<span class="d-flex">${[[#{label.sensor.alias}]]} ${c.sensor.alias}</span>`;
                                     content += `<span class="d-flex">${[[#{label.sensor.name}]]} ${c.sensor.name}</span>`;
                                     content += `<span class="d-flex">${[[#{label.sensor.description}]]} ${c.sensor.description}</span></p>`;
-                                    content += `<div class="d-flex justify-content-center ${i % 2 === 0 ? 'break-after' : ''}">`;
-                                    console.log($(`<img src='${url}'/>`));
-                                    content += `<img src="${url}" /></div><br/><hr/>`
+                                    content += `<div class="d-flex justify-content-center">`;
+                                    content += `<img class="break-avoid" src="${url}" /></div><br/><hr/>`
                                 }
                             );
+                    }
+                    if(selectedSampleData.dataChannels.length % 2 === 0) {
+                     content += '<br/>';
+                     content += '<br/>';
                     }
                     // Sample stats
                     content += `<h3>${[[#{sample.tab.stats}]]}</h3>`;
                     // Stats uni
                     content += `<h4>${[[#{sample.tab.stats.univariate}]]}</h4>`;
-                    const breakPage = selectedSampleData.dataChannels.length % 2 === 0 ? 'break-after': '';
+                    const breakPage = '';
                     let statsUniTable = `<table class="table table-striped break-avoid ${breakPage}"><thead>`;
                     const classCenter = 'text-center align-middle';
                     selectedSampleData.dataChannels.forEach((c, i) => {

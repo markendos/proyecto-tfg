@@ -289,28 +289,28 @@
 
 <!--JS Utilities-->
 <script th:inline="javascript">
-    $(document).ready(function () {
+    $(document).ready(() => {
         const role = [[${role}]];
         if (role) {
             setActiveMenuOption(role);
         }
-        $("#bitalinoSchematicContainer").mouseenter(function () {
+        $("#bitalinoSchematicContainer").mouseenter(() => {
             $("#bitalinoSchematic").show();
         });
-        $("#bitalinoSchematicContainer").mouseleave(function () {
+        $("#bitalinoSchematicContainer").mouseleave(() => {
             $("#bitalinoSchematic").hide();
         });
         $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
-        $('#sampleContainer').scroll(function () {
+        $('#sampleContainer').scroll(() => {
             if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
                 const offset = $('#samples tbody').children().toArray().length;
                 addRows(offset);
             }
         });
 
-        $("th.channel").click(function () {
+        $("th.channel").click(function() {
             $(this).fadeOut(100).toggleClass("channel").fadeIn(100);
 
             if (sampling) {
@@ -322,13 +322,13 @@
             aChannels[ch - 1] = (aChannels[ch - 1] == 0);
         });
 
-        $("#isPlot").change(function () {
+        $("#isPlot").change(() => {
             if (this.checked && sampledData?.length > 0) {
                 drawChart();
             }
         });
 
-        $("#resetBtn").click(function () {
+        $("#resetBtn").click(() => {
             $("th.clickeable").addClass("channel");
             aChannels.fill(false);
             clearData();
@@ -373,16 +373,13 @@
 <!--Bluetooth Connectivity (BITalino) JS Functionalities-->
 <script th:inline="javascript">
     $(document).ready(() => {
-        $("#connectBtn").click(function () {
+        $("#connectBtn").click(() => {
             if (isWebBluetoothEnabled()) {
                 discoverDevices();
             }
         });
-        $("#getVersionBtn").click(function () {
-            getVersion();
-        });
 
-        $("#startSamplingBtn").click(function () {
+        $("#startSamplingBtn").click(() => {
             if (aChannels.indexOf(true) >= 0) {
                 let clear = true;
                 if ((sampledData !== undefined && sampledData.length > 0)
@@ -397,7 +394,7 @@
                 alert(htmlDecode([[#{message.alert.sample.activeChannel}]]));
             }
         });
-        $("#stopSamplingBtn").click(function () {
+        $("#stopSamplingBtn").click(() => {
             stopSampling();
         });
     });
@@ -427,14 +424,14 @@
 
             console.log('Getting Characteristics...');
 
-            //Get the Bitalino Frames characteristic to recieve data from the device
+            // Get the Bitalino Frames characteristic to recieve data from the device
             frames = await service.getCharacteristic('40fdba6b-672e-47c4-808a-e529adff3633');
 
-            //Start notifications for Bitalino events
+            // Start notifications for Bitalino events
             await frames.startNotifications();
             console.log('Notifications have been started.');
 
-            //Get the Bitalino Commands characteristic to send commands to the device
+            // Get the Bitalino Commands characteristic to send commands to the device
             commands = await service.getCharacteristic('4051eb11-bf0a-4c74-8730-a48f4193fcea');
 
             getVersion();
@@ -464,15 +461,15 @@
     async function getVersion() {
         console.log("Getting firmware version...");
 
-        //Set event handler function for the 'firmware version' command
+        // Set event handler function for the 'firmware version' command
         await frames.addEventListener('characteristicvaluechanged', handleFirmwareVersionNotification);
 
-        //Send 'firmware version' command to Bitalino
+        // Send 'firmware version' command to Bitalino
         await commands.writeValue(new Uint8Array([7]));
     }
 
     async function startSampling() {
-        //Get sample limit
+        // Get sample limit
         limit = Number.parseInt($("#numSamples").val());
 
         if (limit > 0) {
@@ -515,16 +512,16 @@
             console.log("Error:" + error);
         }
 
-        //Start acquiring data on selected channels
+        // Start acquiring data on selected channels
 
-        //Set bit to 1|2 for live|simulated sampling mode
+        // Set bit to 1|2 for live|simulated sampling mode
         let bit = 1;
 
         if ($("#isSimulated").is(":checked")) {
             bit = 2;
         }
 
-        //Add acquisition info to the sampled frames array
+        // Add acquisition info to the sampled frames array
         let status = [aChannels.slice(), selected];
         sampledFrames.push(status);
 
@@ -545,10 +542,10 @@
         $("#stopSamplingBtn").attr("disabled", true);
         $("#saveDataBtn").attr("disabled", false);
 
-        //Remove event handler function for data acquisition
+        // Remove event handler function for data acquisition
         await frames.removeEventListener('characteristicvaluechanged', handleDataSampleNotification);
 
-        //Send 'set idle mode' command to Bitalino
+        // Send 'set idle mode' command to Bitalino
         try {
             await commands.writeValue(new Uint8Array([0]));
             sampling = false;
@@ -576,7 +573,7 @@
         console.log('> ' + str);
         device = Object.assign(device, {firmware: str.slice(str.indexOf("v") + 1)});
 
-        //Remove event handler function for the 'firmware version' command
+        // Remove event handler function for the 'firmware version' command
         await frames.removeEventListener('characteristicvaluechanged', handleFirmwareVersionNotification);
     }
 
@@ -603,7 +600,7 @@
         let out = 0;
         let inp = 0;
 
-        //Check CRC
+        // Check CRC
         CRC = (value.getUint8(j) & 0x0F) & 0xFF;
         for (let bytes = 0; bytes < number_bytes; bytes++) {
             for (let bit = 7; bit > -1; bit--) {
@@ -618,7 +615,7 @@
                 x0 = inp ^ out;
             }
         }
-        //If the message was correctly received, it starts decoding
+        // If the message was correctly received, it starts decoding
         if (CRC == ((x3 << 3) | (x2 << 2) | (x1 << 1) | x0)) {
             const digital = [];
             const analog = [];
@@ -760,7 +757,7 @@
 <!--Sample Save JS Utils-->
 <script th:inline="javascript">
     $(document).ready(() => {
-        $("#modalFileSave").on('shown.bs.modal', function () {
+        $("#modalFileSave").on('shown.bs.modal', () => {
             let chInfo = $("#fileSaveForm").find($("div.channelInfo"));
 
             for (let i = 0; i < chInfo.length; i++) {
@@ -1041,10 +1038,10 @@
             $("input.channelCheck:not(:checked)").closest(".row").find("input,select").attr("disabled", true);
             const formData = $('#fileSaveForm').serializeArray();
 
-            $.post(serverContext + "sample/add", formData, function (data) {
+            $.post(serverContext + "sample/add", formData, (data) => {
                 const sample = data.new;
                 saveValues(sample);
-            }).fail(function (data) {
+            }).fail((data) => {
                 if (data.responseJSON?.error?.indexOf("InternalError") > -1) {
                     $("#errormsg").show().append(data.responseJSON.message);
                 } else {
@@ -1060,7 +1057,6 @@
     /* Stores the values of the sample in the system */
     async function saveValues(sample) {
         if (sample?.size === sampledData.length) {
-            const promises = [];
             const channelValues = [];
             console.log(sampledData);
             const checks = $("#fileSaveForm").find("input.channelCheck");
@@ -1086,13 +1082,14 @@
                 }
             });
             aux = 0;
+            const promises = [];
             promises.push(channelValues.map((v, i) => {
                 if (v.length) {
-                    return new Promise(function (resolve, reject) {
+                    return new Promise((resolve, reject) => {
                         const req = new XMLHttpRequest();
                         req.open('POST', serverContext + `sample/saveValues`);
                         req.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-                        req.onload = function () {
+                        req.onload = () => {
                             if (req.status == 200) {
                                 resolve(JSON.parse(req.response));
                             } else {

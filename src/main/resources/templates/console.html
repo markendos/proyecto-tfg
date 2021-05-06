@@ -229,7 +229,7 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "admin/user/all", function (data) {
+        $.get(serverContext + "admin/user/all", (data) => {
             let users = data.all.map(u => ({
                 ...data.active.find((user) => (user.email === u.email) && user),
                 ...u
@@ -239,7 +239,7 @@
                     {...user, enabled: [[#{table.user.value.disabled}]]})
                 .map(user => user.ip ? {...user, status: 'Online'} : {...user, status: 'Offline'});
             drawUsersTable(users);
-        }).fail(function (data) {
+        }).fail((data) => {
             alert([[#{alert.data.error}]]);
             endLoad();
         });
@@ -249,10 +249,10 @@
         if (!loadingData) {
             startLoad();
         }
-        $.get(serverContext + "sensor/all", function (data) {
+        $.get(serverContext + "sensor/all", (data) => {
             const sensors = data.all;
             drawSensorsTable(sensors);
-        }).fail(function (data) {
+        }).fail((data) => {
             alert([[#{alert.data.error}]]);
             endLoad();
         });
@@ -348,7 +348,7 @@
 
 <!--Sensor JS Functionalities-->
 <script th:inline="javascript">
-    $(document).ready(function () {
+    $(document).ready(() => {
         $('#sensorForm').submit(function (event) {
             saveSensor(event);
         });
@@ -363,7 +363,7 @@
         $(".alert").html("").hide();
         $(".error-list").html("");
         const formData = $('#sensorForm').serialize();
-        $.post(serverContext + "admin/sensor/add", formData, function (data) {
+        $.post(serverContext + "admin/sensor/add", formData, (data) => {
             $('#sensorModal').modal('hide');
             fetchSensors();
             if (data === 'updated') {
@@ -372,7 +372,7 @@
                 $("#successmsg").show().html(/*[[#{message.sensor.success.register}]]*/);
             }
         })
-            .fail(function (data) {
+            .fail((data) => {
                 if (data.responseJSON.error.indexOf("SensorAlreadyExists") > -1) {
                     $("#errormsg").show().append(data.responseJSON.message);
                     $('#sensorModal').modal('hide');

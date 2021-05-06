@@ -114,37 +114,32 @@ public class SampleService implements ISampleService {
             ChannelStatistics cs = new ChannelStatistics();
             cs.setDataChannel(dc);
             double[] values = channelValues.stream().mapToDouble(i -> i).toArray();
-            double min = StatUtils.min(values);
-            double max = StatUtils.max(values);
-            double[] normalized = normalizeZeroOne(values, min, max);
-            cs.setMean(StatUtils.mean(normalized));
-            cs.setStdDev(Math.sqrt(StatUtils.variance(normalized)));
-            cs.setMedian(StatUtils.percentile(normalized, 50));
-            Kurtosis k = new Kurtosis();
-            cs.setKurtosis(k.evaluate(normalized));
-            Skewness s = new Skewness();
-            cs.setSkewness(s.evaluate(normalized));
+            cs.setMin(StatUtils.min(values));
+            cs.setMax(StatUtils.max(values));
+            cs.setMean(StatUtils.mean(values));
+            cs.setStdDev(Math.sqrt(StatUtils.variance(values)));
+            cs.setMedian(StatUtils.percentile(values, 50));
 
             /* ----------------------  Distribution tests ---------------------- */
             double alpha = 0.05;
             NormalDistribution normal = new NormalDistribution(cs.getMean(), cs.getStdDev());
             KolmogorovSmirnovTest KSTest = new KolmogorovSmirnovTest();
-            double result = KSTest.kolmogorovSmirnovTest(normal, normalized);
+            double result = KSTest.kolmogorovSmirnovTest(normal, values);
             if(result > alpha) {
                 cs.setDistribution("normal");
             } else {
                 UniformRealDistribution urd = new UniformRealDistribution();
-                result = KSTest.kolmogorovSmirnovTest(urd, normalized);
+                result = KSTest.kolmogorovSmirnovTest(urd, values);
                 if(result > alpha) {
                     cs.setDistribution("uniform");
                 } else {
-                    ConstantRealDistribution crd = new ConstantRealDistribution(1);
-                    result = KSTest.kolmogorovSmirnovTest(crd, normalized);
+                    ConstantRealDistribution crd = new ConstantRealDistribution(cs.getMax());
+                    result = KSTest.kolmogorovSmirnovTest(crd, values);
                     if(result > alpha) {
                         cs.setDistribution("constant");
                     } else {
                         CauchyDistribution cd = new CauchyDistribution(cs.getMedian(), 1);
-                        result = KSTest.kolmogorovSmirnovTest(cd, normalized);
+                        result = KSTest.kolmogorovSmirnovTest(cd, values);
                         if(result > alpha) {
                             cs.setDistribution("cauchy");
                         } else {
@@ -197,15 +192,15 @@ public class SampleService implements ISampleService {
      * @param values Array of values
      * @param min Min value of old range
      * @param max Max value of old range
-     * @return An array of normalized values
+     * @return An array of values values
      */
-    private double[] normalizeZeroOne(double[] values, double min, double max) {
-        double[] normalized = new double[values.length];
+/*    private double[] normalizeZeroOne(double[] values, double min, double max) {
+        double[] values = new double[values.length];
         for(int i = 0; i < values.length; i++) {
-            normalized[i] = (values[i] - min)/(max - min);
+            values[i] = (values[i] - min)/(max - min);
         }
-        return normalized;
-    }
+        return values;
+    }*/
 
     private Sensor getSensor(Long sensorId) {
         Optional<Sensor> sensorOpt = sensorRepository.findById(sensorId);

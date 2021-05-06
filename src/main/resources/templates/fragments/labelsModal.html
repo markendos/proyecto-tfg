@@ -36,7 +36,7 @@
     </div>
     <!--Labels JS Functionalities-->
     <script th:inline="javascript">
-        $(document).ready(function () {
+        $(document).ready(() => {
             $('#labelsForm').submit(function (event) {
                 saveProjectLabels(event);
             });
@@ -51,7 +51,7 @@
                 ajax: {
                     url: serverContext + 'labels/all',
                     dataType: 'json',
-                    processResults: function (data) {
+                    processResults: (data) => {
 
                         return {
                             results: data.all.map(({name: id, name: text}) => ({id, text}))
@@ -85,7 +85,7 @@
             $.ajax({
                 type: 'GET',
                 url: serverContext + 'labels/' + projectId
-            }).then(function (data) {
+            }).then((data) => {
                 // create the option and append to Select2
                 data.tagged.forEach(tag => {
                     let option = new Option(tag.name, tag.name, true, true);
@@ -109,14 +109,14 @@
             $('#labelsModal').modal('hide');
             $('#labelsModal').one('hidden.bs.modal', (e) => {
                 const formData = $('#labelsForm').serialize();
-                $.post(serverContext + "labels/add", formData, function (data) {
+                $.post(serverContext + "labels/add", formData, (data) => {
                     if(window.location.pathname.includes('/home')) {
                         $("#successmsg").show().html(/*[[#{message.project.success.update}]]*/);
                         fetchProjects();
                     }else if((window.location.pathname.includes('/project'))) {
                         window.location.assign(window.location.pathname + '?message=message.project.success.update');
                     }
-                }).fail(function (data) {
+                }).fail((data) => {
                     if (data.responseJSON) {
                         if (data.responseJSON.error.indexOf("InternalError") > -1) {
                             $("#errormsg").show().append(data.responseJSON.message);

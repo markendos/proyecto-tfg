@@ -12,11 +12,11 @@
         <script th:inline="javascript">
             const lang = Cookies.get("language") ?? getLang();
 
-            $(document).ready(function () {
+            $(document).ready(() => {
                 if (lang && (lang === 'en' || lang === 'es')) {
                     $("#locales").val(lang);
                 }
-                $("#locales").change(function () {
+                $("#locales").change(() => {
                     const selectedOption = $('#locales').val();
                     if (selectedOption != '') {
                         const path = window.location.pathname;
