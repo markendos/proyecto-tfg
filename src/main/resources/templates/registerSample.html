@@ -303,7 +303,7 @@
         $("#projectTitle").attr("title", htmlDecode([[${project.description}]]));
         $('[data-toggle="tooltip"]').tooltip();
 
-        $('#sampleContainer').scroll(() => {
+        $('#sampleContainer').scroll(function () {
             if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
                 const offset = $('#samples tbody').children().toArray().length;
                 addRows(offset);
