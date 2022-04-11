@@ -366,7 +366,7 @@
                 $("#sampleModal").modal('show');
 
                 $('#sampleModal .modal-body').scroll(function () {
-                    if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+                    if ($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight * 0.95) {
                         const offset = $('#sampleTable tbody').children().toArray().length;
                         addRows(offset);
                     }
