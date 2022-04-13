@@ -15,7 +15,7 @@ i.schema-icon {
   font-size: 1.3em;
 }
 
-i.schema-icon:hover {
+#bitalinoSchematicContainer:hover {
   cursor: help;
 }
 
@@ -25,16 +25,14 @@ i.schema-icon:hover {
   width: 50%;
   max-width: 450px;
   z-index: 9;
-  display: flex;
   box-shadow: 3px 3px 5px 6px rgba(0, 0, 0, 0.4);
   opacity: 0.95;
   border-radius: 5px;
   padding: 10px;
-  display: none;
   align-self: end;
-  margin: 40px;
   background-color: white;
   margin-left: -15%;
+  top: 25%;
 }
 
 .disconnected {
