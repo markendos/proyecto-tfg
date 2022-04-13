@@ -29,6 +29,7 @@ i.schema-icon {
   opacity: 0.95;
   border-radius: 5px;
   padding: 10px;
+  display: none;
   align-self: end;
   background-color: white;
   margin-left: -15%;
